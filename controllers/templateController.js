@@ -13,7 +13,7 @@ const createTemplate = async (req, res) => {
     try {
         const data = await Template.create({
             templateType_id: req.body.templateType_id,
-            valid_from: req.body.templateType_id,
+            valid_from: req.body.valid_from,
             valid_till:req.body.valid_till,
             offer_data_1:req.body.offer_data_1,
             offer_data_2:req.body.offer_data_2

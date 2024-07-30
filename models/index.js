@@ -40,6 +40,7 @@ Object.keys(db).forEach(modelName => {
 db.Shop = require('./shopdetails')(sequelize, DataTypes);
 db.Organization = require('./organizationdetail')(sequelize, DataTypes);
 db.Category = require('./category')(sequelize, DataTypes);
+db.Beacon = require('./beacon')(sequelize, DataTypes);
 db.temptype = require('./temptype')(sequelize, DataTypes);
 db.template = require('./template')(sequelize, DataTypes);
 
@@ -54,6 +55,9 @@ db.Shop.belongsTo(db.Organization,{foreignKey:"org_id"})
 
 db.Category.hasMany(db.Shop,{foreignKey:'category'})
 db.Shop.belongsTo(db.Category,{foreignKey:'category'})
+
+db.Shop.hasOne(db.Beacon,{foreignKey:'shop_id'})
+db.Beacon.belongsTo(db.Shop,{foreignKey:'shop_id'})
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;

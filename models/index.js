@@ -40,6 +40,14 @@ Object.keys(db).forEach(modelName => {
 db.Shop = require('./shopdetails')(sequelize, DataTypes);
 db.Organization = require('./organizationdetail')(sequelize, DataTypes);
 db.Category = require('./category')(sequelize, DataTypes);
+db.temptype = require('./temptype')(sequelize, DataTypes);
+db.template = require('./template')(sequelize, DataTypes);
+
+db.template.hasMany(db.temptype,{foreignKey:'templateType_id'})
+db.temptype.belongsTo(db.template,{foreignKey:'templateType_id'})
+
+db.Category.hasMany(db.temptype,{foreignKey:'category_id'})
+db.temptype.belongsTo(db.Category,{foreignKey:'category_id'})
 
 db.Organization.hasMany(db.Shop,{foreignKey:"org_id"})
 db.Shop.belongsTo(db.Organization,{foreignKey:"org_id"})

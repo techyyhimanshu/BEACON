@@ -19,7 +19,11 @@ const addBeacon = async (req, res) => {
         }
         
         // Create a new beacon entry using the data from the request body
-        const data = await Beacon.create(req.body);
+        const data = await Beacon.create({
+            beacon_name : req.body.beacon_name,
+            mac :req.body.mac,
+            shop_id : req.body.shop_id
+        });
         
         // If the beacon is created successfully, return a success response
         if (data) {

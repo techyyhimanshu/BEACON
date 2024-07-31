@@ -7,10 +7,8 @@ const router = Router();
 router.post("/api/organization",createOrganization)
 router.get("/api/organizations",getAllOrganization)
 router.post("/api/organization/login",organizationLogin)
-
-
 router.get("/api/organization/:id",getSingleOrganization)
-router.post("/api/organization/shops",verifyToken,getShopsByOrganization)
+router.post("/api/organization/shops",getShopsByOrganization)
 router.patch("/api/organization/:id",updateOrganization)
 router.delete("/api/organization/:id",deleteOrganization)
 

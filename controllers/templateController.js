@@ -12,6 +12,7 @@ const Sequelize = require("sequelize")
 
 
 const createTemplate = async (req, res) => {
+
     try {
         const data = await Template.create({
             templateType_id: req.body.templateType_id,
@@ -52,6 +53,25 @@ const createTemplate = async (req, res) => {
     }
 }
 
+
+const getShopBeacon = async (req,res) => {
+    try{
+        const shopBeacons = await Beacon.findAll({
+            attributes : ["beacon_id","beacon_name"],
+            where : {
+                shop_id : req.body.shop_id
+            }
+        })
+        if (shopBeacons){
+            res.status(400).json({ status: "success", message: shopBeacons })
+        } else {
+            res.status(400).json({ status: "success", message: "no beacon added to this shop" })
+        }
+    }catch(e)
+    {res.status(400).json({ status: "failure", message: e.message });}
+}
+
+
 const getAllTemplate = async (req, res) => {
     try {
         const data = await Template.findAll({
@@ -71,8 +91,9 @@ const getAllTemplate = async (req, res) => {
         console.log(error.message);
         res.status(500).json({ status: "failure" });
     }
-
 }
+
+
 // const getMyTemplate = async (req, res) => {
 //     try {
 //         const data = await Template.findAll({
@@ -149,5 +170,6 @@ module.exports = {
     createTemplate,
     getAllTemplate,
     updateMyTemplate,
-    deleteMyTemplate
+    deleteMyTemplate,
+    getShopBeacon
 }

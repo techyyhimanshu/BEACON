@@ -7,17 +7,20 @@ const Sequelize = require("sequelize")
 
 const createOrganization = async (req, res) => {
     try {
-        const hashedPassword = await argon2.hash("123456")
-        const { org_name, address, contact_number, email } = req.body
-        const data = await Organization.create({
-            org_name: org_name,
-            address: address,
-            email: email,
-            contact_number: contact_number,
-            password_hash: hashedPassword
-        })
-        if (data) {
-            res.status(200).json({ status: "success", message: "Created successfully" })
+        const username=req.username
+        if(username==="consultit"){
+            const { org_name, address, contact_number, email } = req.body
+            const data = await Organization.create({
+                org_name: org_name,
+                address: address,
+                email: email,
+                contact_number: contact_number,
+            })
+            if (data) {
+                res.status(200).json({ status: "success", message: "Created successfully" })
+            }
+        }else{
+            res.status(401).json({status:"failure",message:"Unauthorized"})
         }
     } catch (error) {
         if (error instanceof Sequelize.ValidationError) {

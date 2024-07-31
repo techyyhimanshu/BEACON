@@ -19,7 +19,7 @@ module.exports = {
       },
       shop_id: {
         type: Sequelize.INTEGER,
-        unique:true
+        allowNull :false
       },
       template_id: {
         type: Sequelize.INTEGER

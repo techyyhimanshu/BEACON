@@ -44,8 +44,8 @@ db.Beacon = require('./beacon')(sequelize, DataTypes);
 db.temptype = require('./temptype')(sequelize, DataTypes);
 db.template = require('./template')(sequelize, DataTypes);
 
-db.template.hasMany(db.temptype,{foreignKey:'templateType_id'})
-db.temptype.belongsTo(db.template,{foreignKey:'templateType_id'})
+db.temptype.hasMany(db.template,{foreignKey:'templateType_id'})
+db.template.belongsTo(db.temptype,{foreignKey:'templateType_id'})
 
 db.Category.hasMany(db.temptype,{foreignKey:'category_id'})
 db.temptype.belongsTo(db.Category,{foreignKey:'category_id'})
@@ -56,7 +56,7 @@ db.Shop.belongsTo(db.Organization,{foreignKey:"org_id"})
 db.Category.hasMany(db.Shop,{foreignKey:'category'})
 db.Shop.belongsTo(db.Category,{foreignKey:'category'})
 
-db.Shop.hasOne(db.Beacon,{foreignKey:'shop_id'})
+db.Shop.hasMany(db.Beacon,{foreignKey:'shop_id'})
 db.Beacon.belongsTo(db.Shop,{foreignKey:'shop_id'})
 
 db.sequelize = sequelize;

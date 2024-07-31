@@ -62,15 +62,6 @@ module.exports = (sequelize, DataTypes) => {
         }
       }
     },
-    password_hash: {
-      type:DataTypes.STRING,
-      allowNull:false,
-      validate:{
-        notNull:{
-          msg:"Password cannot be empty"
-        }
-      }
-    },
   }, {
     sequelize,
     paranoid:true,

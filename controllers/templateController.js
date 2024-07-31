@@ -38,7 +38,7 @@ const createTemplate = async (req, res) => {
             }
         }
         else{
-            res.status(200).json({ status: "fail", message: "data is not faount" ,data:data })
+            res.status(200).json({ status: "fail", message: "data is not found" ,data:data })
         }
 
     } catch (error) {

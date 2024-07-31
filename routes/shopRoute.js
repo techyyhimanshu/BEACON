@@ -4,8 +4,8 @@ const verifyToken = require('../middlewares/authMiddleware');
 const router = Router();
 // Define your routes here
 
-router.post("/api/shop",createShop)
-router.get("/api/shops",getAllShops)
+router.post("/api/shop",verifyToken,createShop)
+router.get("/api/shops",verifyToken,getAllShops)
 router.get("/api/shop/login",shopLogin)
 
 

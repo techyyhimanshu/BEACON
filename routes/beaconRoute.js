@@ -1,5 +1,5 @@
 const { Router } = require('express');
-const {addBeacon, login}=require('../controllers/beaconController')
+const {addBeacon, login }= require('../controllers/beaconController')
 const router = Router();
 // Define your routes here
 

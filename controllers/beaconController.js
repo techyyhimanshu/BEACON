@@ -5,7 +5,7 @@ const Template = db.template;
 const TemplateType = db.temptype;
 
 const Sequelize = require("sequelize");
-const appclass = require("../appClass");
+// const appclass = require("../appClass");
 
 // Function to add a new beacon
 const addBeacon = async (req, res) => {

@@ -19,6 +19,9 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       primaryKey: true
     },
+    beacon_name :{
+      type : DataTypes.STRING,
+    },
     mac: {
       type: DataTypes.STRING,
       unique: true,

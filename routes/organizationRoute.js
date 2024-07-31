@@ -10,7 +10,7 @@ router.get("/api/organizations",getAllOrganization)
 
 
 router.get("/api/organization/:id",getSingleOrganization)
-router.post("/api/organization/shops",verifyToken,getShopsByOrganization)
+router.post("/api/organization/shops",getShopsByOrganization)
 router.patch("/api/organization/:id",updateOrganization)
 router.delete("/api/organization/:id",deleteOrganization)
 

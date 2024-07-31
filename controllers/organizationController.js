@@ -109,7 +109,7 @@ const getShopsByOrganization = async (req, res) => {
         const data = await Shop.findAll({
             attributes: ['shop_name', 'shop_no'],
             where: {
-                org_id: req.org_id
+                org_id: req.body.org_id
             },
             include: [{
                 model: db.Category,

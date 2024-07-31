@@ -9,6 +9,9 @@ module.exports = {
         autoIncrement: true,
         primaryKey: true,
       },
+      beacon_name :{
+        type : DataTypes.STRING,
+      },
       mac: {
         type: Sequelize.STRING,
         unique:true,

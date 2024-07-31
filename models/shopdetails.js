@@ -93,7 +93,7 @@ module.exports = (sequelize, DataTypes) => {
           msg:"Email address is invalid"
         }
       }
-    }
+    },
   }, {
     sequelize,
     paranoid:true,

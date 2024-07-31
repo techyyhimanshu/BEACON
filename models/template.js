@@ -16,7 +16,8 @@ module.exports = (sequelize, DataTypes) => {
   template.init({
     template_id: {
       type : DataTypes.INTEGER,
-      primaryKey :true
+      primaryKey :true,
+      autoIncrement:true
     },
     templateType_id: DataTypes.INTEGER,
     valid_from: DataTypes.DATE,

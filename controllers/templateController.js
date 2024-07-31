@@ -20,10 +20,11 @@ const createTemplate = async (req, res) => {
             offer_data_1:req.body.offer_data_1,
             offer_data_2:req.body.offer_data_2
         })
+        console.log(data.template_id);
         if (data) {
 
-            var addToBeacon = await Beacon.update({
-                template_id : data.template_id,
+            var addToBeacon = await Beacon.update(
+                {template_id:data.template_id},{
                 where : {
                     // comment after token
                     shop_id : req.body.shop_id

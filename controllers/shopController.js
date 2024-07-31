@@ -95,10 +95,46 @@ const deleteShop = async (req, res) => {
     }
 
 }
+const shopLogin = async (req, res) => {
+    try {
+        const data = await Shop.findOne({
+            attributes:['email','password_hash','org_id','org_name'],
+            where: { email: req.body.email }
+        });
+        if (data) {
+            const password=data.password_hash
+            const matchedPassword=await argon2.verify(password,req.body.password)
+            if(matchedPassword){
+                const tokenPayload={
+                    org_id:data.org_id,
+                    organization_name:data.org_name,
+                }
+                const token=jwt.sign(tokenPayload,process.env.JWT_SECRET,{expiresIn:'30m'})
+                res.status(200).json({ status: "success", message: "Login successfully",token });
+            }else{
+                res.status(200).json({ status: "failure", message: "Login failed" });
+            }
+        } else {
+            res.status(200).json({ status: "failure", message: "Login failed" });
+        }
+    } catch (error) {
+        // Handle Sequelize validation errors
+        if (error instanceof Sequelize.ValidationError) {
+            const errorMessages = error.errors.map(err => err.message);
+            res.status(400).json({ status: "failure", message: errorMessages });
+        } else {
+            // Log any other errors and return a 500 internal server error response
+            console.log(error);
+            res.status(500).json({ status: "failure", message: "Internal Server Error" });
+        }
+    }
+};
+
 module.exports = {
     createShop,
     getAllShops,
     getSingleShop,
     updateShop,
-    deleteShop
+    deleteShop,
+    shopLogin
 }

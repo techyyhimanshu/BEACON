@@ -16,8 +16,7 @@ const verifyToken = (req, res, next) => {
       }
     }
     // If token is valid, save decoded info to request for use in other routes
-    req.org_id = decoded.org_id;
-    req.name = decoded.organization_name;
+    req.username = decoded.username;
     next();
   });
 };

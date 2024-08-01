@@ -142,7 +142,7 @@ const shopLogin = async (req, res) => {
                     shop_name: data.shop_name
                 }
                 const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '30m' })
-                res.status(200).json({ status: "success", message: "Login successfully", authorization:token });
+                res.status(200).json({ status: "success",authorization:token });
             } else {
                 res.status(200).json({ status: "failure", message: "Login failed" });
             }

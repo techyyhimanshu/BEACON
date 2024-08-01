@@ -86,7 +86,7 @@ const getAllTemplate = async (req, res) => {
             }
         })
         if (data) {
-            res.status(200).json({ status: "success", message: data })
+            res.status(200).json({ status: "success", data: data })
         }
         else {
             res.status(404).json({ status: "failure", message: "Not found" })
@@ -120,7 +120,7 @@ const getMyTemplate = async (req, res) => {
 
         })
         if (data) {
-            res.status(200).json({ status: "success", message: data })
+            res.status(200).json({ status: "success", data: data })
         }
         else {
             res.status(404).json({ status: "failure", message: "Not found" })

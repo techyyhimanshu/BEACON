@@ -36,7 +36,7 @@ const getAllOrganization = async (req, res) => {
             attributes: ['org_name', 'address', 'contact_number', 'email']
         })
         if (data) {
-            res.status(200).json({ status: "success", message: data })
+            res.status(200).json({ status: "success", data: data })
         }
         else {
             res.status(404).json({ status: "failure", message: "Not found" })
@@ -55,7 +55,7 @@ const getSingleOrganization = async (req, res) => {
             }
         })
         if (data) {
-            res.status(200).json({ status: "success", message: data })
+            res.status(200).json({ status: "success", data: data })
         }
         else {
             res.status(404).json({ status: "failure", message: "Not found" })
@@ -122,8 +122,8 @@ const getShopsByOrganization = async (req, res) => {
             shop_no: shop.dataValues.shop_no,
             category: catName
         }));
-        if (data) {
-            res.status(200).json({ status: "success", shops: shops })
+        if (shops) {
+            res.status(200).json({ status: "success", data: shops })
         }
         else {
             res.status(404).json({ status: "failure", message: "Not found" })

@@ -2,31 +2,39 @@ const db = require("../models")
 const Shop = db.Shop
 const Beacon = db.Beacon
 const Sequelize = require("sequelize")
-const argon2=require('argon2')
-const jwt=require('jsonwebtoken')
+const argon2 = require('argon2')
+const jwt = require('jsonwebtoken')
 
 const createShop = async (req, res) => {
     try {
-        const username=req.username
-        if(username==="consultit"){
-            const {shop_name,shop_no,category,contact_number,email,org_id}=req.body
-            const password=req.body.password
-            const hashedPassword=await argon2.hash(password)
-            const data = await Shop.create({
-                shop_name:shop_name,
-                shop_no:shop_no,
-                contact_number:contact_number,
-                category:category,
-                email:email,
-                org_id:org_id,
-                password_hash:hashedPassword
+        const username = req.username
+        if (username === "consultit") {
+            const { shop_name, shop_no, category, contact_number, email, org_id } = req.body
+            const categoryID = await db.Category.findOne({
+                where: { category_id: category }
             })
-            if (data) {
-                res.status(200).json({ status: "success", message: "Created successfully" })
+            if (!categoryID) {
+                res.status(404).json({ status: "faiulre", message: "Category not found" })
+            } else {
+                const password = req.body.password
+                const hashedPassword = await argon2.hash(password)
+                const data = await Shop.create({
+                    shop_name: shop_name,
+                    shop_no: shop_no,
+                    contact_number: contact_number,
+                    category: category,
+                    email: email,
+                    org_id: org_id,
+                    password_hash: hashedPassword
+                })
+                if (data) {
+                    res.status(200).json({ status: "success", message: "Created successfully" })
+                }else {
+                    res.status(401).json({ status: "failure", message: "Unauthorized" });
+                }
             }
-        }else{
-            res.status(401).json({ status: "failure", message:"Unauthorized" });
         }
+
     } catch (error) {
         if (error instanceof Sequelize.ValidationError) {
             const errorMessages = error.errors.map(err => err.message);
@@ -38,16 +46,16 @@ const createShop = async (req, res) => {
 const getAllShops = async (req, res) => {
     try {
         const data = await Shop.findAll({
-            attributes: ['shop_name','shop_no','contact_number','email'],
+            attributes: ['shop_name', 'shop_no', 'contact_number', 'email'],
             // include:[{
             //     model:Organization,
             //     attributes:["org_name"]
             // }]
         })
         if (data) {
-            res.status(200).json({ status: "success", message: data })
+            res.status(200).json({ status: "success", data: data })
         }
-        else{
+        else {
             res.status(404).json({ status: "failure", message: "Not found" })
         }
     } catch (error) {
@@ -59,15 +67,15 @@ const getAllShops = async (req, res) => {
 const getSingleShop = async (req, res) => {
     try {
         const shop = await Shop.findOne({
-            attributes:['shop_name','shop_no','contact_number','email'],
-             where: {
-                shop_id:req.params.id
+            attributes: ['shop_name', 'shop_no', 'contact_number', 'email'],
+            where: {
+                shop_id: req.params.id
             }
         })
         if (shop) {
-            res.status(200).json({ status: "success", message: shop })
+            res.status(200).json({ status: "success", data: shop })
         }
-        else{
+        else {
             res.status(404).json({ status: "failure", message: "Not found" })
         }
     } catch (error) {
@@ -77,15 +85,15 @@ const getSingleShop = async (req, res) => {
 }
 const updateShop = async (req, res) => {
     try {
-        const [affectedRow] = await Shop.update(req.body,{
-             where: {
-                shop_id:req.params.id
+        const [affectedRow] = await Shop.update(req.body, {
+            where: {
+                shop_id: req.params.id
             }
         })
-        if (affectedRow===1) {
+        if (affectedRow === 1) {
             res.status(200).json({ status: "success", message: "Updated successfully" })
         }
-        else{
+        else {
             res.status(404).json({ status: "failure", message: "Record not found" })
         }
     } catch (error) {
@@ -97,19 +105,19 @@ const updateShop = async (req, res) => {
 const deleteShop = async (req, res) => {
     try {
         const affectedRow = await Shop.destroy({
-             where: {
-                shop_id:req.params.id
+            where: {
+                shop_id: req.params.id
             }
         })
-        if (affectedRow===1) {
+        if (affectedRow === 1) {
             await Beacon.destroy({
-                where:{
-                    shop_id:req.params.id
+                where: {
+                    shop_id: req.params.id
                 }
             })
             res.status(200).json({ status: "success", message: "Deleted successfully" })
         }
-        else{
+        else {
             res.status(404).json({ status: "failure", message: "Record not found" })
         }
     } catch (error) {
@@ -121,21 +129,21 @@ const deleteShop = async (req, res) => {
 const shopLogin = async (req, res) => {
     try {
         const data = await Shop.findOne({
-            attributes:['email','password_hash','org_id','shop_name','shop_id'],
+            attributes: ['email', 'password_hash', 'org_id', 'shop_name', 'shop_id'],
             where: { email: req.body.email }
         });
         if (data) {
-            const password=data.password_hash
-            const matchedPassword=await argon2.verify(password,req.body.password)
-            if(matchedPassword){
-                const tokenPayload={
-                    org_id:data.org_id,
-                    shop_id:data.shop_id,
-                    shop_name:data.shop_name
+            const password = data.password_hash
+            const matchedPassword = await argon2.verify(password, req.body.password)
+            if (matchedPassword) {
+                const tokenPayload = {
+                    org_id: data.org_id,
+                    shop_id: data.shop_id,
+                    shop_name: data.shop_name
                 }
-                const token=jwt.sign(tokenPayload,process.env.JWT_SECRET,{expiresIn:'30m'})
-                res.status(200).json({ status: "success", message: "Login successfully",token });
-            }else{
+                const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '30m' })
+                res.status(200).json({ status: "success", message: "Login successfully", authorization:token });
+            } else {
                 res.status(200).json({ status: "failure", message: "Login failed" });
             }
         } else {

@@ -66,7 +66,6 @@ async function findUrl(macAddress) {
             where: { mac: macAddress }
         });
         // If beacon data is found, proceed to find the associated template
-        const tempID=beaconData.template_id
         if (beaconData) {
             const templateData=await Template.findOne({
                 where:{
@@ -129,7 +128,7 @@ const login = async (req, res) => {
             res.status(200).json({ status: "success", url: builtUrl || "https://www.google.com" });
         } else {
             // Return a message if the beacon is not added yet
-            res.status(200).json({ status: "beacon is not added yet", url: "https://www.google.com" });
+            res.status(200).json({ status: "beacon is not added yet" });
         }
     } catch (error) {
         // Handle Sequelize validation errors

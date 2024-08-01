@@ -38,7 +38,7 @@ module.exports = (sequelize, DataTypes) => {
       }
     },
     contact_number:{
-      type:DataTypes.INTEGER,
+      type:DataTypes.STRING,
       allowNull:false,
       validate:{
         notNull:{

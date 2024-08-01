@@ -9,13 +9,9 @@ const createOrganization = async (req, res) => {
     try {
         const username=req.username
         if(username==="consultit"){
+            console.log(req.body);
             const { org_name, address, contact_number, email } = req.body
-            const data = await Organization.create({
-                org_name: org_name,
-                address: address,
-                email: email,
-                contact_number: contact_number,
-            })
+            const data = await Organization.create(req.body)
             if (data) {
                 res.status(200).json({ status: "success", message: "Created successfully" })
             }
@@ -33,7 +29,7 @@ const createOrganization = async (req, res) => {
 const getAllOrganization = async (req, res) => {
     try {
         const data = await Organization.findAll({
-            attributes: ['org_name', 'address', 'contact_number', 'email']
+            attributes: ['org_id','org_name', 'address', 'contact_number', 'email']
         })
         if (data) {
             res.status(200).json({ status: "success", data: data })

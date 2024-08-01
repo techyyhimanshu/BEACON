@@ -57,15 +57,15 @@ const createTemplate = async (req, res) => {
 const getShopBeacon = async (req,res) => {
     try{
         const shopBeacons = await Beacon.findAll({
-            attributes : ["beacon_id","beacon_name"],
+            attributes : ["beacon_id","mac"],
             where : {
-                shop_id : req.body.shop_id
+                shop_id : req.params.id
             }
         })
-        if (shopBeacons){
-            res.status(400).json({ status: "success", message: shopBeacons })
+        if (shopBeacons.length!==0){
+            res.status(200).json({ status: "success", message: shopBeacons })
         } else {
-            res.status(400).json({ status: "success", message: "no beacon added to this shop" })
+            res.status(404).json({ status: "Not found", message: "no beacon added to this shop" })
         }
     }catch(e)
     {res.status(400).json({ status: "failure", message: e.message });}
@@ -75,7 +75,7 @@ const getShopBeacon = async (req,res) => {
 const getAllTemplate = async (req, res) => {
     try {
         const data = await Template.findAll({
-            attributes: ['templateType_id','valid_from','valid_till','offer_data_1','offer_data_2'],
+            attributes: ['template_id','valid_from','valid_till','offer_data_1','offer_data_2'],
             include : {
                 model : TemplateType,
                 attributes : ["template_path"]
@@ -96,9 +96,8 @@ const getAllTemplate = async (req, res) => {
 
 const getMyTemplate = async (req, res) => {
     try {
-        console.log("get my templte method call");
         const data = await Beacon.findAll({
-            attributes : ['beacon_name'],
+            attributes : ['mac'],
             include :[{
                 model:Template ,
                 attributes : ['templateType_id','valid_from','valid_till','offer_data_1','offer_data_2'],
@@ -112,7 +111,7 @@ const getMyTemplate = async (req, res) => {
         ],
             where:{
                 // cmment it after token
-                shop_id : req.body.shop_id
+                shop_id : req.params.id
             }
             
         })
@@ -149,7 +148,7 @@ const updateMyTemplate = async (req, res) => {
             res.status(200).json({ status: "success", message: "Updated successfully" })
         }
         else{
-            res.status(404).json({ status: "failure", message: "Record not found!!!" })
+            // res.status(404).json({ status: "failure", message: "Record not found!!!" })
         }
     } catch (error) {
         console.log(error.message);

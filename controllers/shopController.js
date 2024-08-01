@@ -1,6 +1,6 @@
 const db = require("../models")
 const Shop = db.Shop
-const Organization = db.Organization
+const Beacon = db.Beacon
 const Sequelize = require("sequelize")
 const argon2=require('argon2')
 const jwt=require('jsonwebtoken')
@@ -102,6 +102,11 @@ const deleteShop = async (req, res) => {
             }
         })
         if (affectedRow===1) {
+            await Beacon.destroy({
+                where:{
+                    shop_id:req.params.id
+                }
+            })
             res.status(200).json({ status: "success", message: "Deleted successfully" })
         }
         else{

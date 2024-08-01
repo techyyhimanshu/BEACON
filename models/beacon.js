@@ -3,6 +3,7 @@ const {
   Model
 } = require('sequelize');
 const { Shop } = require('./shopdetails');
+const { template } = require('./template');
 module.exports = (sequelize, DataTypes) => {
   class Beacon extends Model {
     /**
@@ -50,7 +51,13 @@ module.exports = (sequelize, DataTypes) => {
         }
       }
     },
-    template_id: DataTypes.INTEGER
+    template_id:{
+      type:DataTypes.INTEGER,
+      references:{
+        model:template,
+        key:'template_id'
+      }
+    }
   }, {
     sequelize,
     paranoid: true,

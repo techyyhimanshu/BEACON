@@ -65,19 +65,14 @@ async function findUrl(macAddress) {
             attributes: ["template_id"],
             where: { mac: macAddress }
         });
-
         // If beacon data is found, proceed to find the associated template
+        const tempID=beaconData.template_id
         if (beaconData) {
-            const templateData = await Template.findOne({
-                attributes: ['valid_from', 'valid_till', 'templateType_id', 'offer_data_1', 'offer_data_2'],
-                where: {
-                    template_id: beaconData.template_id,
-                    deletedAt: null
+            const templateData=await Template.findOne({
+                where:{
+                    template_id:beaconData.template_id
                 }
-            });
-
-            console.log("Template data is: " + templateData.get("valid_from"));
-
+            })
             // If template data is found, check if the offer is valid today
             if (templateData) {
                 let today = new Date();

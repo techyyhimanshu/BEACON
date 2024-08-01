@@ -4,7 +4,7 @@ const router = Router();
 const verifyToken = require('../middlewares/authMiddleware');
 // Define your routes here
 
-router.post("/api/shop/create-template",createTemplate)
+router.post("/api/template",createTemplate)
 router.get("/api/templates",getAllTemplate)
 router.get("/api/shop/template/:id",getMyTemplate)
 router.patch("/api/shop/template/update",updateMyTemplate)

@@ -14,77 +14,81 @@ const Sequelize = require("sequelize")
 const createTemplate = async (req, res) => {
 
     try {
-        const data = await Template.create({
-            templateType_id: req.body.templateType_id,
-            valid_from: req.body.valid_from,
-            valid_till:req.body.valid_till,
-            offer_data_1:req.body.offer_data_1,
-            offer_data_2:req.body.offer_data_2
-        })
-        console.log(data.template_id);
-        if (data) {
-
-            var addToBeacon = await Beacon.update(
-                {template_id:data.template_id},{
-                where : {
-                    // comment after token
-                    beacon_id : req.body.beacon_id
-                    // beacon_id : req.beacon_id ;
-                }
+        const templateType = await TemplateType.findByPk(req.body.template_type_id)
+        if (!templateType) {
+            res.status(404).json({ status: 'failure', message: "Template url not  found" })
+        } else {
+            const data = await Template.create({
+                templateType_id: req.body.templateType_id,
+                valid_from: req.body.valid_from,
+                valid_till: req.body.valid_till,
+                offer_data_1: req.body.offer_data_1,
+                offer_data_2: req.body.offer_data_2
             })
-            if (addToBeacon==0){
-                res.status(200).json({ status: "failure", message: "no beacon asign to this shop" })
+            if (data) {
+
+                var addToBeacon = await Beacon.update(
+                    { template_id: data.template_id }, {
+                    where: {
+                        // comment after token
+                        beacon_id: req.body.beacon_id
+                        // beacon_id : req.beacon_id ;
+                    }
+                })
+                if (addToBeacon == 0) {
+                    res.status(200).json({ status: "failure", message: "no beacon asign to this shop" })
+                }
+                else {
+                    res.status(200).json({ status: "success", message: "Created successfully" })
+                }
             }
-            else{
-                res.status(200).json({ status: "success", message: "Created successfully" })
+            else {
+                res.status(200).json({ status: "fail", message: "data is not found", data: data })
             }
         }
-        else{
-            res.status(200).json({ status: "fail", message: "data is not found" ,data:data })
-        }
+
 
     } catch (error) {
         if (error instanceof Sequelize.ValidationError) {
             const errorMessages = error.errors.map(err => err.message);
             res.status(400).json({ status: "failure", message: errorMessages });
-        }else{
+        } else {
             res.status(400).json({ status: "failure", message: error.message });
         }
     }
 }
 
 
-const getShopBeacon = async (req,res) => {
-    try{
+const getShopBeacon = async (req, res) => {
+    try {
         const shopBeacons = await Beacon.findAll({
-            attributes : ["beacon_id","mac"],
-            where : {
-                shop_id : req.params.id
+            attributes: ["beacon_id", "mac"],
+            where: {
+                shop_id: req.params.id
             }
         })
-        if (shopBeacons.length!==0){
+        if (shopBeacons.length !== 0) {
             res.status(200).json({ status: "success", message: shopBeacons })
         } else {
             res.status(404).json({ status: "Not found", message: "no beacon added to this shop" })
         }
-    }catch(e)
-    {res.status(400).json({ status: "failure", message: e.message });}
+    } catch (e) { res.status(400).json({ status: "failure", message: e.message }); }
 }
 
 
 const getAllTemplate = async (req, res) => {
     try {
         const data = await Template.findAll({
-            attributes: ['template_id','valid_from','valid_till','offer_data_1','offer_data_2'],
-            include : {
-                model : TemplateType,
-                attributes : ["template_path"]
+            attributes: ['template_id', 'valid_from', 'valid_till', 'offer_data_1', 'offer_data_2'],
+            include: {
+                model: TemplateType,
+                attributes: ["template_path"]
             }
         })
         if (data) {
             res.status(200).json({ status: "success", message: data })
         }
-        else{
+        else {
             res.status(404).json({ status: "failure", message: "Not found" })
         }
     } catch (error) {
@@ -97,28 +101,28 @@ const getAllTemplate = async (req, res) => {
 const getMyTemplate = async (req, res) => {
     try {
         const data = await Beacon.findAll({
-            attributes : ['mac'],
-            include :[{
-                model:Template ,
-                attributes : ['templateType_id','valid_from','valid_till','offer_data_1','offer_data_2'],
-                order:[
-                    ['valid_till','ASC']
+            attributes: ['mac'],
+            include: [{
+                model: Template,
+                attributes: ['templateType_id', 'valid_from', 'valid_till', 'offer_data_1', 'offer_data_2'],
+                order: [
+                    ['valid_till', 'ASC']
                 ]
-            },{
-                model:Shop ,
-                attributes : ['shop_name'],
+            }, {
+                model: Shop,
+                attributes: ['shop_name'],
             }
-        ],
-            where:{
+            ],
+            where: {
                 // cmment it after token
-                shop_id : req.params.id
+                shop_id: req.params.id
             }
-            
+
         })
         if (data) {
             res.status(200).json({ status: "success", message: data })
         }
-        else{
+        else {
             res.status(404).json({ status: "failure", message: "Not found" })
         }
     } catch (error) {
@@ -129,25 +133,25 @@ const getMyTemplate = async (req, res) => {
 }
 
 const updateMyTemplate = async (req, res) => {
-    console.log("req body"+req.body);
+    console.log("req body" + req.body);
     try {
         console.log("update method call");
         const [affectedRow] = await Template.update({
             templateType_id: req.body.templateType_id,
             valid_from: req.body.templateType_id,
-            valid_till:req.body.valid_till,
-            offer_data_1:req.body.offer_data_1,
-            offer_data_2:req.body.offer_data_2
-        },{
-             where: {
-                template_id:req.body.template_id
+            valid_till: req.body.valid_till,
+            offer_data_1: req.body.offer_data_1,
+            offer_data_2: req.body.offer_data_2
+        }, {
+            where: {
+                template_id: req.body.template_id
             }
         })
         console.log(affectedRow);
         if (affectedRow === 1) {
             res.status(200).json({ status: "success", message: "Updated successfully" })
         }
-        else{
+        else {
             // res.status(404).json({ status: "failure", message: "Record not found!!!" })
         }
     } catch (error) {
@@ -160,14 +164,14 @@ const updateMyTemplate = async (req, res) => {
 const deleteMyTemplate = async (req, res) => {
     try {
         const affectedRow = await Template.destroy({
-             where: {
-                template_id:req.body.template_id
+            where: {
+                template_id: req.body.template_id
             }
         })
-        if (affectedRow===1) {
+        if (affectedRow === 1) {
             res.status(200).json({ status: "success", message: "Deleted successfully" })
         }
-        else{
+        else {
             res.status(404).json({ status: "failure", message: "Record not found for delete" })
         }
     } catch (error) {

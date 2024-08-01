@@ -5,9 +5,14 @@ const Sequelize = require("sequelize")
 
 const createShop = async (req, res) => {
     try {
-        const data = await Shop.create(req.body)
-        if (data) {
-            res.status(200).json({ status: "success", message: "Created successfully" })
+        const username=req.username
+        if(username==="consultit"){
+            const data = await Shop.create(req.body)
+            if (data) {
+                res.status(200).json({ status: "success", message: "Created successfully" })
+            }
+        }else{
+            res.status(401).json({ status: "failure", message:"Unauthorized" });
         }
     } catch (error) {
         if (error instanceof Sequelize.ValidationError) {

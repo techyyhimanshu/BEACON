@@ -1,4 +1,4 @@
-const jwt = require('jsonwebauthorization');
+const jwt = require('jsonwebtoken');
 
 const verifyauthorization = (req, res, next) => {
   const { authorization } = req.headers;

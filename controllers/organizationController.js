@@ -129,6 +129,7 @@ const getShopsByOrganization = async (req, res) => {
             res.status(404).json({ status: "failure", message: "Not found" })
         }
     } catch (error) {
+        console.log(error);
         res.status(500).json({ status: "failure" });
     }
 

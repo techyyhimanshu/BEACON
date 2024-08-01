@@ -9,29 +9,33 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      org_id:{
+      org_id: {
         allowNull: false,
         type: Sequelize.INTEGER
       },
       shop_name: {
         type: Sequelize.STRING,
-        allowNull:false
+        allowNull: false
       },
       shop_no: {
         type: Sequelize.INTEGER,
-        allowNull:false,
-        unique:true
+        allowNull: false,
+        unique: true
       },
       category: {
         type: Sequelize.INTEGER
       },
       contact_number: {
         type: Sequelize.INTEGER,
-        unique:true
+        unique: true
       },
       email: {
         type: Sequelize.STRING,
-        unique:true
+        unique: true
+      },
+      password_hash: {
+        type: Sequelize.STRING,
+        allowNull: false,
       },
       createdAt: {
         allowNull: false,
@@ -41,7 +45,7 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE
       },
-      deletedAt:{
+      deletedAt: {
         allowNull: true,
         type: Sequelize.DATE
       }

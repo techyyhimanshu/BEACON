@@ -130,7 +130,9 @@ const getMyTemplate = async (req, res) => {
 }
 
 const updateMyTemplate = async (req, res) => {
+    console.log("req body"+req.body);
     try {
+        console.log("update method call");
         const [affectedRow] = await Template.update({
             templateType_id: req.body.templateType_id,
             valid_from: req.body.templateType_id,
@@ -142,11 +144,12 @@ const updateMyTemplate = async (req, res) => {
                 template_id:req.body.template_id
             }
         })
-        if (affectedRow===1) {
+        console.log(affectedRow);
+        if (affectedRow === 1) {
             res.status(200).json({ status: "success", message: "Updated successfully" })
         }
         else{
-            res.status(404).json({ status: "failure", message: "Record not found" })
+            res.status(404).json({ status: "failure", message: "Record not found!!!" })
         }
     } catch (error) {
         console.log(error.message);
@@ -154,6 +157,7 @@ const updateMyTemplate = async (req, res) => {
     }
 
 }
+
 const deleteMyTemplate = async (req, res) => {
     try {
         const affectedRow = await Template.destroy({
@@ -165,7 +169,7 @@ const deleteMyTemplate = async (req, res) => {
             res.status(200).json({ status: "success", message: "Deleted successfully" })
         }
         else{
-            res.status(404).json({ status: "failure", message: "Record not found" })
+            res.status(404).json({ status: "failure", message: "Record not found for delete" })
         }
     } catch (error) {
         console.log(error.message);

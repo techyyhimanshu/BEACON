@@ -30,7 +30,7 @@ const createTempType = async (req, res) => {
 }
 const getAllTemplateType = async (req, res) => {
     try {
-        const data = await Shop.findAll({
+        const data = await TemplateType.findAll({
             attributes: ['template_path','templateType_id'],
             include : {
                 model : Category,
@@ -54,6 +54,26 @@ const getAllTemplateType = async (req, res) => {
 
 }
 
+const categoryTemplate = async (req, res) => {
+    try {
+        const catTempData = await TemplateType.findAll({},{
+             where: {
+                category_id:req.body.category_id
+            }
+        })
+        if (catTempData) {
+            res.status(200).json({ status: "success", message: catTempData})
+        }
+        else{
+            res.status(404).json({ status: "failure", message: "Record not found" })
+        }
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).json({ status: "failure" });
+    }
+}
+
+
 const updateTemplate = async (req, res) => {
     try {
         const [affectedRow] = await TemplateType.update({
@@ -74,8 +94,9 @@ const updateTemplate = async (req, res) => {
         console.log(error.message);
         res.status(500).json({ status: "failure" });
     }
-
 }
+
+
 const deleteTemplate = async (req, res) => {
     try {
         const affectedRow = await TemplateType.destroy({
@@ -98,6 +119,7 @@ const deleteTemplate = async (req, res) => {
 module.exports = {
     createTempType,
     getAllTemplateType,
+    categoryTemplate,
     updateTemplate,
     deleteTemplate
 }

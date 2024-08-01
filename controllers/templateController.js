@@ -111,6 +111,7 @@ const getMyTemplate = async (req, res) => {
             }
         ],
             where:{
+                // cmment it after token
                 shop_id : req.body.shop_id
             }
             

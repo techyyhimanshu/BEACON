@@ -2,12 +2,25 @@ const db = require("../models")
 const Shop = db.Shop
 const Organization = db.Organization
 const Sequelize = require("sequelize")
+const argon2=require('argon2')
+const jwt=require('jsonwebtoken')
 
 const createShop = async (req, res) => {
     try {
         const username=req.username
         if(username==="consultit"){
-            const data = await Shop.create(req.body)
+            const {shop_name,shop_no,category,contact_number,email,org_id}=req.body
+            const password=req.body.password
+            const hashedPassword=await argon2.hash(password)
+            const data = await Shop.create({
+                shop_name:shop_name,
+                shop_no:shop_no,
+                contact_number:contact_number,
+                category:category,
+                email:email,
+                org_id:org_id,
+                password_hash:hashedPassword
+            })
             if (data) {
                 res.status(200).json({ status: "success", message: "Created successfully" })
             }
@@ -103,7 +116,7 @@ const deleteShop = async (req, res) => {
 const shopLogin = async (req, res) => {
     try {
         const data = await Shop.findOne({
-            attributes:['email','password_hash','org_id','org_name'],
+            attributes:['email','password_hash','org_id','shop_name','shop_id'],
             where: { email: req.body.email }
         });
         if (data) {
@@ -112,7 +125,8 @@ const shopLogin = async (req, res) => {
             if(matchedPassword){
                 const tokenPayload={
                     org_id:data.org_id,
-                    organization_name:data.org_name,
+                    shop_id:data.shop_id,
+                    shop_name:data.shop_name
                 }
                 const token=jwt.sign(tokenPayload,process.env.JWT_SECRET,{expiresIn:'30m'})
                 res.status(200).json({ status: "success", message: "Login successfully",token });

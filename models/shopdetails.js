@@ -93,14 +93,6 @@ module.exports = (sequelize, DataTypes) => {
           msg:"Email address is invalid"
         }
       }
-    },password_hash: {
-      type:DataTypes.STRING,
-      allowNull:false,
-      validate:{
-        notNull:{
-          msg:"Password cannot be empty"
-        }
-      }
     }
   }, {
     sequelize,

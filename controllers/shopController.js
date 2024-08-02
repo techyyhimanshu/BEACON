@@ -21,8 +21,6 @@ const createShop = async (req, res) => {
             } else if (!organizationID) {
                 res.status(404).json({ status: "faiulre", message: "Organization not found" })
             } else {
-                const password = req.body.password
-                const hashedPassword = await argon2.hash(password)
                 const data = await Shop.create({
                     shop_name: shop_name,
                     shop_no: shop_no,
@@ -30,7 +28,6 @@ const createShop = async (req, res) => {
                     category: category,
                     email: email,
                     org_id: org_id,
-                    password_hash: hashedPassword
                 })
                 if (data) {
                     res.status(200).json({ status: "success", message: "Created successfully" })

@@ -22,7 +22,7 @@ const addBeacon = async (req, res) => {
         const data = await Beacon.create({
             beacon_name : req.body.beacon_name,
             mac :req.body.mac,
-            shop_id : req.body.shop_id
+            shop_id : req.body.shop_id,
         });
         
         // If the beacon is created successfully, return a success response
@@ -89,9 +89,17 @@ async function findUrl(macAddress) {
                         attributes: ['template_path'],
                         where: { templateType_id: templateData.templateType_id }
                     });
-
+                    var launchUrl=""
                     // Construct the URL using the template path and offer data
-                    const launchUrl = templateTypeData.template_path + templateData.offer_data_1 + '/' + templateData.offer_data_2;
+                    if(templateTypeData.offer_data_1&& templateTypeData.offer_data_2){
+                         launchUrl = templateTypeData.template_path + templateData.offer_data_1 + '/' + templateData.offer_data_2;
+                    }else if(templateTypeData.offer_data_1){
+                         launchUrl = templateTypeData.template_path + templateData.offer_data_1;
+                    }else if(templateTypeData.offer_data_2){
+                         launchUrl = templateTypeData.template_path + templateData.offer_data_2;
+                    }else{
+                         launchUrl = templateTypeData.template_path;
+                    }
                     console.log("URL built for beacon: " + launchUrl);
                     return launchUrl;
                 } else {

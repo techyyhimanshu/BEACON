@@ -6,6 +6,7 @@ const beaconRoute = require('./beaconRoute');
 const templateTypeRoute = require('./templateTypeRoute');
 const templateRoute = require('./templateRoute');
 const adminRoute = require('./adminRoute');
+const categoryRoute = require('./categoryRoute');
 
 const routes = Router();
 routes.use(organizationRoute);
@@ -14,6 +15,7 @@ routes.use(beaconRoute);
 routes.use(templateTypeRoute);
 routes.use(templateRoute);
 routes.use(adminRoute);
+routes.use(categoryRoute);
 
 
 module.exports = routes;

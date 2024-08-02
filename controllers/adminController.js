@@ -3,7 +3,7 @@ const adminLogin = async (req, res) => {
     try {
         const { username, password } = req.body
         if (username === "cit_superadmin" && password === "citpvt") {
-            const token=jwt.sign({username:username},process.env.JWT_SECRET,{expiresIn:'30m'})
+            const token=jwt.sign({username:username},process.env.JWT_SECRET,{expiresIn:'24h'})
             res.status(200).json({ status: "success",authorization:token });
 
         } else {

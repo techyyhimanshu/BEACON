@@ -146,7 +146,7 @@ const shopLogin = async (req, res) => {
                     shop_id: data.shop_id,
                     shop_name: data.shop_name
                 }
-                const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '30m' })
+                const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '24h' })
                 res.status(200).json({ status: "success",authorization:token });
             } else {
                 res.status(200).json({ status: "failure", message: "Login failed" });
@@ -171,11 +171,11 @@ const getShopBeacon = async (req, res) => {
         const shopBeacons = await Beacon.findAll({
             attributes: ["beacon_id", "mac"],
             where: {
-                shop_id: req.params.id
+                shop_id:req.shop_id
             }
         })
         if (shopBeacons.length !== 0) {
-            res.status(200).json({ status: "success", message: shopBeacons })
+            res.status(200).json({ status: "success", data: shopBeacons })
         } else {
             res.status(404).json({ status: "Not found", message: "no beacon added to this shop" })
         }

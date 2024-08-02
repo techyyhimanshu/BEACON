@@ -17,6 +17,7 @@ const verifyauthorization = (req, res, next) => {
     }
     // If authorization is valid, save decoded info to request for use in other routes
     req.username = decoded.username;
+    req.shop_id=decoded.shop_id
     next();
   });
 };

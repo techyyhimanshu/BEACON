@@ -12,6 +12,6 @@ router.post("/api/shop/login",shopLogin)
 router.get("/api/shop/:id",verifyToken,getSingleShop)
 router.patch("/api/shop/:id",verifyToken,updateShop)
 router.delete("/api/shop/:id",verifyToken,deleteShop)
-router.get("/api/shop/:id/beacons",getShopBeacon)
+router.get("/api/shop/beacons/list",verifyToken,getShopBeacon)
 
 module.exports = router;

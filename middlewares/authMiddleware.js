@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-const verifyauthorization = (req, res, next) => {
+const verifyToken = (req, res, next) => {
   const { authorization } = req.headers;
   if (!authorization) {
     return res.status(403).json({ status: "failure", message: "Unauthorized" });
@@ -22,4 +22,4 @@ const verifyauthorization = (req, res, next) => {
   });
 };
 
-module.exports = verifyauthorization;
+module.exports = verifyToken;

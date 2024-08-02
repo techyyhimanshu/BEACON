@@ -32,7 +32,7 @@ module.exports = (sequelize, DataTypes) => {
           msg: "MAC address cannot be null"
         },
         is: {
-          args: /^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/,
+          args: /^([0-9A-Za-z]{2}[:-]){5}([0-9A-Za-z]{2})$/,
           msg: "MAC address must be in the format XX:XX:XX:XX:XX:XX"
         }
       }

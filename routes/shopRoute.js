@@ -6,7 +6,7 @@ const router = Router();
 
 router.post("/api/shop",verifyToken,createShop)
 router.get("/api/shops",verifyToken,getAllShops)
-router.get("/api/shop/login",shopLogin)
+router.post("/api/shop/login",shopLogin)
 
 
 router.get("/api/shop/:id",verifyToken,getSingleShop)

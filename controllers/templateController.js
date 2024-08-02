@@ -19,7 +19,7 @@ const createTemplate = async (req, res) => {
             res.status(404).json({ status: 'failure', message: "Template url not  found" })
         } else {
             const data = await Template.create({
-                templateType_id: req.body.templateType_id,
+                templateType_id: req.body.template_type_id,
                 valid_from: req.body.valid_from,
                 valid_till: req.body.valid_till,
                 offer_data_1: req.body.offer_data_1,

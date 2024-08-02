@@ -166,6 +166,22 @@ const shopLogin = async (req, res) => {
         }
     }
 };
+const getShopBeacon = async (req, res) => {
+    try {
+        const shopBeacons = await Beacon.findAll({
+            attributes: ["beacon_id", "mac"],
+            where: {
+                shop_id: req.params.id
+            }
+        })
+        if (shopBeacons.length !== 0) {
+            res.status(200).json({ status: "success", message: shopBeacons })
+        } else {
+            res.status(404).json({ status: "Not found", message: "no beacon added to this shop" })
+        }
+    } catch (e) { res.status(400).json({ status: "failure", message: e.message }); }
+}
+
 
 module.exports = {
     createShop,
@@ -173,5 +189,6 @@ module.exports = {
     getSingleShop,
     updateShop,
     deleteShop,
-    shopLogin
+    shopLogin,
+    getShopBeacon
 }

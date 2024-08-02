@@ -13,8 +13,13 @@ const createShop = async (req, res) => {
             const categoryID = await db.Category.findOne({
                 where: { category_id: category }
             })
+            const organizationID = await db.Organization.findOne({
+                where: { org_id:org_id }
+            })
             if (!categoryID) {
                 res.status(404).json({ status: "faiulre", message: "Category not found" })
+            }else if(!organizationID){
+                res.status(404).json({ status: "faiulre", message: "Organization not found" })
             } else {
                 const password = req.body.password
                 const hashedPassword = await argon2.hash(password)

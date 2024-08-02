@@ -14,11 +14,11 @@ const createShop = async (req, res) => {
                 where: { category_id: category }
             })
             const organizationID = await db.Organization.findOne({
-                where: { org_id:org_id }
+                where: { org_id: org_id }
             })
             if (!categoryID) {
                 res.status(404).json({ status: "faiulre", message: "Category not found" })
-            }else if(!organizationID){
+            } else if (!organizationID) {
                 res.status(404).json({ status: "faiulre", message: "Organization not found" })
             } else {
                 const password = req.body.password
@@ -34,7 +34,7 @@ const createShop = async (req, res) => {
                 })
                 if (data) {
                     res.status(200).json({ status: "success", message: "Created successfully" })
-                }else {
+                } else {
                     res.status(401).json({ status: "failure", message: "Unauthorized" });
                 }
             }
@@ -51,7 +51,7 @@ const createShop = async (req, res) => {
 const getAllShops = async (req, res) => {
     try {
         const data = await Shop.findAll({
-            attributes: ['shop_id','shop_name', 'shop_no', 'contact_number', 'email'],
+            attributes: ['shop_id', 'shop_name', 'shop_no', 'contact_number', 'email'],
             // include:[{
             //     model:Organization,
             //     attributes:["org_name"]
@@ -72,7 +72,7 @@ const getAllShops = async (req, res) => {
 const getSingleShop = async (req, res) => {
     try {
         const shop = await Shop.findOne({
-            attributes: ['shop_id','shop_name', 'shop_no', 'contact_number', 'email'],
+            attributes: ['shop_id', 'shop_name', 'shop_no', 'contact_number', 'email'],
             where: {
                 shop_id: req.params.id
             }
@@ -90,16 +90,70 @@ const getSingleShop = async (req, res) => {
 }
 const updateShop = async (req, res) => {
     try {
-        const [affectedRow] = await Shop.update(req.body, {
-            where: {
-                shop_id: req.params.id
+        if (req.username === 'cit_superadmin') {
+            if (req.body.org_id) {
+                const orgID = req.body.org_id
+                const catID = req.body.category_id
+                const Organization = await db.Organization.findOne({
+                    attributes: ['org_id'],
+                    where: {
+                        org_id: orgID
+                    }
+                })
+                if (!Organization) {
+                    res.status(404).json({ status: "failure", message: "Organization not found" })
+                } else {
+                    if (req.body.category_id) {
+                        const Category = await db.Category.findOne({
+                            attributes: ['category_id'],
+                            where: {
+                                category_id: catID
+                            }
+                        })
+                        if (!Category) {
+                            res.status(404).json({ status: "failure", message: "Category not found" })
+                        } else {
+                            const [affectedRow] = await Shop.update(req.body, {
+                                where: {
+                                    shop_id: req.params.id
+                                }
+                            })
+                            if (affectedRow === 1) {
+                                res.status(200).json({ status: "success", message: "Updated successfully" })
+                            }
+                            else {
+                                res.status(404).json({ status: "failure", message: "Record not found" })
+                            }
+                        }
+                    }else{
+                        const [affectedRow] = await Shop.update(req.body, {
+                            where: {
+                                shop_id: req.params.id
+                            }
+                        })
+                        if (affectedRow === 1) {
+                            res.status(200).json({ status: "success", message: "Updated successfully" })
+                        }
+                        else {
+                            res.status(404).json({ status: "failure", message: "Record not found" })
+                        }
+                    }
+                }
+            }else{
+                const [affectedRow] = await Shop.update(req.body, {
+                    where: {
+                        shop_id: req.params.id
+                    }
+                })
+                if (affectedRow === 1) {
+                    res.status(200).json({ status: "success", message: "Updated successfully" })
+                }
+                else {
+                    res.status(404).json({ status: "failure", message: "Record not found" })
+                }
             }
-        })
-        if (affectedRow === 1) {
-            res.status(200).json({ status: "success", message: "Updated successfully" })
-        }
-        else {
-            res.status(404).json({ status: "failure", message: "Record not found" })
+        } else {
+            res.status(403).json({ status: "failure", message: "Unauthorized" })
         }
     } catch (error) {
         console.log(error.message);
@@ -147,7 +201,7 @@ const shopLogin = async (req, res) => {
                     shop_name: data.shop_name
                 }
                 const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '24h' })
-                res.status(200).json({ status: "success",authorization:token });
+                res.status(200).json({ status: "success", token: token });
             } else {
                 res.status(200).json({ status: "failure", message: "Login failed" });
             }
@@ -171,7 +225,7 @@ const getShopBeacon = async (req, res) => {
         const shopBeacons = await Beacon.findAll({
             attributes: ["beacon_id", "mac"],
             where: {
-                shop_id:req.shop_id
+                shop_id: req.shop_id
             }
         })
         if (shopBeacons.length !== 0) {

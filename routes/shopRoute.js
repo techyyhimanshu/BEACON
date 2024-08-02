@@ -9,9 +9,9 @@ router.get("/api/shops",verifyToken,getAllShops)
 router.get("/api/shop/login",shopLogin)
 
 
-router.get("/api/shop/:id",getSingleShop)
-router.patch("/api/shop/:id",updateShop)
-router.delete("/api/shop/:id",deleteShop)
+router.get("/api/shop/:id",verifyToken,getSingleShop)
+router.patch("/api/shop/:id",verifyToken,updateShop)
+router.delete("/api/shop/:id",verifyToken,deleteShop)
 
 
 module.exports = router;

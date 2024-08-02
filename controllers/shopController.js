@@ -51,7 +51,7 @@ const createShop = async (req, res) => {
 const getAllShops = async (req, res) => {
     try {
         const data = await Shop.findAll({
-            attributes: ['shop_name', 'shop_no', 'contact_number', 'email'],
+            attributes: ['shop_id','shop_name', 'shop_no', 'contact_number', 'email'],
             // include:[{
             //     model:Organization,
             //     attributes:["org_name"]
@@ -72,7 +72,7 @@ const getAllShops = async (req, res) => {
 const getSingleShop = async (req, res) => {
     try {
         const shop = await Shop.findOne({
-            attributes: ['shop_name', 'shop_no', 'contact_number', 'email'],
+            attributes: ['shop_id','shop_name', 'shop_no', 'contact_number', 'email'],
             where: {
                 shop_id: req.params.id
             }

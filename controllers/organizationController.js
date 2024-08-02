@@ -8,7 +8,7 @@ const Sequelize = require("sequelize")
 const createOrganization = async (req, res) => {
     try {
         const username=req.username
-        if(username==="consultit"){
+        if(username==="cit_superadmin"){
             console.log(req.body);
             const { org_name, address, contact_number, email } = req.body
             const data = await Organization.create(req.body)

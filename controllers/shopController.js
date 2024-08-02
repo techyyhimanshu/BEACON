@@ -8,7 +8,7 @@ const jwt = require('jsonwebtoken')
 const createShop = async (req, res) => {
     try {
         const username = req.username
-        if (username === "consultit") {
+        if (username === "cit_superadmin") {
             const { shop_name, shop_no, category, contact_number, email, org_id } = req.body
             const categoryID = await db.Category.findOne({
                 where: { category_id: category }

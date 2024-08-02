@@ -2,7 +2,7 @@ const jwt=require('jsonwebtoken')
 const adminLogin = async (req, res) => {
     try {
         const { username, password } = req.body
-        if (username === "consultit" && password === "citpvt") {
+        if (username === "cit_superadmin" && password === "citpvt") {
             const token=jwt.sign({username:username},process.env.JWT_SECRET,{expiresIn:'30m'})
             res.status(200).json({ status: "success",authorization:token });
 

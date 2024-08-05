@@ -171,7 +171,7 @@ const updateBeacon = async (req, res) => {
         if (!shopData) {
             return res.status(404).json({ status: "failure", message: "Shop not found" });
         }
-        
+
         // Create a new beacon entry using the data from the request body
         const data = await Beacon.update({
             beacon_name : req.body.beacon_name,
@@ -203,10 +203,50 @@ const updateBeacon = async (req, res) => {
     }
 };
 
+// Function to get single beacon by id
+const getSingleBeacon = async (req, res) => {
+    try {
+        // Retrieve the beacon by its primary key (beacon_id) from the request body
+        console.log(req.params.id);
+        
+        const beaconData = await Beacon.findByPk(req.params.id,{
+            attributes : ['beacon_id','mac','beacon_name'],
+            include:[ {
+                model : Shop,
+                attributes : ['shop_name']
+            },{
+                
+                model : Template,
+                attributes : ['templateType_id','valid_from','valid_till','offer_data_1','offer_data_2']
+            }]
+        });
+        
+        // If the beacon is not found, return a 404 error response
+        if (!beaconData) {
+            return res.status(404).json({ status: "failure", message: "Beacon not found" });
+        }
+        // If the beacon is fatch successfully, return a success response
+        else{
+            res.status(200).json({ status: "success", message: "Updated successfully", data:beaconData });
+        }
+    } catch (error) {
+        // Handle Sequelize validation errors
+        if (error instanceof Sequelize.ValidationError) {
+            const errorMessages = error.errors.map(err => err.message);
+            res.status(400).json({ status: "failure", message: errorMessages });
+        } else {
+            // Log any other errors and return a 500 internal server error response
+            console.log(error);
+            res.status(500).json({ status: "failure", message: "Internal Server Error" });
+        }
+    }
+};
+
 
 // Exporting the functions to be used in other files
 module.exports = {
     addBeacon,
     login,
-    updateBeacon
+    updateBeacon,
+    getSingleBeacon
 };

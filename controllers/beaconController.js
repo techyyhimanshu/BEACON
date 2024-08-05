@@ -55,6 +55,13 @@ const getAllBeacons=async (req,res)=>{
                 include:[{
                     model:Shop,
                     attributes:['shop_id','shop_name']
+                },{
+                    model:Template,
+                    attributes:['template_id'],
+                    include:[{
+                        model:TemplateType,
+                        attributes:['template_path']
+                    }]
                 }]
             })
             if(beacons){

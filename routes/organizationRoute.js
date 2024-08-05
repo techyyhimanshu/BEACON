@@ -1,5 +1,5 @@
 const { Router } = require('express');
-const {createOrganization,getAllOrganization,getSingleOrganization,updateOrganization,deleteOrganization,getShopsByOrganization}=require('../controllers/organizationController');
+const {createOrganization,getAllOrganization,getSingleOrganization,updateOrganization,deleteOrganization,getShopsByOrganization, getOrganizationBeacons}=require('../controllers/organizationController');
 const verifyToken = require('../middlewares/authMiddleware');
 const router = Router();
 // Define your routes here
@@ -13,6 +13,7 @@ router.get("/api/organization/:id",getSingleOrganization)
 router.post("/api/organization/shops",getShopsByOrganization)
 router.patch("/api/organization/:id",verifyToken,updateOrganization)
 router.delete("/api/organization/:id",verifyToken,deleteOrganization)
+router.get("/api/organization/:id/beacons",verifyToken,getOrganizationBeacons)
 
 
 module.exports = router;

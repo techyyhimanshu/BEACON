@@ -46,6 +46,9 @@ const addBeacon = async (req, res) => {
         }
     }
 };
+const getAllBeacons=async (req,res)=>{
+    
+}
 
 // Function to calculate the difference in days between two dates
 function getDifference(date_1, date_2) {
@@ -96,14 +99,16 @@ async function findUrl(macAddress) {
                     });
                     var launchUrl=""
                     // Construct the URL using the template path and offer data
-                    if(templateTypeData.offer_data_1&& templateTypeData.offer_data_2){
-                         launchUrl = templateTypeData.template_path + templateData.offer_data_1 + '/' + templateData.offer_data_2;
-                    }else if(templateTypeData.offer_data_1){
-                         launchUrl = templateTypeData.template_path + templateData.offer_data_1;
-                    }else if(templateTypeData.offer_data_2){
-                         launchUrl = templateTypeData.template_path +'offerData1'+'/'+ templateData.offer_data_2;
-                    }else{
-                         launchUrl = templateTypeData.template_path;
+                    if(templateTypeData.template_path){
+                        if(templateTypeData.offer_data_1&& templateTypeData.offer_data_2){
+                            launchUrl = templateTypeData.template_path + templateData.offer_data_1 + '/' + templateData.offer_data_2;
+                       }else if(templateTypeData.offer_data_1){
+                            launchUrl = templateTypeData.template_path + templateData.offer_data_1;
+                       }else if(templateTypeData.offer_data_2){
+                            launchUrl = templateTypeData.template_path + templateData.offer_data_2;
+                       }else{
+                            launchUrl = templateTypeData.template_path;
+                       }
                     }
                     console.log("URL built for beacon: " + launchUrl);
                     return launchUrl;

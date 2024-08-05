@@ -103,6 +103,8 @@ async function findUrl(macAddress) {
         });
         // If beacon data is found, proceed to find the associated template
         if (beaconData) {
+            console.log("beacon data found");
+            
             const templateData=await Template.findOne({
                 where:{
                     template_id:beaconData.template_id
@@ -125,17 +127,25 @@ async function findUrl(macAddress) {
                         attributes: ['template_path'],
                         where: { templateType_id: templateData.templateType_id }
                     });
-                    var launchUrl=""
+                    var launchUrl="";
+                    const staticPath  = templateTypeData.template_path
+                    if(staticPath[staticPath.length -1]!='/')
+                    {
+                        staticPath = staticPath + '/';
+                    }
+                    console.log("url path end point = "+staticPath[staticPath.length -1]);
+                    console.log("offer data 2 = "+templateData.get('offer_data_2'));
+                    
                     // Construct the URL using the template path and offer data
-                    if(templateTypeData.template_path){
-                        if(templateTypeData.offer_data_1&& templateTypeData.offer_data_2){
-                            launchUrl = templateTypeData.template_path + templateData.offer_data_1 + '/' + templateData.offer_data_2;
-                       }else if(templateTypeData.offer_data_1){
-                            launchUrl = templateTypeData.template_path + templateData.offer_data_1;
-                       }else if(templateTypeData.offer_data_2){
-                            launchUrl = templateTypeData.template_path + templateData.offer_data_2;
+                    if(staticPath){
+                        if(templateData.offer_data_1 && templateData.offer_data_2){
+                            launchUrl = staticPath + templateData.offer_data_1 + '/' + templateData.offer_data_2;
+                       }else if(templateData.offer_data_1){
+                            launchUrl = staticPath + templateData.offer_data_1;
+                       }else if(templateData.offer_data_2){
+                            launchUrl = staticPath + templateData.offer_data_2;
                        }else{
-                            launchUrl = templateTypeData.template_path;
+                            launchUrl = staticPath;
                        }
                     }
                     console.log("URL built for beacon: " + launchUrl);
@@ -169,7 +179,8 @@ const login = async (req, res) => {
         // If beacon data is found, find the associated URL
         if (data) {
             const builtUrl = await findUrl(req.body.mac);
-
+            console.log(builtUrl);
+            
             // Send the URL as part of the response, defaulting to Google if no URL is built
             res.status(200).json({ status: "success", url: builtUrl || "https://www.google.com" });
         } else {

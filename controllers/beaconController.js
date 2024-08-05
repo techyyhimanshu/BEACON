@@ -47,6 +47,27 @@ const addBeacon = async (req, res) => {
     }
 };
 const getAllBeacons=async (req,res)=>{
+   
+    try {
+        if(req.username==='cit_superadmin'){
+            const beacons=await Beacon.findAll({
+                attributes:['beacon_id','beacon_name','mac'],
+                include:[{
+                    model:Shop,
+                    attributes:['shop_id','shop_name']
+                }]
+            })
+            if(beacons){
+                res.status(200).json({status:"success",data:beacons})
+            }else{
+                res.status(404).json({status:"failure",message:"Not found"})
+            }  
+        }else{
+            res.status(403).json({status:"failure",message:"Unauthorized"})
+        }
+    } catch (error) {
+        res.status(500).json({status:"failure",message:"Internal server error"})
+    }
     
 }
 
@@ -213,5 +234,6 @@ const updateBeacon = async (req, res) => {
 module.exports = {
     addBeacon,
     login,
-    updateBeacon
+    updateBeacon,
+    getAllBeacons
 };

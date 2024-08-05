@@ -220,9 +220,9 @@ const shopLogin = async (req, res) => {
 const getShopBeacon = async (req, res) => {
     try {
         const shopBeacons = await Beacon.findAll({
-            attributes: ["beacon_id", "mac"],
+            attributes: ["beacon_id","beacon_name", "mac"],
             where: {
-                shop_id: req.shop_id
+                shop_id: req.params.id
             }
         })
         if (shopBeacons.length !== 0) {

@@ -5,6 +5,7 @@ const Template = db.template;
 const TemplateType = db.temptype;
 
 const Sequelize = require("sequelize");
+const beacon = require("../models/beacon");
 // const appclass = require("../appClass");
 
 // Function to add a new beacon
@@ -28,6 +29,10 @@ const addBeacon = async (req, res) => {
         // If the beacon is created successfully, return a success response
         if (data) {
             res.status(200).json({ status: "success", message: "Created successfully" });
+        }
+        else{
+            res.status(404).json({ status: "failure", message: "Not Created successfully" });
+
         }
     } catch (error) {
         // Handle Sequelize validation errors
@@ -96,7 +101,7 @@ async function findUrl(macAddress) {
                     }else if(templateTypeData.offer_data_1){
                          launchUrl = templateTypeData.template_path + templateData.offer_data_1;
                     }else if(templateTypeData.offer_data_2){
-                         launchUrl = templateTypeData.template_path + templateData.offer_data_2;
+                         launchUrl = templateTypeData.template_path +'offerData1'+'/'+ templateData.offer_data_2;
                     }else{
                          launchUrl = templateTypeData.template_path;
                     }
@@ -104,7 +109,7 @@ async function findUrl(macAddress) {
                     return launchUrl;
                 } else {
                     // Return a message if there is no valid offer today
-                    return "There is no offer valid today.";
+                    return "Offer exprired ----- There is no offer valid today.";
                 }
             } else {
                 // Return a message if template data is not found
@@ -151,8 +156,57 @@ const login = async (req, res) => {
     }
 };
 
+// Function to update old beacon
+const updateBeacon = async (req, res) => {
+    try {
+        // Retrieve the beacon by its primary key (beacon_id) from the request body
+        const beaconData = await Beacon.findByPk(req.body.beacon_id);
+        
+        // If the shop is not found, return a 404 error response
+        if (!beaconData) {
+            return res.status(404).json({ status: "failure", message: "Beacon not found" });
+        }
+         // Retrieve the shop by its primary key (shop_id) from the request body
+        const shopData = await Shop.findByPk(req.body.shop_id);
+        if (!shopData) {
+            return res.status(404).json({ status: "failure", message: "Shop not found" });
+        }
+        
+        // Create a new beacon entry using the data from the request body
+        const data = await Beacon.update({
+            beacon_name : req.body.beacon_name,
+            shop_id : req.body.shop_id,
+        },{
+            where : {
+                beacon_id : req.body.beacon_id
+            }
+        }
+    );
+        
+        // If the beacon is created successfully, return a success response
+        if (data) {
+            res.status(200).json({ status: "success", message: "Updated successfully", data:data });
+        }
+        else{
+            res.status(200).json({ status: "failure", message: "Something went wrong !!! beacon not updated successfully" });
+        }
+    } catch (error) {
+        // Handle Sequelize validation errors
+        if (error instanceof Sequelize.ValidationError) {
+            const errorMessages = error.errors.map(err => err.message);
+            res.status(400).json({ status: "failure", message: errorMessages });
+        } else {
+            // Log any other errors and return a 500 internal server error response
+            console.log(error);
+            res.status(500).json({ status: "failure", message: "Internal Server Error" });
+        }
+    }
+};
+
+
 // Exporting the functions to be used in other files
 module.exports = {
     addBeacon,
-    login
+    login,
+    updateBeacon
 };

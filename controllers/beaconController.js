@@ -128,7 +128,7 @@ async function findUrl(macAddress) {
                         where: { templateType_id: templateData.templateType_id }
                     });
                     var launchUrl="";
-                    const staticPath  = templateTypeData.template_path + '?offertext='
+                    const staticPath  = templateTypeData.template_path
                     // if(staticPath[staticPath.length -1]!='/')
                     // {
                     //     staticPath = staticPath + '/';
@@ -139,9 +139,9 @@ async function findUrl(macAddress) {
                     // Construct the URL using the template path and offer data
                     if(staticPath){
                         if(templateData.offer_data_1 && templateData.offer_data_2){
-                            launchUrl = staticPath + templateData.offer_data_1 + '&&offerdata=' + templateData.offer_data_2;
+                            launchUrl = staticPath +'?offertext=' + templateData.offer_data_1 + '&&offerdata=' + templateData.offer_data_2;
                        }else if(templateData.offer_data_1){
-                            launchUrl = staticPath + templateData.offer_data_1;
+                            launchUrl = staticPath + '?offertext='+ templateData.offer_data_1;
                        }else if(templateData.offer_data_2){
                             launchUrl = staticPath + templateData.offer_data_2;
                        }else{

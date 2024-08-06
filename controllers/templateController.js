@@ -18,12 +18,16 @@ const createTemplate = async (req, res) => {
         if (!templateType) {
             res.status(404).json({ status: 'failure', message: "Template url not  found" })
         } else {
+
+            var offerData1 =  (req.body.offer_data_1).replaceAll(' ','%20');
+            var offerData2 =  (req.body.offer_data_2).replaceAll(' ','%20');
+
             const data = await Template.create({
                 templateType_id: req.body.template_type_id,
                 valid_from: req.body.valid_from,
                 valid_till: req.body.valid_till,
-                offer_data_1: req.body.offer_data_1,
-                offer_data_2: req.body.offer_data_2
+                offer_data_1: offerData1,
+                offer_data_2: offerData2
             })
             if (data) {
 
@@ -136,12 +140,16 @@ const updateMyTemplate = async (req, res) => {
     console.log("req body" + req.body);
     try {
         console.log("update method call");
+
+        var offerData1 =  (req.body.offer_data_1).replaceAll(' ','%20');
+        var offerData2 =  (req.body.offer_data_2).replaceAll(' ','%20');
+
         const [affectedRow] = await Template.update({
             templateType_id: req.body.templateType_id,
             valid_from: req.body.templateType_id,
             valid_till: req.body.valid_till,
-            offer_data_1: req.body.offer_data_1,
-            offer_data_2: req.body.offer_data_2
+            offer_data_1: offerData1,
+            offer_data_2: offerData2
         }, {
             where: {
                 template_id: req.body.template_id

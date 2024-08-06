@@ -103,7 +103,7 @@ const deleteOrganization = async (req, res) => {
 const getShopsByOrganization = async (req, res) => {
     try {
         const data = await Shop.findAll({
-            attributes: ['shop_name', 'shop_no'],
+            attributes: ['shop_id','shop_name', 'shop_no'],
             where: {
                 org_id: req.body.org_id
             },
@@ -112,17 +112,22 @@ const getShopsByOrganization = async (req, res) => {
                 attributes: ['category_name']
             }]
         })
-        const catName = data[0].dataValues.Category.category_name
-        const shops = data.map(shop => ({
-            shop_name: shop.dataValues.shop_name,
-            shop_no: shop.dataValues.shop_no,
-            category: catName
-        }));
-        if (shops) {
-            res.status(200).json({ status: "success", data: shops })
+        //const catName = data[0].dataValues.Category.category_name
+        // const shops = data.map(shop => ({
+        //     shop_name: shop.dataValues.shop_name,
+        //     shop_no: shop.dataValues.shop_no,
+        //     category: catName
+        // }));
+        console.log(data);
+        
+        if (data.length===0) {
+            // if(data.length==0)
+            // {
+                res.status(200).json({ status: "failure", data: "organization not found" })
+            // }
         }
         else {
-            res.status(404).json({ status: "failure", message: "Not found" })
+            res.status(200).json({ status: "success", data: data })
         }
     } catch (error) {
         console.log(error);

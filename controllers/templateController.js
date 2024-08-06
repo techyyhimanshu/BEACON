@@ -15,12 +15,13 @@ const createTemplate = async (req, res) => {
 
     try {
         const templateType = await TemplateType.findByPk(req.body.template_type_id)
-        if (!templateType) {
-            res.status(404).json({ status: 'failure', message: "Template url not  found" })
+        
+        if (!templateType) { res.status(404).json({ status: 'failure', message: "Template url not  found" })
         } else {
-
-            var offerData1 =  (req.body.offer_data_1).replaceAll(' ','%20');
-            var offerData2 =  (req.body.offer_data_2).replaceAll(' ','%20');
+            var offerData1 ='';
+            var offerData2 ='';
+            if(req.body.offer_data_1 != '') {   offerData1 =  (req.body.offer_data_1).replaceAll(' ','%20'); }
+            if(req.body.offer_data_2 != '') {   offerData2 =  (req.body.offer_data_2).replaceAll(' ','%20'); }
 
             const data = await Template.create({
                 templateType_id: req.body.template_type_id,

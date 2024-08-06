@@ -143,7 +143,7 @@ async function findUrl(macAddress) {
                        }else if(templateData.offer_data_1){
                             launchUrl = staticPath + '?offertext='+ templateData.offer_data_1;
                        }else if(templateData.offer_data_2){
-                            launchUrl = staticPath + templateData.offer_data_2;
+                            launchUrl = staticPath +  '?offerdata=' +templateData.offer_data_2;
                        }else{
                             launchUrl = staticPath;
                        }

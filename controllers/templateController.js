@@ -14,14 +14,24 @@ const Sequelize = require("sequelize")
 const createTemplate = async (req, res) => {
 
     try {
-        const templateType = await TemplateType.findByPk(req.body.template_type_id)
-        
-        if (!templateType) { res.status(404).json({ status: 'failure', message: "Template url not  found" })
+        const templateType = await TemplateType.findByPk(req.body.template_type_id * 1)
+
+        if (!templateType) {
+            res.status(404).json({ status: 'failure', message: "Template url not  found" })
         } else {
-            var offerData1 ='';
-            var offerData2 ='';
-            if(req.body.offer_data_1 != '') {   offerData1 =  (req.body.offer_data_1).replaceAll(' ','%20'); }
-            if(req.body.offer_data_2 != '') {   offerData2 =  (req.body.offer_data_2).replaceAll(' ','%20'); }
+            var offerData1 = '';
+            var offerData2 = '';
+            var body_offer_1 = req.body.offer_data_1;
+            var body_offer_2 = req.body.offer_data_2;
+            if (body_offer_1 != undefined ) {
+                console.log("body first");
+
+                offerData1 = body_offer_1.replaceAll(' ', '%20');
+            }
+            if (body_offer_2 != undefined ) {
+                console.log("body second");
+                offerData2 = body_offer_2.replaceAll(' ', '%20');
+            }
 
             const data = await Template.create({
                 templateType_id: req.body.template_type_id,
@@ -142,8 +152,8 @@ const updateMyTemplate = async (req, res) => {
     try {
         console.log("update method call");
 
-        var offerData1 =  (req.body.offer_data_1).replaceAll(' ','%20');
-        var offerData2 =  (req.body.offer_data_2).replaceAll(' ','%20');
+        var offerData1 = (req.body.offer_data_1).replaceAll(' ', '%20');
+        var offerData2 = (req.body.offer_data_2).replaceAll(' ', '%20');
 
         const [affectedRow] = await Template.update({
             templateType_id: req.body.templateType_id,

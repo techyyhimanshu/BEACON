@@ -24,6 +24,10 @@ module.exports = {
       template_id: {
         type: Sequelize.INTEGER
       },
+      beacon_org:{
+        type : Sequelize.STRING,
+        allowNull : false
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

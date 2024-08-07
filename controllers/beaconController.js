@@ -81,7 +81,7 @@ const getBeaconsList = async (req, res) => {
 
     try {
         const beacons = await Beacon.findAll({
-            attributes: ['beacon_id', 'beacon_name', 'mac'],
+            attributes: ['beacon_id', 'beacon_name', 'mac','beacon_org'],
         })
         if (beacons) {
             res.status(200).json({ status: "success", data: beacons })

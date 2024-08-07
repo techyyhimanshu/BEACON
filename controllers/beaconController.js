@@ -13,24 +13,24 @@ const addBeacon = async (req, res) => {
     try {
         // Retrieve the shop by its primary key (shop_id) from the request body
         const shop = await Shop.findByPk(req.body.shop_id);
-        
+
         // If the shop is not found, return a 404 error response
         if (!shop) {
             return res.status(404).json({ status: "failure", message: "Shop not found" });
         }
-        
+
         // Create a new beacon entry using the data from the request body
         const data = await Beacon.create({
-            beacon_name : req.body.beacon_name,
-            mac :req.body.mac,
-            shop_id : req.body.shop_id,
+            beacon_name: req.body.beacon_name,
+            mac: req.body.mac,
+            shop_id: req.body.shop_id,
         });
-        
+
         // If the beacon is created successfully, return a success response
         if (data) {
             res.status(200).json({ status: "success", message: "Created successfully" });
         }
-        else{
+        else {
             res.status(404).json({ status: "failure", message: "Not Created successfully" });
 
         }
@@ -46,38 +46,53 @@ const addBeacon = async (req, res) => {
         }
     }
 };
-const getAllBeacons=async (req,res)=>{
-   
+const getAllBeacons = async (req, res) => {
+
     try {
-        if(req.username==='cit_superadmin'){
-            const beacons=await Beacon.findAll({
-                attributes:['beacon_id','beacon_name','mac'],
-                include:[{
-                    model:Shop,
-                    attributes:['shop_id','shop_name']
-                },{
-                    model:Template,
-                    attributes:['template_id'],
-                    include:[{
-                        model:TemplateType,
-                        attributes:['template_path']
+        if (req.username === 'cit_superadmin') {
+            const beacons = await Beacon.findAll({
+                attributes: ['beacon_id', 'beacon_name', 'mac'],
+                include: [{
+                    model: Shop,
+                    attributes: ['shop_id', 'shop_name']
+                }, {
+                    model: Template,
+                    attributes: ['template_id'],
+                    include: [{
+                        model: TemplateType,
+                        attributes: ['template_path']
                     }]
                 }]
             })
-            if(beacons){
-                res.status(200).json({status:"success",data:beacons})
-            }else{
-                res.status(404).json({status:"failure",message:"Not found"})
-            }  
-        }else{
-            res.status(403).json({status:"failure",message:"Unauthorized"})
+            if (beacons) {
+                res.status(200).json({ status: "success", data: beacons })
+            } else {
+                res.status(404).json({ status: "failure", message: "Not found" })
+            }
+        } else {
+            res.status(403).json({ status: "failure", message: "Unauthorized" })
         }
     } catch (error) {
-        res.status(500).json({status:"failure",message:"Internal server error"})
+        res.status(500).json({ status: "failure", message: "Internal server error" })
     }
-    
-}
 
+}
+const getBeaconsList = async (req, res) => {
+
+    try {
+        const beacons = await Beacon.findAll({
+            attributes: ['beacon_id', 'beacon_name', 'mac'],
+        })
+        if (beacons) {
+            res.status(200).json({ status: "success", data: beacons })
+        } else {
+            res.status(404).json({ status: "failure", message: "Not found" })
+        }
+    } catch (error) {
+        res.status(500).json({ status: "failure", message: "Internal server error" })
+    }
+
+}
 // Function to calculate the difference in days between two dates
 function getDifference(date_1, date_2) {
     let date1 = new Date(date_1);
@@ -88,7 +103,7 @@ function getDifference(date_1, date_2) {
 
     // Convert the time difference from milliseconds to days
     let differenceInDays = Math.round(differenceInTime / (1000 * 3600 * 24));
-    
+
     console.log("Day difference is " + differenceInDays);
     return differenceInDays;
 }
@@ -104,10 +119,10 @@ async function findUrl(macAddress) {
         // If beacon data is found, proceed to find the associated template
         if (beaconData) {
             console.log("beacon data found");
-            
-            const templateData=await Template.findOne({
-                where:{
-                    template_id:beaconData.template_id
+
+            const templateData = await Template.findOne({
+                where: {
+                    template_id: beaconData.template_id
                 }
             })
             // If template data is found, check if the offer is valid today
@@ -127,26 +142,26 @@ async function findUrl(macAddress) {
                         attributes: ['template_path'],
                         where: { templateType_id: templateData.templateType_id }
                     });
-                    var launchUrl="";
-                    const staticPath  = templateTypeData.template_path
+                    var launchUrl = "";
+                    const staticPath = templateTypeData.template_path
                     // if(staticPath[staticPath.length -1]!='/')
                     // {
                     //     staticPath = staticPath + '/';
                     // }
                     // console.log("url path end point = "+staticPath[staticPath.length -1]);
-                    console.log("offer data 2 = "+templateData.get('offer_data_2'));
-                    
+                    console.log("offer data 2 = " + templateData.get('offer_data_2'));
+
                     // Construct the URL using the template path and offer data
-                    if(staticPath){
-                        if(templateData.offer_data_1 && templateData.offer_data_2){
-                            launchUrl = staticPath +'?offertext=' + templateData.offer_data_1 + '&&offerdata=' + templateData.offer_data_2;
-                       }else if(templateData.offer_data_1){
-                            launchUrl = staticPath + '?offertext='+ templateData.offer_data_1;
-                       }else if(templateData.offer_data_2){
-                            launchUrl = staticPath +  '?offerdata=' +templateData.offer_data_2;
-                       }else{
+                    if (staticPath) {
+                        if (templateData.offer_data_1 && templateData.offer_data_2) {
+                            launchUrl = staticPath + '?offertext=' + templateData.offer_data_1 + '&&offerdata=' + templateData.offer_data_2;
+                        } else if (templateData.offer_data_1) {
+                            launchUrl = staticPath + '?offertext=' + templateData.offer_data_1;
+                        } else if (templateData.offer_data_2) {
+                            launchUrl = staticPath + '?offerdata=' + templateData.offer_data_2;
+                        } else {
                             launchUrl = staticPath;
-                       }
+                        }
                     }
                     console.log("URL built for beacon: " + launchUrl);
                     return launchUrl;
@@ -180,7 +195,7 @@ const login = async (req, res) => {
         if (data) {
             const builtUrl = await findUrl(req.body.mac);
             console.log(builtUrl);
-            
+
             // Send the URL as part of the response, defaulting to Google if no URL is built
             res.status(200).json({ status: "success", url: builtUrl || "https://www.google.com" });
         } else {
@@ -205,12 +220,12 @@ const updateBeacon = async (req, res) => {
     try {
         // Retrieve the beacon by its primary key (beacon_id) from the request body
         const beaconData = await Beacon.findByPk(req.body.beacon_id);
-        
+
         // If the shop is not found, return a 404 error response
         if (!beaconData) {
             return res.status(404).json({ status: "failure", message: "Beacon not found" });
         }
-         // Retrieve the shop by its primary key (shop_id) from the request body
+        // Retrieve the shop by its primary key (shop_id) from the request body
         const shopData = await Shop.findByPk(req.body.shop_id);
         if (!shopData) {
             return res.status(404).json({ status: "failure", message: "Shop not found" });
@@ -218,20 +233,20 @@ const updateBeacon = async (req, res) => {
 
         // Create a new beacon entry using the data from the request body
         const data = await Beacon.update({
-            beacon_name : req.body.beacon_name,
-            shop_id : req.body.shop_id,
-        },{
-            where : {
-                beacon_id : req.body.beacon_id
+            beacon_name: req.body.beacon_name,
+            shop_id: req.body.shop_id,
+        }, {
+            where: {
+                beacon_id: req.body.beacon_id
             }
         }
-    );
-        
+        );
+
         // If the beacon is created successfully, return a success response
         if (data) {
-            res.status(200).json({ status: "success", message: "Updated successfully", data:data });
+            res.status(200).json({ status: "success", message: "Updated successfully", data: data });
         }
-        else{
+        else {
             res.status(200).json({ status: "failure", message: "Something went wrong !!! beacon not updated successfully" });
         }
     } catch (error) {
@@ -252,26 +267,26 @@ const getSingleBeacon = async (req, res) => {
     try {
         // Retrieve the beacon by its primary key (beacon_id) from the request body
         console.log(req.params.id);
-        
-        const beaconData = await Beacon.findByPk(req.params.id,{
-            attributes : ['beacon_id','mac','beacon_name'],
-            include:[ {
-                model : Shop,
-                attributes : ['shop_name']
-            },{
-                
-                model : Template,
-                attributes : ['templateType_id','valid_from','valid_till','offer_data_1','offer_data_2']
+
+        const beaconData = await Beacon.findByPk(req.params.id, {
+            attributes: ['beacon_id', 'mac', 'beacon_name'],
+            include: [{
+                model: Shop,
+                attributes: ['shop_name']
+            }, {
+
+                model: Template,
+                attributes: ['templateType_id', 'valid_from', 'valid_till', 'offer_data_1', 'offer_data_2']
             }]
         });
-        
+
         // If the beacon is not found, return a 404 error response
         if (!beaconData) {
             return res.status(404).json({ status: "failure", message: "Beacon not found" });
         }
         // If the beacon is fatch successfully, return a success response
-        else{
-            res.status(200).json({ status: "success", message: "Updated successfully", data:beaconData });
+        else {
+            res.status(200).json({ status: "success", message: "Updated successfully", data: beaconData });
         }
     } catch (error) {
         // Handle Sequelize validation errors
@@ -293,5 +308,6 @@ module.exports = {
     login,
     updateBeacon,
     getAllBeacons,
-    getSingleBeacon
+    getSingleBeacon,
+    getBeaconsList
 };

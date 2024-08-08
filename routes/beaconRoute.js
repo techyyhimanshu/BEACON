@@ -9,7 +9,5 @@ router.post("/api/beacon",verifyToken,addBeacon)
 router.post("/api/beacon/login",login)
 router.patch("/api/beacon/update",verifyToken,updateBeacon)
 router.get("/api/beacon/:id",verifyToken,getSingleBeacon)
-router.post("/api/beacon/user/visited",beaconVisited)
-
 
 module.exports = router;

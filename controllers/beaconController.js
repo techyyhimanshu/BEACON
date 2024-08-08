@@ -195,10 +195,13 @@ const login = async (req, res) => {
         // If beacon data is found, find the associated URL
         if (data) {
             const builtUrl = await findUrl(req.body.mac);
-            console.log(builtUrl);
-
+            const visitedData=beaconVisited(req.body)
+            if(visitedData){
+                res.status(200).json({ status: "success", url: builtUrl || "https://www.google.com" });
+            }else{
+                res.status(200).json({ status: "failure", message:"Error Occured"});
+            }
             // Send the URL as part of the response, defaulting to Google if no URL is built
-            res.status(200).json({ status: "success", url: builtUrl || "https://www.google.com" });
         } else {
             // Return a message if the beacon is not added yet
             res.status(200).json({ status: "beacon is not added yet" });
@@ -301,18 +304,21 @@ const getSingleBeacon = async (req, res) => {
         }
     }
 };
-const beaconVisited = async (req, res) => {
+const beaconVisited = async (data) => {
     try {
-        const data = await BeaconVisited.create(req.body)
-        if (data) {
-            res.status(200).json({ status: "success", message: "Created successfully" })
+        const data2 = await BeaconVisited.create({
+            beacon_mac:data.mac,
+            user_mac:data.user_mac,
+            location:data.locations
+        })
+        if (data2) {
+            return data2
         } else {
-            res.status(200).json({ status: "failure", message: "Error occured" })
+            return null
         }
     } catch (error) {
         console.log(error);
-        
-        res.status(500).json({ status: "failure", message: "Internal server error" })
+        return null
     }
 }
 

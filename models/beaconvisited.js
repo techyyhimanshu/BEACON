@@ -14,8 +14,8 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   BeaconVisited.init({
-    beacon_id: {
-      type: DataTypes.INTEGER,
+    beacon_mac: {
+      type: DataTypes.STRING,
       allowNull: false
     },
     user_mac: DataTypes.STRING,

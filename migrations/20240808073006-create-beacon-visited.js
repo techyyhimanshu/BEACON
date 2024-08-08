@@ -9,8 +9,8 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      beacon_id: {
-        type: Sequelize.INTEGER,
+      beacon_mac: {
+        type: Sequelize.STRING,
         allowNull:false
       },
       user_mac: {

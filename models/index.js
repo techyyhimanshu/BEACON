@@ -43,6 +43,7 @@ db.Category = require('./category')(sequelize, DataTypes);
 db.Beacon = require('./beacon')(sequelize, DataTypes);
 db.temptype = require('./temptype')(sequelize, DataTypes);
 db.template = require('./template')(sequelize, DataTypes);
+db.BeaconVisited = require('./beaconvisited')(sequelize, DataTypes);
 
 db.temptype.hasMany(db.template,{foreignKey:'templateType_id'})
 db.template.belongsTo(db.temptype,{foreignKey:'templateType_id'})

@@ -3,6 +3,7 @@ const Beacon = db.Beacon;
 const Shop = db.Shop;
 const Template = db.template;
 const TemplateType = db.temptype;
+const BeaconVisited = db.BeaconVisited;
 
 const Sequelize = require("sequelize");
 const beacon = require("../models/beacon");
@@ -81,7 +82,7 @@ const getBeaconsList = async (req, res) => {
 
     try {
         const beacons = await Beacon.findAll({
-            attributes: ['beacon_id', 'beacon_name', 'mac','beacon_org'],
+            attributes: ['beacon_id', 'beacon_name', 'mac', 'beacon_org'],
         })
         if (beacons) {
             res.status(200).json({ status: "success", data: beacons })
@@ -300,6 +301,20 @@ const getSingleBeacon = async (req, res) => {
         }
     }
 };
+const beaconVisited = async (req, res) => {
+    try {
+        const data = await BeaconVisited.create(req.body)
+        if (data) {
+            res.status(200).json({ status: "success", message: "Created successfully" })
+        } else {
+            res.status(200).json({ status: "failure", message: "Error occured" })
+        }
+    } catch (error) {
+        console.log(error);
+        
+        res.status(500).json({ status: "failure", message: "Internal server error" })
+    }
+}
 
 
 // Exporting the functions to be used in other files
@@ -309,5 +324,6 @@ module.exports = {
     updateBeacon,
     getAllBeacons,
     getSingleBeacon,
-    getBeaconsList
+    getBeaconsList,
+    beaconVisited
 };

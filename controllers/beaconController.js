@@ -309,7 +309,7 @@ const beaconVisited = async (data) => {
         const data2 = await BeaconVisited.create({
             beacon_mac:data.mac,
             user_mac:data.user_mac,
-            location:data.locations
+            location:data.location
         })
         if (data2) {
             return data2

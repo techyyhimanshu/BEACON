@@ -7,6 +7,8 @@ const templateTypeRoute = require('./templateTypeRoute');
 const templateRoute = require('./templateRoute');
 const adminRoute = require('./adminRoute');
 const categoryRoute = require('./categoryRoute');
+const userRoute = require('./userRoute');
+
 
 const routes = Router();
 routes.use(organizationRoute);
@@ -16,6 +18,8 @@ routes.use(templateTypeRoute);
 routes.use(templateRoute);
 routes.use(adminRoute);
 routes.use(categoryRoute);
+routes.use(userRoute);
+
 
 
 module.exports = routes;

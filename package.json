@@ -16,8 +16,7 @@
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.11.0",
-    "sequelize": "^6.37.3",
-    "vercel": "^35.2.3"
+    "sequelize": "^6.37.3"
   },
   "devDependencies": {
     "@babel/cli": "^7.24.8",

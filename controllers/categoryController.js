@@ -15,7 +15,20 @@ try {
     res.status(404).json({status:"failure",message:"Internal server error"})
 }
 }
+const addCategory=async(req,res)=>{
+    try {
+    const data=await Category.create(req.body)
+    if(data){
+        res.status(200).json({status:"success",message:"Created successfully"})
+    }else{
+        res.status(200).json({status:"failure",message:"Error occured"})
+    }
+    } catch (error) {
+        
+    }
+}
 
 module.exports={
-    getAllCategories
+    getAllCategories,
+    addCategory
 }

@@ -195,11 +195,11 @@ const login = async (req, res) => {
         // If beacon data is found, find the associated URL
         if (data) {
             const builtUrl = await findUrl(req.body.mac);
-            const visitedData=beaconVisited(req.body)
-            if(visitedData){
+            const visitedData = beaconVisited(req.body)
+            if (visitedData) {
                 res.status(200).json({ status: "success", url: builtUrl || "https://www.google.com" });
-            }else{
-                res.status(200).json({ status: "failure", message:"Error Occured"});
+            } else {
+                res.status(200).json({ status: "failure", message: "Error Occured" });
             }
             // Send the URL as part of the response, defaulting to Google if no URL is built
         } else {
@@ -307,9 +307,9 @@ const getSingleBeacon = async (req, res) => {
 const beaconVisited = async (data) => {
     try {
         const data2 = await BeaconVisited.create({
-            beacon_mac:data.mac,
-            user_mac:data.user_mac,
-            location:data.location
+            beacon_mac: data.mac,
+            user_mac: data.user_mac,
+            location: data.location
         })
         if (data2) {
             return data2
@@ -322,6 +322,29 @@ const beaconVisited = async (data) => {
     }
 }
 
+const getDevicesOfBeacons = async (req, res) => {
+    try {
+        const count = await BeaconVisited.count({
+            where:{
+                beacon_mac:req.body.mac
+            }
+        })
+        const devices = await BeaconVisited.findAll({
+            where:{
+                beacon_mac:req.body.mac
+            },
+            order:[["createdAt","DESC"]]
+        })
+        if (count!==0 &&devices.length!==0) {
+            res.status(200).json({ status: "success", count: count,data:devices });
+        } else {
+            res.status(404).json({ status: "failure", message: "Not found" });
+        }
+    } catch (error) {
+        res.status(500).json({ status: "failure", message: "Internal server error" });
+    }
+}
+
 
 // Exporting the functions to be used in other files
 module.exports = {
@@ -331,5 +354,6 @@ module.exports = {
     getAllBeacons,
     getSingleBeacon,
     getBeaconsList,
-    beaconVisited
+    beaconVisited,
+    getDevicesOfBeacons
 };

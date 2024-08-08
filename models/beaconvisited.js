@@ -24,8 +24,9 @@ module.exports = (sequelize, DataTypes) => {
     },
   }, {
     sequelize,
-    modelName: 'BeaconVisiteds',
-    updatedAt:false
+    modelName: 'BeaconVisited',
+    updatedAt:false,
+    tableName:"BeaconVisited"
   });
   return BeaconVisited;
 };

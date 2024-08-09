@@ -48,6 +48,7 @@ const addBeacon = async (req, res) => {
         }
     }
 };
+
 const getAllBeacons = async (req, res) => {
 
     try {
@@ -79,6 +80,7 @@ const getAllBeacons = async (req, res) => {
     }
 
 }
+
 const getBeaconsList = async (req, res) => {
 
     try {
@@ -307,6 +309,7 @@ const getSingleBeacon = async (req, res) => {
         }
     }
 };
+
 const beaconVisited = async (data) => {
     try {
         const data2 = await BeaconVisited.create({

@@ -1,6 +1,6 @@
 const db = require("../models");
 const Sequelize = require('sequelize');
-// const Category=db.Category
+const User =db.user
 
 const trackUser = async(req,res)=>{
 try {
@@ -62,7 +62,7 @@ const beaconTotalUser = async(req,res)=>{
 const beaconTodayUser = async(req,res)=>{
         try {
             const beaconTodayUser = await db.sequelize.query(`
-                SELECT COUNT(distinct BeaconVisited.user_mac) 
+                SELECT COUNT(distinct BeaconVisited.user_mac) as count
                 FROM BeaconVisited
                 WHERE BeaconVisited.beacon_mac = ?
                 AND DATE(BeaconVisited.createdAt) = CURDATE(); `,
@@ -71,7 +71,7 @@ const beaconTodayUser = async(req,res)=>{
                     replacements: [req.body.mac]
                 })
             if(beaconTodayUser){
-                res.status(200).json({status:"success",data:beaconTodayUser})
+                res.status(200).json({status:"success",count:beaconTodayUser[0].count})
             }else{
                 res.status(404).json({status:"failure",message:"Not found"})
             }
@@ -84,7 +84,7 @@ const beaconTodayUser = async(req,res)=>{
 const beaconWeekUser = async(req,res)=>{
         try {
             const beaconWeekUser = await db.sequelize.query(`
-                SELECT COUNT(distinct BeaconVisited.user_mac) 
+                SELECT COUNT(distinct BeaconVisited.user_mac) as count
                 FROM BeaconVisited
                 WHERE BeaconVisited.beacon_mac = ?
                 AND DATE(BeaconVisited.createdAt) > (CURDATE()- INTERVAL 7 DAY); `,
@@ -93,7 +93,7 @@ const beaconWeekUser = async(req,res)=>{
                     replacements: [req.body.mac]
                 })
             if(beaconWeekUser){
-                res.status(200).json({status:"success",data:beaconWeekUser})
+                res.status(200).json({status:"success",count:beaconWeekUser[0].count})
             }else{
                 res.status(404).json({status:"failure",message:"Not found"})
             }
@@ -102,10 +102,29 @@ const beaconWeekUser = async(req,res)=>{
         }
     }
 
+    const getAllUsers = async (req, res) => {
+
+        try {
+            if (req.username === 'cit_superadmin') {
+                const users = await User.findAll({})
+                if (users) {
+                    res.status(200).json({ status: "success", data: users })
+                } else {
+                    res.status(404).json({ status: "failure", message: "Not found" })
+                }
+            } else {
+                res.status(403).json({ status: "failure", message: "Unauthorized" })
+            }
+        } catch (error) {
+            res.status(500).json({ status: "failure", message: "Internal server error" })
+        }
+    
+    }
 
 module.exports={
     trackUser,
     beaconTodayUser,
     beaconWeekUser,
-    beaconTotalUser
+    beaconTotalUser,
+    getAllUsers
 }

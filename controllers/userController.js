@@ -34,15 +34,23 @@ try {
 const beaconTotalUser = async(req,res)=>{
     try {
         const beaconTotalUser = await db.sequelize.query(`
-            SELECT COUNT(DISTINCT BeaconVisited.user_mac) 
+            SELECT COUNT(DISTINCT BeaconVisited.user_mac) as count
+            FROM BeaconVisited 
+            WHERE BeaconVisited.beacon_mac = ?; `,
+            {
+                type: Sequelize.QueryTypes.SELECT,
+                replacements: [req.body.mac]
+            });
+        const beaconTotalUserData = await db.sequelize.query(`
+            SELECT DISTINCT BeaconVisited.user_mac
             FROM BeaconVisited 
             WHERE BeaconVisited.beacon_mac = ?; `,
             {
                 type: Sequelize.QueryTypes.SELECT,
                 replacements: [req.body.mac]
             })
-        if(beaconTotalUser){
-            res.status(200).json({status:"success",data:beaconTotalUser})
+        if(beaconTotalUser && beaconTotalUserData){
+            res.status(200).json({status:"success",count:beaconTotalUser[0].count, data : beaconTotalUserData })
         }else{
             res.status(404).json({status:"failure",message:"Not found"})
         }

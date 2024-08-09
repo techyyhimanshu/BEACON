@@ -4,9 +4,10 @@ const Shop = db.Shop;
 const Template = db.template;
 const TemplateType = db.temptype;
 const BeaconVisited = db.BeaconVisited;
+const User = db.user;
 
 const Sequelize = require("sequelize");
-const beacon = require("../models/beacon");
+// const beacon = require("../models/beacon");
 // const appclass = require("../appClass");
 
 // Function to add a new beacon
@@ -42,7 +43,7 @@ const addBeacon = async (req, res) => {
             res.status(400).json({ status: "failure", message: errorMessages });
         } else {
             // Log any other errors and return a 500 internal server error response
-            console.log(error);
+            // console.log(error);
             res.status(500).json({ status: "failure", message: "Internal Server Error" });
         }
     }
@@ -105,7 +106,7 @@ function getDifference(date_1, date_2) {
     // Convert the time difference from milliseconds to days
     let differenceInDays = Math.round(differenceInTime / (1000 * 3600 * 24));
 
-    console.log("Day difference is " + differenceInDays);
+    // console.log("Day difference is " + differenceInDays);
     return differenceInDays;
 }
 
@@ -119,7 +120,7 @@ async function findUrl(macAddress) {
         });
         // If beacon data is found, proceed to find the associated template
         if (beaconData) {
-            console.log("beacon data found");
+            // console.log("beacon data found");
 
             const templateData = await Template.findOne({
                 where: {
@@ -132,11 +133,11 @@ async function findUrl(macAddress) {
                 const beforeTime = getDifference(templateData.get("valid_from"), today);
                 const afterTime = getDifference(today, templateData.get("valid_till"));
 
-                console.log("Before time: " + beforeTime + " - After time: " + afterTime);
+                // console.log("Before time: " + beforeTime + " - After time: " + afterTime);
 
                 // Check if the current date falls within the validity period of the offer
                 if (beforeTime >= 0 && afterTime > 0) {
-                    console.log("Offer is valid today");
+                    // console.log("Offer is valid today");
 
                     // Find the template type data to construct the URL
                     const templateTypeData = await TemplateType.findOne({
@@ -150,7 +151,7 @@ async function findUrl(macAddress) {
                     //     staticPath = staticPath + '/';
                     // }
                     // console.log("url path end point = "+staticPath[staticPath.length -1]);
-                    console.log("offer data 2 = " + templateData.get('offer_data_2'));
+                    // console.log("offer data 2 = " + templateData.get('offer_data_2'));
 
                     // Construct the URL using the template path and offer data
                     if (staticPath) {
@@ -196,6 +197,8 @@ const login = async (req, res) => {
         if (data) {
             const builtUrl = await findUrl(req.body.mac);
             const visitedData = beaconVisited(req.body)
+            //console.log(visitedData);
+            
             if (visitedData) {
                 res.status(200).json({ status: "success", url: builtUrl || "https://www.google.com" });
             } else {
@@ -213,7 +216,7 @@ const login = async (req, res) => {
             res.status(400).json({ status: "failure", message: errorMessages });
         } else {
             // Log any other errors and return a 500 internal server error response
-            console.log(error);
+            //console.log(error);
             res.status(500).json({ status: "failure", message: "Internal Server Error" });
         }
     }
@@ -260,7 +263,7 @@ const updateBeacon = async (req, res) => {
             res.status(400).json({ status: "failure", message: errorMessages });
         } else {
             // Log any other errors and return a 500 internal server error response
-            console.log(error);
+            //console.log(error);
             res.status(500).json({ status: "failure", message: "Internal Server Error" });
         }
     }
@@ -270,7 +273,7 @@ const updateBeacon = async (req, res) => {
 const getSingleBeacon = async (req, res) => {
     try {
         // Retrieve the beacon by its primary key (beacon_id) from the request body
-        console.log(req.params.id);
+        //console.log(req.params.id);
 
         const beaconData = await Beacon.findByPk(req.params.id, {
             attributes: ['beacon_id', 'mac', 'beacon_name'],
@@ -290,7 +293,7 @@ const getSingleBeacon = async (req, res) => {
         }
         // If the beacon is fatch successfully, return a success response
         else {
-            res.status(200).json({ status: "success", message: "Updated successfully", data: beaconData });
+            res.status(200).json({ status: "success", message:"found successfully", data: beaconData });
         }
     } catch (error) {
         // Handle Sequelize validation errors
@@ -299,7 +302,7 @@ const getSingleBeacon = async (req, res) => {
             res.status(400).json({ status: "failure", message: errorMessages });
         } else {
             // Log any other errors and return a 500 internal server error response
-            console.log(error);
+            //console.log(error);
             res.status(500).json({ status: "failure", message: "Internal Server Error" });
         }
     }
@@ -312,12 +315,37 @@ const beaconVisited = async (data) => {
             location: data.location
         })
         if (data2) {
-            return data2
+            try{
+                var user =  await User.create({
+                    user_mac:data.user_mac,
+                    last_location: data.location
+                }) 
+                return data2
+            } catch(e){
+                console.log("error name :" + e.message);
+                
+                if(e instanceof Sequelize.ValidationError){
+                    console.log("validation false");
+                    
+                    const updatedresult = await db.sequelize.query(`
+                        UPDATE Users SET 
+                        last_location = ? 
+                        WHERE user_mac = ? ;`,
+                        {
+                            type: Sequelize.QueryTypes.UPDATE,
+                            replacements: [data.location,data.user_mac]
+                        })
+                    console.log("update result :" + updatedresult);
+                    
+                } else {
+                    return null
+                }
+            }
         } else {
             return null
         }
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         return null
     }
 }

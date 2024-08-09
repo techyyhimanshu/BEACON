@@ -31,6 +31,73 @@ try {
 }
 }
 
+const beaconTotalUser = async(req,res)=>{
+    try {
+        const beaconTotalUser = await db.sequelize.query(`
+            SELECT COUNT(DISTINCT BeaconVisited.user_mac) 
+            FROM BeaconVisited 
+            WHERE BeaconVisited.beacon_mac = ?; `,
+            {
+                type: Sequelize.QueryTypes.SELECT,
+                replacements: [req.body.mac]
+            })
+        if(beaconTotalUser){
+            res.status(200).json({status:"success",data:beaconTotalUser})
+        }else{
+            res.status(404).json({status:"failure",message:"Not found"})
+        }
+    } catch (error) {
+        res.status(404).json({status:"failure",message:"Internal server error", Error : error.message })
+    }
+    }
+
+const beaconTodayUser = async(req,res)=>{
+        try {
+            const beaconTodayUser = await db.sequelize.query(`
+                SELECT COUNT(distinct BeaconVisited.user_mac) 
+                FROM BeaconVisited
+                WHERE BeaconVisited.beacon_mac = ?
+                AND DATE(BeaconVisited.createdAt) = CURDATE(); `,
+                {
+                    type: Sequelize.QueryTypes.SELECT,
+                    replacements: [req.body.mac]
+                })
+            if(beaconTodayUser){
+                res.status(200).json({status:"success",data:beaconTodayUser})
+            }else{
+                res.status(404).json({status:"failure",message:"Not found"})
+            }
+        } catch (error) {
+            res.status(404).json({status:"failure",message:"Internal server error", Error : error.message })
+        }
+    }
+    
+    
+const beaconWeekUser = async(req,res)=>{
+        try {
+            const beaconWeekUser = await db.sequelize.query(`
+                SELECT COUNT(distinct BeaconVisited.user_mac) 
+                FROM BeaconVisited
+                WHERE BeaconVisited.beacon_mac = ?
+                AND DATE(BeaconVisited.createdAt) > (CURDATE()- INTERVAL 7 DAY); `,
+                {
+                    type: Sequelize.QueryTypes.SELECT,
+                    replacements: [req.body.mac]
+                })
+            if(beaconWeekUser){
+                res.status(200).json({status:"success",data:beaconWeekUser})
+            }else{
+                res.status(404).json({status:"failure",message:"Not found"})
+            }
+        } catch (error) {
+            res.status(404).json({status:"failure",message:"Internal server error", Error : error.message })
+        }
+    }
+
+
 module.exports={
-    trackUser
+    trackUser,
+    beaconTodayUser,
+    beaconWeekUser,
+    beaconTotalUser
 }

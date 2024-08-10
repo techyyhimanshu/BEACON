@@ -8,6 +8,7 @@ const templateRoute = require('./templateRoute');
 const adminRoute = require('./adminRoute');
 const categoryRoute = require('./categoryRoute');
 const userRoute = require('./userRoute');
+const menuRoute = require('./menuRoute');
 
 
 const routes = Router();
@@ -19,6 +20,7 @@ routes.use(templateRoute);
 routes.use(adminRoute);
 routes.use(categoryRoute);
 routes.use(userRoute);
+routes.use(menuRoute);
 
 
 

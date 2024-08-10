@@ -45,6 +45,7 @@ db.temptype = require('./temptype')(sequelize, DataTypes);
 db.template = require('./template')(sequelize, DataTypes);
 db.BeaconVisited = require('./beaconvisited')(sequelize, DataTypes);
 db.user = require('./user')(sequelize, DataTypes);
+db.menu = require('./menu')(sequelize, DataTypes);
 
 
 db.temptype.hasMany(db.template,{foreignKey:'templateType_id'})

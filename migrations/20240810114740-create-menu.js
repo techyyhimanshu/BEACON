@@ -12,13 +12,21 @@ module.exports = {
       menu_name: {
         type: Sequelize.STRING
       },
+      alias: {
+        type: Sequelize.STRING,
+        allowNull:true
+      },
+      url: {
+        type: Sequelize.STRING,
+        allowNull:true
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE 
       }
     });
   },

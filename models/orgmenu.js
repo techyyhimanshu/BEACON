@@ -32,6 +32,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull:false
     },
+    url: {
+      type: DataTypes.STRING,
+      allowNull:true
+    }
   }, {
     sequelize,
     modelName: 'OrgMenu',

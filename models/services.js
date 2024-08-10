@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
   }
   Services.init({
     service_id:{
-      type : DataTypes.INTGER,
+      type : DataTypes.INTEGER,
       primaryKey :true,
       allowNull:false ,
       autoIncrement:true
@@ -23,7 +23,7 @@ module.exports = (sequelize, DataTypes) => {
     service_name: DataTypes.STRING,
     description: DataTypes.STRING,
     org_id:{
-      type : DataTypes.INTGER,
+      type : DataTypes.INTEGER,
       allowNull : false
     }
   }, {

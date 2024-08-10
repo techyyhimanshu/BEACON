@@ -84,17 +84,17 @@ const getAllBeacons = async (req, res) => {
 const getBeaconsList = async (req, res) => {
 
     try {
-        const {count, rows } = await Beacon.findAndCountAll({
+        const { count, rows } = await Beacon.findAndCountAll({
             attributes: ['beacon_id', 'beacon_name', 'mac', 'beacon_org'],
         })
         //console.log(rows,count);
-        
+
         if (rows) {
-            const countRows={
+            const countRows = {
                 count,
                 rows
             }
-            res.status(200).json({ status: "success",data:countRows})
+            res.status(200).json({ status: "success", data: countRows })
         } else {
             res.status(404).json({ status: "failure", message: "Not found" })
         }
@@ -125,13 +125,13 @@ async function findUrl(macAddress) {
         const beaconData = await Beacon.findOne({
             attributes: ["template_id"],
             where: { mac: macAddress },
-            include:{
-                model : Shop,
-                attributes : ["org_id"]
+            include: {
+                model: Shop,
+                attributes: ["org_id"]
             }
         });
         console.log(beaconData.ShopDetail.dataValues.org_id);
-        
+
         // If beacon data is found, proceed to find the associated template
         if (beaconData) {
             // console.log("beacon data found");
@@ -168,19 +168,26 @@ async function findUrl(macAddress) {
                     // console.log("offer data 2 = " + templateData.get('offer_data_2'));
 
                     // Construct the URL using the template path and offer data
+                    console.log(staticPath);
+                    
+                    var launchUrlOrg = {}
                     if (staticPath) {
                         if (templateData.offer_data_1 && templateData.offer_data_2) {
                             launchUrl = staticPath + '&&offertext=' + templateData.offer_data_1 + '&&offerdata=' + templateData.offer_data_2;
+
                         } else if (templateData.offer_data_1) {
                             launchUrl = staticPath + '&&offertext=' + templateData.offer_data_1;
                         } else if (templateData.offer_data_2) {
                             launchUrl = staticPath + '&&offerdata=' + templateData.offer_data_2;
                         } else {
                             launchUrl = staticPath;
-                        }
+                        }                                                
                     }
-                    console.log("URL built for beacon: " + launchUrl);
-                    return launchUrl;
+                    launchUrlOrg = {
+                        url: launchUrl,
+                        org_id: beaconData.ShopDetail.dataValues.org_id
+                    }
+                    return launchUrlOrg;
                 } else {
                     // Return a message if there is no valid offer today
                     return "Offer exprired ----- There is no offer valid today.";
@@ -209,12 +216,12 @@ const login = async (req, res) => {
 
         // If beacon data is found, find the associated URL
         if (data) {
-            const builtUrl = await findUrl(req.body.mac);
+            const {url,org_id} = await findUrl(req.body.mac);
             const visitedData = beaconVisited(req.body)
             //console.log(visitedData);
 
             if (visitedData) {
-                res.status(200).json({ status: "success", url: builtUrl || "https://www.google.com" });
+                res.status(200).json({ status: "success", url: url || "https://www.google.com", org_id: org_id });
             } else {
                 res.status(200).json({ status: "failure", message: "Error Occured" });
             }
@@ -230,7 +237,7 @@ const login = async (req, res) => {
             res.status(400).json({ status: "failure", message: errorMessages });
         } else {
             // Log any other errors and return a 500 internal server error response
-            //console.log(error);
+            console.log(error);
             res.status(500).json({ status: "failure", message: "Internal Server Error" });
         }
     }

@@ -24,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
     vision: DataTypes.STRING,
     mission: DataTypes.STRING,
     org_id: {
-      type : DataTypes.INTGER,
+      type : DataTypes.INTEGER,
       allowNull : false
     }
   }, {

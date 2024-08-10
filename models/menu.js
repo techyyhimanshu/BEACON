@@ -21,6 +21,10 @@ module.exports = (sequelize, DataTypes) => {
     menu_name: {
       type:DataTypes.STRING,
       allowNull:false
+    },
+    base_url: {
+      type:DataTypes.STRING,
+      allowNull:false
     }
   }, {
     sequelize,

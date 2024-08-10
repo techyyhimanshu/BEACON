@@ -12,11 +12,7 @@ module.exports = {
       menu_name: {
         type: Sequelize.STRING
       },
-      alias: {
-        type: Sequelize.STRING,
-        allowNull:true
-      },
-      url: {
+      base_url: {
         type: Sequelize.STRING,
         allowNull:true
       },

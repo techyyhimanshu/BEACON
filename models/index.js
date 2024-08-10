@@ -65,7 +65,7 @@ db.Shop.belongsTo(db.Organization,{foreignKey:"org_id"})
 db.Category.hasMany(db.Shop,{foreignKey:'category'})
 db.Shop.belongsTo(db.Category,{foreignKey:'category'})
 
-db.Shop.hasMany(db.Beacon,{foreignKey:'shop_id'})
+db.Shop.hasOne(db.Beacon,{foreignKey:'shop_id'})
 db.Beacon.belongsTo(db.Shop,{foreignKey:'shop_id'})
 
 db.sequelize = sequelize;

@@ -120,8 +120,14 @@ async function findUrl(macAddress) {
         // Find the beacon data by its MAC address
         const beaconData = await Beacon.findOne({
             attributes: ["template_id"],
-            where: { mac: macAddress }
+            where: { mac: macAddress },
+            include:{
+                model : Shop,
+                attributes : ["org_id"]
+            }
         });
+        console.log(beaconData.ShopDetail.dataValues.org_id);
+        
         // If beacon data is found, proceed to find the associated template
         if (beaconData) {
             // console.log("beacon data found");
@@ -129,13 +135,7 @@ async function findUrl(macAddress) {
             const templateData = await Template.findOne({
                 where: {
                     template_id: beaconData.template_id
-                },
-                include : [
-                    {
-                        model : Shop
-                    }
-                ]
-
+                }
             })
             // If template data is found, check if the offer is valid today
             if (templateData) {
@@ -155,7 +155,7 @@ async function findUrl(macAddress) {
                         where: { templateType_id: templateData.templateType_id }
                     });
                     var launchUrl = "";
-                    const staticPath = templateTypeData.template_path
+                    const staticPath = templateTypeData.template_path + "?orgId=" + beaconData.ShopDetail.dataValues.org_id
                     // if(staticPath[staticPath.length -1]!='/')
                     // {
                     //     staticPath = staticPath + '/';
@@ -166,11 +166,11 @@ async function findUrl(macAddress) {
                     // Construct the URL using the template path and offer data
                     if (staticPath) {
                         if (templateData.offer_data_1 && templateData.offer_data_2) {
-                            launchUrl = staticPath + '?offertext=' + templateData.offer_data_1 + '&&offerdata=' + templateData.offer_data_2;
+                            launchUrl = staticPath + '&&offertext=' + templateData.offer_data_1 + '&&offerdata=' + templateData.offer_data_2;
                         } else if (templateData.offer_data_1) {
-                            launchUrl = staticPath + '?offertext=' + templateData.offer_data_1;
+                            launchUrl = staticPath + '&&offertext=' + templateData.offer_data_1;
                         } else if (templateData.offer_data_2) {
-                            launchUrl = staticPath + '?offerdata=' + templateData.offer_data_2;
+                            launchUrl = staticPath + '&&offerdata=' + templateData.offer_data_2;
                         } else {
                             launchUrl = staticPath;
                         }

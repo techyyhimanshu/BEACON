@@ -84,11 +84,13 @@ const getAllBeacons = async (req, res) => {
 const getBeaconsList = async (req, res) => {
 
     try {
-        const beacons = await Beacon.findAll({
+        const {count, rows } = await Beacon.findAndCountAll({
             attributes: ['beacon_id', 'beacon_name', 'mac', 'beacon_org'],
         })
-        if (beacons) {
-            res.status(200).json({ status: "success", data: beacons })
+        //console.log(rows,count);
+        
+        if (rows) {
+            res.status(200).json({ status: "success",count:count, data: rows})
         } else {
             res.status(404).json({ status: "failure", message: "Not found" })
         }
@@ -127,7 +129,13 @@ async function findUrl(macAddress) {
             const templateData = await Template.findOne({
                 where: {
                     template_id: beaconData.template_id
-                }
+                },
+                include : [
+                    {
+                        model : Shop
+                    }
+                ]
+
             })
             // If template data is found, check if the offer is valid today
             if (templateData) {

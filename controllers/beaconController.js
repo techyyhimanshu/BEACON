@@ -90,7 +90,11 @@ const getBeaconsList = async (req, res) => {
         //console.log(rows,count);
         
         if (rows) {
-            res.status(200).json({ status: "success",count:count, data: rows})
+            const countRows={
+                count,
+                rows
+            }
+            res.status(200).json({ status: "success",data:countRows})
         } else {
             res.status(404).json({ status: "failure", message: "Not found" })
         }

@@ -26,7 +26,7 @@ module.exports = {
       },
       beacon_org:{
         type : Sequelize.STRING,
-        allowNull : false
+        // allowNull : false
       },
       createdAt: {
         allowNull: false,

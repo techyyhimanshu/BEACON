@@ -60,7 +60,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     beacon_org:{
       type : DataTypes.STRING,
-      allowNull : false
+      // allowNull : false
     }
   }, {
     sequelize,

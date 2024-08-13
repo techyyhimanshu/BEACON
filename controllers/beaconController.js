@@ -4,6 +4,7 @@ const Shop = db.Shop;
 const Template = db.template;
 const TemplateType = db.temptype;
 const BeaconVisited = db.BeaconVisited;
+const BeaconTemplate = db.BeaconTemplate;
 const User = db.user;
 
 const Sequelize = require("sequelize");
@@ -169,7 +170,7 @@ async function findUrl(macAddress) {
 
                     // Construct the URL using the template path and offer data
                     console.log(staticPath);
-                    
+
                     var launchUrlOrg = {}
                     if (staticPath) {
                         if (templateData.offer_data_1 && templateData.offer_data_2) {
@@ -208,11 +209,40 @@ async function findUrl(macAddress) {
 
 // Function to handle login and find the URL for a beacon
 const login = async (req, res) => {
+    // try {
+    //     const data = await Beacon.findOne({
+    //         attributes: ["beacon_id"],
+    //         where: { mac: req.body.mac }
+    //     });
+    //     if (data) {
+    //         const visitedData = await beaconVisited(req.body)
+    //         const beaconTemplateData = await BeaconTemplate.findAll({
+    //             attributes: ["alias","is_main"],
+    //             where: {
+    //                 beacon_id: data.beacon_id
+    //             },
+    //             include:[{
+    //                 model:Template,
+    //                 attributes:['templateType_id'],
+    //                 include:[{
+    //                     model:TemplateType,
+    //                     attributes:['template_path']
+    //                 }]
+    //             }]
+    //         })            
+    //         res.status(200).json({ status: "success", data:beaconTemplateData })
+    //     } else {
+    //         res.status(404).json({ status: "failure", message: "Beacon not found" })
+    //     }
+    // } catch (error) {
+    //     console.log(error.message);
+
+    // }
     try {
         // Find the beacon data by its MAC address
-        const data = await Beacon.findOne({
-            where: { mac: req.body.mac }
-        });
+    const data = await Beacon.findOne({
+        where: { mac: req.body.mac }
+    });
 
         // If beacon data is found, find the associated URL
         if (data) {

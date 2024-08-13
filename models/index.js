@@ -47,6 +47,7 @@ db.BeaconVisited = require('./beaconvisited')(sequelize, DataTypes);
 db.user = require('./user')(sequelize, DataTypes);
 db.menu = require('./menu')(sequelize, DataTypes);
 db.OrgMenu = require('./orgmenu')(sequelize, DataTypes);
+db.BeaconTemplate = require('./beacontemplates')(sequelize, DataTypes);
 
 
 db.temptype.hasMany(db.template,{foreignKey:'templateType_id'})
@@ -69,6 +70,9 @@ db.Shop.belongsTo(db.Category,{foreignKey:'category'})
 
 db.Shop.hasOne(db.Beacon,{foreignKey:'shop_id'})
 db.Beacon.belongsTo(db.Shop,{foreignKey:'shop_id'})
+
+db.BeaconTemplate.hasMany(db.template,{foreignKey:'template_id'})
+db.template.belongsTo(db.BeaconTemplate,{foreignKey:'template_id'})
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;

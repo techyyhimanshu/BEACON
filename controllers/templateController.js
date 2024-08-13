@@ -4,6 +4,7 @@ const TemplateType = db.temptype
 const Template = db.template
 const Shop = db.Shop
 const Beacon = db.Beacon
+const BeaconTemplate = db.BeaconTemplate
 
 
 
@@ -12,7 +13,33 @@ const Sequelize = require("sequelize")
 
 
 const createTemplate = async (req, res) => {
+    // try {
+    //     const templateData = await TemplateType.findOne({
+    //         where: {
+    //             templateType_id: req.body.template_id
+    //         },
+    //         attributes:["templateType_id"]
+    //     })
+    //     if (templateData) {
+    //         const beaconData = await Beacon.findByPk(req.body.beacon_id,{
+    //             attributes:["beacon_id"]
+    //         })
+    //         if (beaconData) {
+    //             const createdData = await BeaconTemplate.create(req.body)
+    //             if (createdData) {
+    //                 res.status(200).json({ status: 'success', message: "Template assigned " })
+    //             } else {
+    //                 res.status(200).json({ status: 'failure', message: "Error occured" })
+    //             }
+    //         } else {
+    //             res.status(404).json({ status: 'failure', message: "Beacon not found" })
+    //         }
+    //     } else {
+    //         res.status(404).json({ status: 'failure', message: "Template not  found" })
+    //     }
+    // } catch (error) {
 
+    // }
     try {
         const templateType = await TemplateType.findByPk(req.body.template_type_id * 1)
 
@@ -23,12 +50,12 @@ const createTemplate = async (req, res) => {
             var offerData2 = '';
             var body_offer_1 = req.body.offer_data_1;
             var body_offer_2 = req.body.offer_data_2;
-            if (body_offer_1 != undefined ) {
+            if (body_offer_1 != undefined) {
                 console.log("body first");
 
                 offerData1 = body_offer_1.replaceAll(' ', '%20');
             }
-            if (body_offer_2 != undefined ) {
+            if (body_offer_2 != undefined) {
                 console.log("body second");
                 offerData2 = body_offer_2.replaceAll(' ', '%20');
             }
@@ -41,20 +68,48 @@ const createTemplate = async (req, res) => {
                 offer_data_2: offerData2
             })
             if (data) {
-
-                var addToBeacon = await Beacon.update(
-                    { template_id: data.template_id }, {
+                const checkBeaconTemplate = await Beacon.findOne({
+                    attributes: ["template_id"],
                     where: {
-                        // comment after token
                         beacon_id: req.body.beacon_id
-                        // beacon_id : req.beacon_id ;
                     }
                 })
-                if (addToBeacon == 0) {
-                    res.status(200).json({ status: "failure", message: "no beacon asign to this shop" })
-                }
-                else {
-                    res.status(200).json({ status: "success", message: "Created successfully" })
+                if (checkBeaconTemplate.template_id === null) {
+                    //---Parent template----------
+                    const updateBeaconTemplate = await Beacon.update(
+                        { template_id: data.template_id }, {
+                        where: {
+                            beacon_id: req.body.beacon_id
+                        }
+                    }
+                    )
+                    const addToBeaconTemplateParent = await BeaconTemplate.create(
+                        {
+                            template_id: data.template_id,
+                            beacon_id: req.body.beacon_id,
+                            alias: req.body.alias
+                        })
+                    if (addToBeaconTemplateParent == 0) {
+                        res.status(200).json({ status: "failure", message: "no beacon asign to this shop" })
+                    }
+                    else {
+                        res.status(200).json({ status: "success", message: "Created successfully" })
+                    }
+                } else {
+                    // child template
+                    const addToBeaconTemplateChild = await BeaconTemplate.create(
+                        {
+                            template_id: data.template_id,
+                            beacon_id: req.body.beacon_id,
+                            parent: checkBeaconTemplate.template_id,
+                            alias: req.body.alias
+                        })
+                    if (addToBeaconTemplateChild == 0) {
+                        res.status(200).json({ status: "failure", message: "no beacon asign to this shop" })
+                    }
+                    else {
+                        res.status(200).json({ status: "success", message: "Created successfully" })
+                    }
                 }
             }
             else {

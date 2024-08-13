@@ -151,7 +151,11 @@ const getAllTemplate = async (req, res) => {
             attributes: ['template_id', 'valid_from', 'valid_till', 'offer_data_1', 'offer_data_2'],
             include: {
                 model: TemplateType,
-                attributes: ["template_path"]
+                attributes: ["template_path"],
+                include:{
+                    model:Category,
+                    attributes:['category_name']
+                }
             }
         })
         if (data) {

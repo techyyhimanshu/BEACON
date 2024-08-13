@@ -382,9 +382,6 @@ const getOrganizationMenu = async (req,res) => {
     try{
         const buildUrl = await db.sequelize.query(`
             SELECT
-                Beacons.beacon_id,
-                Beacons.mac,
-                Beacons.beacon_name,
                 BeaconTemplates.parent,
                 BeaconTemplates.alias,
                 templates.template_id,
@@ -400,14 +397,15 @@ const getOrganizationMenu = async (req,res) => {
                             THEN CONCAT(tempTypes.template_path,"?orgId=",ShopDetails.org_id,"&&offerdata=",templates.offer_data_2)
                         ELSE CONCAT(tempTypes.template_path,"?orgId=",ShopDetails.org_id)
                         END 
-                    ELSE 'OFFER NOT VALID'
+                    ELSE 'www.google.com'
                 END as URL
             FROM beaconDB.ShopDetails,beaconDB.Beacons,beaconDB.templates,beaconDB.tempTypes,beaconDB.BeaconTemplates
             WHERE ShopDetails.org_id= 1
             AND Beacons.shop_id = ShopDetails.shop_id
             AND BeaconTemplates.beacon_id = Beacons.beacon_id
             AND templates.template_id = BeaconTemplates.template_id
-            AND tempTypes.templateType_id = templates.templateType_id;`,
+            AND tempTypes.templateType_id = templates.templateType_id
+            order by Beacons.beacon_id,BeaconTemplates.parent;`,
             {
                 type: Sequelize.QueryTypes.SELECT,
                 replacements: [req.params.id]

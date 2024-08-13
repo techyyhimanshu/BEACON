@@ -13,33 +13,38 @@ const Sequelize = require("sequelize")
 
 
 const createTemplate = async (req, res) => {
-    // try {
-    //     const templateData = await TemplateType.findOne({
-    //         where: {
-    //             templateType_id: req.body.template_id
-    //         },
-    //         attributes:["templateType_id"]
-    //     })
-    //     if (templateData) {
-    //         const beaconData = await Beacon.findByPk(req.body.beacon_id,{
-    //             attributes:["beacon_id"]
-    //         })
-    //         if (beaconData) {
-    //             const createdData = await BeaconTemplate.create(req.body)
-    //             if (createdData) {
-    //                 res.status(200).json({ status: 'success', message: "Template assigned " })
-    //             } else {
-    //                 res.status(200).json({ status: 'failure', message: "Error occured" })
-    //             }
-    //         } else {
-    //             res.status(404).json({ status: 'failure', message: "Beacon not found" })
-    //         }
-    //     } else {
-    //         res.status(404).json({ status: 'failure', message: "Template not  found" })
-    //     }
-    // } catch (error) {
 
-    // }
+    //#region GLT KAAM
+    /*  try {
+        const templateData = await TemplateType.findOne({
+            where: {
+                templateType_id: req.body.template_id
+            },
+            attributes:["templateType_id"]
+        })
+        if (templateData) {
+            const beaconData = await Beacon.findByPk(req.body.beacon_id,{
+                attributes:["beacon_id"]
+            })
+            if (beaconData) {
+                const createdData = await BeaconTemplate.create(req.body)
+                if (createdData) {
+                    res.status(200).json({ status: 'success', message: "Template assigned " })
+                } else {
+                    res.status(200).json({ status: 'failure', message: "Error occured" })
+                }
+            } else {
+                res.status(404).json({ status: 'failure', message: "Beacon not found" })
+            }
+        } else {
+            res.status(404).json({ status: 'failure', message: "Template not  found" })
+        }
+     } catch (error) {
+
+     }
+    */
+   //#endregion
+
     try {
         const templateType = await TemplateType.findByPk(req.body.template_type_id * 1)
 
@@ -73,6 +78,7 @@ const createTemplate = async (req, res) => {
                         beacon_id: req.body.beacon_id
                     }
                 })
+
                 if (checkBeaconTemplate.template_id === null) {
                     //---Parent template----------
                     const updateBeaconTemplate = await Beacon.update(
@@ -81,6 +87,7 @@ const createTemplate = async (req, res) => {
                             beacon_id: req.body.beacon_id
                         }
                     }
+                    
                     )
                     const addToBeaconTemplateParent = await BeaconTemplate.create(
                         {

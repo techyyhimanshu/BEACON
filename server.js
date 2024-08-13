@@ -6,7 +6,7 @@ const cors=require('cors')
 dotenv.config()
 app.use(cors({
     origin:'*',
-    methods:'GET,HEAD,PUT,POST,DELETE',
+    methods:'GET,HEAD,PUT,POST,DELETE,PATCH',
     allowedHeaders:'Origin,X-Requested-With,Content-Type,Accept,Authorization'
 }))
 const PORT=process.env.PORT || 3000

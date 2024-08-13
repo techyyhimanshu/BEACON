@@ -290,7 +290,7 @@ async function findUrl(macAddress) {
 //     }
 // }; 
 
-const getOrganizationBeacons = async (req, res) => {
+const getOrganizationBeacons2 = async (req, res) => {
     try {
         const orgBeacons = await db.sequelize.query(`
             select beacon_id,beacon_name,mac 
@@ -332,6 +332,99 @@ const getOrganizationBeacons = async (req, res) => {
         res.status(400).json({ status: "failure", message: e.message }); }
 }
 
+
+const getOrganizationBeacons = async (req,res) => {
+    try{
+        const buildUrl = await db.sequelize.query(`
+            SELECT
+                Beacons.beacon_id,
+                Beacons.mac,
+                Beacons.beacon_name,
+                CASE 
+                    WHEN datediff(CURDATE(),templates.valid_from) > 0  AND datediff(templates.valid_till,CURDATE()) > 0
+                    THEN
+                        CASE
+                            WHEN ((templates.offer_data_1!= "" OR templates.offer_data_1 != NULL) AND (templates.offer_data_2!= "" OR templates.offer_data_2 != NULL)) 
+                            THEN CONCAT(tempTypes.template_path,"?orgId=",ShopDetails.org_id,"&&offertext=" ,templates.offer_data_1,"&&offerdata=",templates.offer_data_2)
+                            WHEN (templates.offer_data_1!= "" OR templates.offer_data_1 != NULL) 
+                            THEN CONCAT(tempTypes.template_path,"?orgId=",ShopDetails.org_id,"&&offertext=",templates.offer_data_1)
+                            WHEN (templates.offer_data_2!= "" OR templates.offer_data_2 != NULL) 
+                            THEN CONCAT(tempTypes.template_path,"?orgId=",ShopDetails.org_id,"&&offerdata=",templates.offer_data_2)
+                        ELSE CONCAT(tempTypes.template_path,"?orgId=",ShopDetails.org_id)
+                        END 
+                    ELSE 'OFFER NOT VALID'
+                END as URL
+            FROM beaconDB.ShopDetails,beaconDB.Beacons,beaconDB.templates,beaconDB.tempTypes
+            WHERE ShopDetails.org_id= ?
+            AND Beacons.shop_id = ShopDetails.shop_id
+            AND Beacons.template_id = templates.template_id
+            AND tempTypes.templateType_id = templates.templateType_id;`,
+            {
+                type: Sequelize.QueryTypes.SELECT,
+                replacements: [req.params.id]
+            });
+
+            if(buildUrl)
+            {
+                res.status(200).json({ status: "success", data: buildUrl })
+            }
+            else{
+                res.status(404).json({ status: "failure", message: "technical issue in url fetching" })
+            }
+    }
+    catch(e){
+        res.status(404).json({ status: "failure", message: e.message })
+    }
+}
+
+
+const getOrganizationMenu = async (req,res) => {
+    try{
+        const buildUrl = await db.sequelize.query(`
+            SELECT
+                BeaconTemplates.parent,
+                BeaconTemplates.alias,
+                templates.template_id,
+                CASE 
+                    WHEN datediff(CURDATE(),templates.valid_from) > 0  AND datediff(templates.valid_till,CURDATE()) > 0
+                    THEN
+                        CASE
+                            WHEN ((templates.offer_data_1!= "" OR templates.offer_data_1 != NULL) AND (templates.offer_data_2!= "" OR templates.offer_data_2 != NULL)) 
+                            THEN CONCAT(tempTypes.template_path,"?orgId=",ShopDetails.org_id,"&&offertext=" ,templates.offer_data_1,"&&offerdata=",templates.offer_data_2)
+                            WHEN (templates.offer_data_1!= "" OR templates.offer_data_1 != NULL) 
+                            THEN CONCAT(tempTypes.template_path,"?orgId=",ShopDetails.org_id,"&&offertext=",templates.offer_data_1)
+                            WHEN (templates.offer_data_2!= "" OR templates.offer_data_2 != NULL) 
+                            THEN CONCAT(tempTypes.template_path,"?orgId=",ShopDetails.org_id,"&&offerdata=",templates.offer_data_2)
+                        ELSE CONCAT(tempTypes.template_path,"?orgId=",ShopDetails.org_id)
+                        END 
+                    ELSE 'www.google.com'
+                END as URL
+            FROM beaconDB.ShopDetails,beaconDB.Beacons,beaconDB.templates,beaconDB.tempTypes,beaconDB.BeaconTemplates
+            WHERE ShopDetails.org_id= 1
+            AND Beacons.shop_id = ShopDetails.shop_id
+            AND BeaconTemplates.beacon_id = Beacons.beacon_id
+            AND templates.template_id = BeaconTemplates.template_id
+            AND tempTypes.templateType_id = templates.templateType_id
+            order by Beacons.beacon_id,BeaconTemplates.parent;`,
+            {
+                type: Sequelize.QueryTypes.SELECT,
+                replacements: [req.params.id]
+            });
+
+            if(buildUrl)
+            {
+                res.status(200).json({ status: "success", data: buildUrl })
+            }
+            else{
+                res.status(404).json({ status: "failure", message: "technical issue in url fetching" })
+            }
+    }
+    catch(e){
+        res.status(404).json({ status: "failure", message: e.message })
+    }
+}
+
+
 module.exports = {
     createOrganization,
     getAllOrganization,
@@ -339,5 +432,6 @@ module.exports = {
     updateOrganization,
     deleteOrganization,
     getShopsByOrganization,
-    getOrganizationBeacons
+    getOrganizationBeacons,
+    getOrganizationMenu
 }

@@ -52,7 +52,6 @@ const createTemplate = async (req, res) => {
             var body_offer_2 = req.body.offer_data_2;
             if (body_offer_1 != undefined) {
                 console.log("body first");
-
                 offerData1 = body_offer_1.replaceAll(' ', '%20');
             }
             if (body_offer_2 != undefined) {

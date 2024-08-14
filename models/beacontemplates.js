@@ -15,8 +15,7 @@ module.exports = (sequelize, DataTypes) => {
   }
   BeaconTemplates.init({
     beacon_id: {
-      type:DataTypes.INTEGER,
-      allowNull:false
+      type:DataTypes.INTEGER
     },
     template_id: {
       type:DataTypes.INTEGER,

@@ -10,8 +10,7 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       beacon_id: {
-        type: Sequelize.INTEGER,
-        allowNull: false
+        type: Sequelize.INTEGER
       },
       template_id: {
         type: Sequelize.INTEGER,

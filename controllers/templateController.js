@@ -315,7 +315,6 @@ const asignTemplateToBeacon = async (req, res) => {
                 beacon_id: req.body.beacon_id
             }
         })
-
         if (checkBeaconTemplate.template_id === null) {
             //---Parent template----------
             const updateBeaconTemplate = await Beacon.update(
@@ -349,13 +348,105 @@ const asignTemplateToBeacon = async (req, res) => {
                 res.status(200).json({ status: "failure", message: "no beacon asign to this shop" })
             }
             else {
-                res.status(200).json({ status: "success", message: "Created successfully" })
+                res.status(200).json({ status: "success", message: "Child Created successfully" })
             }
         }
 
     } catch (error) {
         console.log(error.message);
         res.status(500).json({ status: "failure" });
+    }
+}
+
+const createChildTemplate = async (req, res) => {
+
+    try {
+        // console.log("call creation");
+        
+        //#region CHECK ALIAS BY BEACON OR ORG ID
+        // const orgBeacons = await db.sequelize.query(`
+        //         select BeaconTemplates.alias 
+        //         from beaconDB.BeaconTemplates 
+        //         where BeaconTemplates.beacon_id in
+        //         (select Beacons.beacon_id
+        //         from beaconDB.Beacons, beaconDB.ShopDetails
+        //         where Beacons.shop_id = ShopDetails.shop_id 
+        //         AND ShopDetails.org_id = 
+        //         (select org_id from ShopDetails 
+        //         where shop_id = 
+        //         (select shop_id from Beacons 
+        //         where beacon_id = ?)));`,
+        //     {
+        //         type: Sequelize.QueryTypes.SELECT,
+        //         replacements: [req.body.beacon_id]
+        //     });
+        //     // console.log(orgBeacons,'======',req.body.alias);
+            
+        //     for(let beaAlias of orgBeacons ) {
+        //         if (beaAlias.alias == req.body.alias)
+        //         {res.status(200).json({ status: "failure", message: "Template alias can not be same in Organization" }) 
+        //         break;
+        //     }
+        //     }
+        //#endregion
+
+        const templateType = await TemplateType.findByPk(req.body.template_type_id * 1)
+
+        if (!templateType) {
+            res.status(404).json({ status: 'failure', message: "Template url not  found" })
+        } else {
+            // data filtration
+            var offerData1 = '';
+            var offerData2 = '';
+            var body_offer_1 = req.body.offer_data_1;
+            var body_offer_2 = req.body.offer_data_2;
+            if (body_offer_1 != undefined) {
+                console.log("body first");
+                offerData1 = body_offer_1.replaceAll(' ', '%20');
+            }
+            if (body_offer_2 != undefined) {
+                console.log("body second");
+                offerData2 = body_offer_2.replaceAll(' ', '%20');
+            }
+
+            // CHECK Master TEMPLATE EXISTATNCE
+            const templateParent = await Template.findByPk(req.body.Parent_template_id * 1)
+            if (!templateParent) {
+                res.status(404).json({ status: 'failure', message: "Create Master Template First" })
+            }
+
+            const data = await Template.create({
+                templateType_id: req.body.template_type_id,
+                valid_from: req.body.valid_from,
+                valid_till: req.body.valid_till,
+                offer_data_1: offerData1,
+                offer_data_2: offerData2
+            })
+            if (data) {
+                    const addToBeaconTemplateParent = await BeaconTemplate.create(
+                        {
+                            parent: req.body.Parent_template_id,
+                            template_id : data.template_id,
+                            // beacon_id: req.body.beacon_id,
+                            alias: req.body.alias
+                        })
+                    if (addToBeaconTemplateParent == 0) {
+                        res.status(200).json({ status: "failure", message: "child template is not asign with template " })
+                    }
+                    else {
+                        res.status(200).json({ status: "success", message: "Created successfully" })
+                    }
+            } else{
+                res.status(404).json({ status: "failure", message: "error in template creation !" })
+            }
+        }
+    } catch (error) {
+        if (error instanceof Sequelize.ValidationError) {
+            const errorMessages = error.errors.map(err => err.message);
+            res.status(400).json({ status: "failure", message: errorMessages });
+        } else {
+            res.status(400).json({ status: "failure", message: error.message });
+        }
     }
 }
 
@@ -366,5 +457,6 @@ module.exports = {
     deleteMyTemplate,
     getShopBeacon,
     getMyTemplate,
-    asignTemplateToBeacon
+    asignTemplateToBeacon,
+    createChildTemplate
 }

@@ -11,6 +11,7 @@ const Sequelize = require("sequelize")
 
 const createOrganization = async (req, res) => {
     try {
+        
         const username = req.username
         if (username === "cit_superadmin") {
             console.log(req.body);
@@ -400,7 +401,7 @@ const getOrganizationMenu = async (req,res) => {
                     ELSE 'www.google.com'
                 END as URL
             FROM beaconDB.ShopDetails,beaconDB.Beacons,beaconDB.templates,beaconDB.tempTypes,beaconDB.BeaconTemplates
-            WHERE ShopDetails.org_id= 1
+            WHERE ShopDetails.org_id= ?
             AND Beacons.shop_id = ShopDetails.shop_id
             AND BeaconTemplates.beacon_id = Beacons.beacon_id
             AND templates.template_id = BeaconTemplates.template_id

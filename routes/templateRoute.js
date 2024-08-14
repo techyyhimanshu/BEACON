@@ -1,5 +1,5 @@
 const { Router } = require('express');
-const {createTemplate,   getAllTemplate,getMyTemplate, updateMyTemplate,  deleteMyTemplate }=require("../controllers/templateController")
+const {createTemplate,   getAllTemplate,getMyTemplate,asignTemplateToBeacon, updateMyTemplate,  deleteMyTemplate }=require("../controllers/templateController")
 const router = Router();
 const verifyToken = require('../middlewares/authMiddleware');
 // Define your routes here
@@ -9,4 +9,6 @@ router.get("/api/templates",getAllTemplate)
 router.get("/api/shop/template/:id",getMyTemplate)
 router.patch("/api/shop/template/update",updateMyTemplate)
 router.post("/api/shop/template/delete",deleteMyTemplate)
+router.post("/api/template/asign",asignTemplateToBeacon)
+
 module.exports = router;

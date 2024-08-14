@@ -46,6 +46,33 @@ const createTemplate = async (req, res) => {
    //#endregion
 
     try {
+        // console.log("call creation");
+        
+        const orgBeacons = await db.sequelize.query(`
+                select BeaconTemplates.alias 
+                from beaconDB.BeaconTemplates 
+                where BeaconTemplates.beacon_id in
+                (select Beacons.beacon_id
+                from beaconDB.Beacons, beaconDB.ShopDetails
+                where Beacons.shop_id = ShopDetails.shop_id 
+                AND ShopDetails.org_id = 
+                (select org_id from ShopDetails 
+                where shop_id = 
+                (select shop_id from Beacons 
+                where beacon_id = ?)));`,
+            {
+                type: Sequelize.QueryTypes.SELECT,
+                replacements: [req.body.beacon_id]
+            });
+            // console.log(orgBeacons,'======',req.body.alias);
+            
+            for(let beaAlias of orgBeacons ) {
+                if (beaAlias.alias == req.body.alias)
+                {res.status(200).json({ status: "failure", message: "Template alias can not be same in Organization" }) 
+                break;
+            }
+            }
+
         const templateType = await TemplateType.findByPk(req.body.template_type_id * 1)
 
         if (!templateType) {
@@ -86,9 +113,7 @@ const createTemplate = async (req, res) => {
                         where: {
                             beacon_id: req.body.beacon_id
                         }
-                    }
-                    
-                    )
+                    } )
                     const addToBeaconTemplateParent = await BeaconTemplate.create(
                         {
                             template_id: data.template_id,
@@ -122,7 +147,6 @@ const createTemplate = async (req, res) => {
                 res.status(200).json({ status: "fail", message: "data is not found", data: data })
             }
         }
-
 
     } catch (error) {
         if (error instanceof Sequelize.ValidationError) {
@@ -262,13 +286,85 @@ const deleteMyTemplate = async (req, res) => {
         console.log(error.message);
         res.status(500).json({ status: "failure" });
     }
-
 }
+
+// ASIGN BUILEDED TEMPLATE TO BEACON
+const asignTemplateToBeacon = async (req, res) => {
+    try {
+        const checkBeacon = await Beacon.findOne({
+            attributes: ["beacon_id"],
+            where: {
+                beacon_id: req.body.beacon_id
+            }
+        });
+        if(!checkBeacon)
+        {  res.status(200).json({ status: "failure", message: "beacon is not found"});      }
+
+        const checkTemplate = await Template.findOne({
+            attributes: ["template_id"],
+            where: {
+                template_id: req.body.template_id
+            }
+        })
+        if(!checkTemplate)
+        {  res.status(200).json({ status: "failure", message: "template is not found"});      }
+
+        const checkBeaconTemplate = await Beacon.findOne({
+            attributes: ["template_id"],
+            where: {
+                beacon_id: req.body.beacon_id
+            }
+        })
+
+        if (checkBeaconTemplate.template_id === null) {
+            //---Parent template----------
+            const updateBeaconTemplate = await Beacon.update(
+                { template_id: data.template_id }, {
+                where: {
+                    beacon_id: req.body.beacon_id
+                }
+                });
+            const addToBeaconTemplateParent = await BeaconTemplate.create(
+                {
+                    template_id: data.template_id,
+                    beacon_id: req.body.beacon_id,
+                    alias: req.body.alias
+                });
+            if (addToBeaconTemplateParent == 0) {
+                res.status(200).json({ status: "failure", message: "no beacon asign to this shop" })
+            }
+            else {
+                res.status(200).json({ status: "success", message: "Created successfully" })
+            }
+        } else {
+            // child template
+            const addToBeaconTemplateChild = await BeaconTemplate.create(
+                {
+                    template_id: req.body.template_id,
+                    beacon_id: req.body.beacon_id,
+                    parent: checkBeaconTemplate.template_id,
+                    alias: req.body.alias
+                })
+            if (addToBeaconTemplateChild == 0) {
+                res.status(200).json({ status: "failure", message: "no beacon asign to this shop" })
+            }
+            else {
+                res.status(200).json({ status: "success", message: "Created successfully" })
+            }
+        }
+
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).json({ status: "failure" });
+    }
+}
+
 module.exports = {
     createTemplate,
     getAllTemplate,
     updateMyTemplate,
     deleteMyTemplate,
     getShopBeacon,
-    getMyTemplate
+    getMyTemplate,
+    asignTemplateToBeacon
 }

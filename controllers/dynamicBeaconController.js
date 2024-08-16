@@ -19,7 +19,7 @@ const beaconFire = async(req,res)=>{
         {
             // beacon found
             var url = "https://beacon-cz70.onrender.com/api/fetch/dynamicTemplate/" + beacon.template_id
-            res.status(200).json({status:"failure",url:url})
+            res.status(200).json({status:"success",url:url})
         }
         else if(beacon.template_id===null){
             res.status(200).json({status:"failure",message:"no template is asign to this beacon "})

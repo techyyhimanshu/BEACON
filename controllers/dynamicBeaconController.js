@@ -18,7 +18,7 @@ const beaconFire = async(req,res)=>{
         if(beacon.template_id)
         {
             // beacon found
-            var url = "http://127.0.0.1:3000/api/fetch/dynamicTemplate/" + beacon.template_id
+            var url = "https://beacon-cz70.onrender.com/api/fetch/dynamicTemplate/" + beacon.template_id
             res.status(200).json({status:"failure",url:url})
         }
         else if(beacon.template_id===null){

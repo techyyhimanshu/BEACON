@@ -48,7 +48,20 @@ db.user = require('./user')(sequelize, DataTypes);
 db.menu = require('./menu')(sequelize, DataTypes);
 db.OrgMenu = require('./orgmenu')(sequelize, DataTypes);
 db.BeaconTemplate = require('./beacontemplates')(sequelize, DataTypes);
+db.tbl_template = require('./tbl_template')(sequelize, DataTypes);
+db.tbl_temp_content = require('./tbl_temp_content')(sequelize, DataTypes);
+db.tbl_temp_button = require('./tbl_temp_button')(sequelize, DataTypes);
+db.tbl_temp_menu = require('./tbl_temp_menu')(sequelize, DataTypes);
 
+
+db.tbl_temp_menu.belongsTo(db.tbl_template,{foreignKey:'temp_id'})
+db.tbl_template.hasMany(db.tbl_temp_menu,{foreignKey:'temp_id'})
+
+db.tbl_temp_button.belongsTo(db.tbl_template,{foreignKey:'temp_id'})
+db.tbl_template.hasMany(db.tbl_temp_button,{foreignKey:'temp_id'})
+
+db.tbl_temp_content.belongsTo(db.tbl_template,{foreignKey:'temp_id'})
+db.tbl_template.hasMany(db.tbl_temp_content,{foreignKey:'temp_id'})
 
 db.temptype.hasMany(db.template,{foreignKey:'templateType_id'})
 db.template.belongsTo(db.temptype,{foreignKey:'templateType_id'})

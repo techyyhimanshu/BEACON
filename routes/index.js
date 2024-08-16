@@ -10,6 +10,10 @@ const categoryRoute = require('./categoryRoute');
 const userRoute = require('./userRoute');
 const menuRoute = require('./menuRoute');
 const orgMenuRoute = require('./orgMenuRoute');
+const dynamicTempRoute = require('./dynamicTempRoute');
+const dynamicBeaconRoute = require('./dynamicBeaconRoute');
+
+
 
 
 const routes = Router();
@@ -23,6 +27,9 @@ routes.use(categoryRoute);
 routes.use(userRoute);
 routes.use(menuRoute);
 routes.use(orgMenuRoute);
+routes.use(dynamicBeaconRoute);
+routes.use(dynamicTempRoute);
+
 
 
 

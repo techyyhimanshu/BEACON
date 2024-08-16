@@ -1,3 +1,4 @@
+const { Logger } = require("sequelize/lib/utils/logger");
 const db = require("../models");
 const Beacon = db.Beacon;
 const Shop = db.Shop;
@@ -320,6 +321,36 @@ const updateBeacon = async (req, res) => {
     }
 };
 
+// DELETE BEACON 
+const deleteBeacon = async (req, res) => {
+    try {
+        // Retrieve the beacon by its primary key (beacon_id) from the request body
+        const beaconData = await Beacon.findByPk(req.params.id);
+
+        // If the shop is not found, return a 404 error response
+        if (!beaconData) {
+            return res.status(404).json({ status: "failure", message: "Beacon not found" });
+        }
+        // DELETE BEACON
+        const data = await Beacon.destroy({
+            where: {
+                beacon_id: req.params.id
+            }
+        }
+        );
+
+        // If the beacon is created successfully, return a success response
+        if (data > 0 ) {
+            res.status(200).json({ status: "success", message: "DELETED successfully" });
+        }
+        else {
+            res.status(200).json({ status: "failure", message: "Something went wrong !!! beacon not DELETED successfully" });
+        }
+    } catch (error) {
+        res.status(500).json({ status: "failure", message: "Internal Server Error" });
+        console.log(error.message);
+    }
+};
 // Function to get single beacon by id
 const getSingleBeacon = async (req, res) => {
     try {
@@ -411,4 +442,5 @@ module.exports = {
     getSingleBeacon,
     getBeaconsList,
     beaconVisited,
+    deleteBeacon
 };

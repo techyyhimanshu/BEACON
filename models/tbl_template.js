@@ -30,11 +30,13 @@ module.exports = (sequelize, DataTypes) => {
     createdAt:DataTypes.DATE,
     createdBy:DataTypes.STRING,
     updatedAt: DataTypes.DATE,
-    updatedBy:DataTypes.STRING
+    updatedBy:DataTypes.STRING,
+    deletedAt:DataTypes.DATE
     
   }, {
     sequelize,
     modelName: 'tbl_template',
+    paranoid:true
   });
   return tbl_template;
 };

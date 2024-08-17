@@ -96,7 +96,7 @@ const getTemplate= async(req,res)=>{
 // GET ALL TEMPLATES
 const getAllTemplate= async(req,res)=>{
     try {
-        const  template =await Template.findAll({
+        const  {count, rows} =await Template.findAndCountAll({
             attributes :['temp_id','title','description','imagePath','textColor','backgroundColor','buttonColor'],
             include:[
                 {
@@ -113,8 +113,8 @@ const getAllTemplate= async(req,res)=>{
                 }
             ]
         })
-        if(template){
-            res.status(200).json({status:"success",data:template})
+        if(count > 0){
+            res.status(200).json({status:"success",count:count, data:rows})
         }
         else{
             res.status(404).json({status:"failure",message:"data not found"})

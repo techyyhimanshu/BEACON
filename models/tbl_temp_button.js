@@ -38,10 +38,14 @@ module.exports = (sequelize, DataTypes) => {
     },
     updatedBy: {
       type: DataTypes.STRING
+    },
+    deletedAt:{
+      type : DataTypes.DATE
     }
   }, {
     sequelize,
     modelName: 'tbl_temp_button',
+    paranoid:true
   });
   return tbl_temp_button;
 };

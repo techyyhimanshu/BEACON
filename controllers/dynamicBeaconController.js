@@ -43,31 +43,31 @@ const beaconVisited = async (data) => {
             beacon_mac: data.mac,
             user_mac: data.device_uniqueID,
             location: data.location
-        })
+        });
         if (data2) {
-            try {
-                var user = await User.create({
-                    user_mac: data.device_uniqueID,
-                    last_location: data.location
+                var user = await User.findOne({
+                    attributes : ['user_mac'],
+                    where:{
+                        user_mac : data.device_uniqueID
+                    }
                 })
-                return data2
-            } catch (e) {
-                if (e instanceof Sequelize.ValidationError) {
-                    //console.log("validation false");
+                if(!user)
+                    {
+                    var newUser = await User.create({
+                        user_mac: data.device_uniqueID,
+                        last_location: data.location
+                    })
+                } else {
                     const updatedresult = await db.sequelize.query(`
                         UPDATE Users SET 
                         last_location = ? 
                         WHERE user_mac = ? ;`,
                         {
                             type: Sequelize.QueryTypes.UPDATE,
-                            replacements: [data.location, data.user_mac]
-                        })
-                    // console.log("update result :" + updatedresult);
-
-                } else {
-                    return null
+                            replacements: [data.location, data.device_uniqueID]
+                        });
                 }
-            }
+                return data2
         } else {
             return null
         }

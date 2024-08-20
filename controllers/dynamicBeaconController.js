@@ -8,77 +8,70 @@ const Beacon =db.Beacon;
 const BeaconVisited =db.BeaconVisited;
 const User =db.user;
 
-const beaconFire = async(req,res)=>{
-    try{
-        const beacon = await Beacon.findOne({
-            attributes : ['template_id'],
-            where:{
-                mac: req.body.mac
-            }
-        })
-        if(beacon.template_id)
-        {
-            // beacon found
-            const visitedData = beaconVisited(req.body)
-            var url = "https://beacon-cz70.onrender.com/api/fetch/dynamicTemplate/" + beacon.template_id
-            res.status(200).json({status:"success",url:url})
-        }
-        else if(beacon.template_id===null){
-            res.status(200).json({status:"failure",message:"no template is asign to this beacon "})
-        } else{
-            res.status(200).json({status:"failure",message:"beacon not found"})
-        }
-
-    }catch(error){
-        res.status(404).json({status:"failure",message:"error occur on beacon fire"})
-        console.log(error.name,error.message);
-        
-    }
-
-}
-
-// USER IS SAVED TO BEACON VISITED 
-const beaconVisited = async (data) => {
+const beaconFire = async (req, res) => {
     try {
-        const data2 = await BeaconVisited.create({
-            beacon_mac: data.mac,
-            user_mac: data.device_uniqueID,
-            location: data.location
+        const beacon = await Beacon.findOne({
+            attributes: ['template_id'],
+            where: { mac: req.body.mac }
         });
-        if (data2) {
-                var user = await User.findOne({
-                    attributes : ['user_mac'],
-                    where:{
-                        user_mac : data.device_uniqueID
-                    }
-                })
-                if(!user)
-                    {
-                    var newUser = await User.create({
-                        user_mac: data.device_uniqueID,
-                        last_location: data.location
-                    })
-                } else {
-                    const updatedresult = await db.sequelize.query(`
-                        UPDATE Users SET 
-                        last_location = ? 
-                        WHERE user_mac = ? ;`,
-                        {
-                            type: Sequelize.QueryTypes.UPDATE,
-                            replacements: [data.location, data.device_uniqueID]
-                        });
-                    //console.log(updatedresult);
-                    
-                }
-                return data2
+
+        if (beacon) {
+            if (beacon.template_id) {
+                // beacon found, process in parallel
+                beaconVisited(req.body); // Process in the background without waiting
+                const url = `https://beacon-cz70.onrender.com/api/fetch/dynamicTemplate/${beacon.template_id}`;
+                return res.status(200).json({ status: "success", url });
+            } else {
+                return res.status(200).json({ status: "failure", message: "no template is assigned to this beacon" });
+            }
         } else {
-            return null
+            return res.status(200).json({ status: "failure", message: "beacon not found" });
         }
     } catch (error) {
-        console.log(error);
-        return null
+        console.log(error.name, error.message);
+        return res.status(404).json({ status: "failure", message: "error occurred on beacon fire" });
     }
-}
+};
+
+// USER IS SAVED TO BEACON VISITED
+const beaconVisited = async (data) => {
+    try {
+        const uniqueId = data.device_uniqueID;
+
+        const [data2, user] = await Promise.all([
+            BeaconVisited.create({
+                beacon_mac: data.mac,
+                user_mac: uniqueId,
+                location: data.location
+            }),
+            User.findOne({
+                attributes: ['user_mac', 'last_location'],
+                where: { user_mac: uniqueId }
+            })
+        ]);
+
+        if (user) {
+            // USER IS OLD, update only if location has changed
+            if (user.last_location !== data.location) {
+                await User.update(
+                    { last_location: data.location },
+                    { where: { user_mac: uniqueId } }
+                );
+            }
+        } else {
+            // USER IS NEW
+            await User.create({
+                user_mac: uniqueId,
+                last_location: data.location
+            });
+        }
+
+        return data2;
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+};
 
 const templateAsignToBeacon = async(req,res)=>{
     try{

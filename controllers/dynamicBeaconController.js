@@ -1,4 +1,5 @@
 const db = require("../models");
+const Sequelize = require('sequelize');
 const TempButton =db.tbl_temp_button;
 const TempContent =db.tbl_temp_content;
 const TempSubMenu =db.tbl_temp_menu;
@@ -66,6 +67,8 @@ const beaconVisited = async (data) => {
                             type: Sequelize.QueryTypes.UPDATE,
                             replacements: [data.location, data.device_uniqueID]
                         });
+                    //console.log(updatedresult);
+                    
                 }
                 return data2
         } else {

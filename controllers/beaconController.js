@@ -405,10 +405,10 @@ const beaconVisited = async (data) => {
                 })
                 return data2
             } catch (e) {
-                console.log("error name :" + e.message);
+                // console.log("error name :" + e.message);
 
                 if (e instanceof Sequelize.ValidationError) {
-                    console.log("validation false");
+                    //console.log("validation false");
 
                     const updatedresult = await db.sequelize.query(`
                         UPDATE Users SET 
@@ -418,7 +418,7 @@ const beaconVisited = async (data) => {
                             type: Sequelize.QueryTypes.UPDATE,
                             replacements: [data.location, data.user_mac]
                         })
-                    console.log("update result :" + updatedresult);
+                    // console.log("update result :" + updatedresult);
 
                 } else {
                     return null
@@ -428,7 +428,7 @@ const beaconVisited = async (data) => {
             return null
         }
     } catch (error) {
-        //console.log(error);
+        console.log(error);
         return null
     }
 }

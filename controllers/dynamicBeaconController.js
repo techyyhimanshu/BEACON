@@ -4,8 +4,8 @@ const TempContent =db.tbl_temp_content;
 const TempSubMenu =db.tbl_temp_menu;
 const Template =db.tbl_template;
 const Beacon =db.Beacon;
-
-
+const BeaconVisited =db.BeaconVisited;
+const User =db.user;
 
 const beaconFire = async(req,res)=>{
     try{
@@ -18,6 +18,7 @@ const beaconFire = async(req,res)=>{
         if(beacon.template_id)
         {
             // beacon found
+            const visitedData = beaconVisited(req.body)
             var url = "https://beacon-cz70.onrender.com/api/fetch/dynamicTemplate/" + beacon.template_id
             res.status(200).json({status:"success",url:url})
         }
@@ -33,6 +34,47 @@ const beaconFire = async(req,res)=>{
         
     }
 
+}
+
+// USER IS SAVED TO BEACON VISITED 
+const beaconVisited = async (data) => {
+    try {
+        const data2 = await BeaconVisited.create({
+            beacon_mac: data.mac,
+            user_mac: data.device_uniqueID,
+            location: data.location
+        })
+        if (data2) {
+            try {
+                var user = await User.create({
+                    user_mac: data.device_uniqueID,
+                    last_location: data.location
+                })
+                return data2
+            } catch (e) {
+                if (e instanceof Sequelize.ValidationError) {
+                    //console.log("validation false");
+                    const updatedresult = await db.sequelize.query(`
+                        UPDATE Users SET 
+                        last_location = ? 
+                        WHERE user_mac = ? ;`,
+                        {
+                            type: Sequelize.QueryTypes.UPDATE,
+                            replacements: [data.location, data.user_mac]
+                        })
+                    // console.log("update result :" + updatedresult);
+
+                } else {
+                    return null
+                }
+            }
+        } else {
+            return null
+        }
+    } catch (error) {
+        console.log(error);
+        return null
+    }
 }
 
 const templateAsignToBeacon = async(req,res)=>{

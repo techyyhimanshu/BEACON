@@ -15,6 +15,8 @@ const {craeteTemplate,
     getButton,
     getContent,
     getAllSubMenu,
+    deleteButton,
+    deleteContent,
     deleteTemplate}=require("../controllers/dynamicTempController")
 
     // Define your routes here
@@ -30,6 +32,8 @@ router.patch("/api/update/dynamicContent",updateContent)
 router.patch("/api/update/dynamicButton",updateButton)
 router.get("/api/fetch/dynamicButton/:id",getButton)
 router.get("/api/fetch/dynamicContent/:id",getContent)
+router.delete("/api/delete/dynamicButton/:id",deleteButton)
+router.delete("/api/delete/dynamicContent/:id",deleteContent)
 
 // sub menu routes 
 router.get("/api/submenus",getAllSubMenu)

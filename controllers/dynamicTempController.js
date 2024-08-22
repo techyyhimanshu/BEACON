@@ -413,8 +413,45 @@ const getContent = async(req,res)=>{
     }
 }
 
+// DELETE BUTTON BY BUTTON ID
+const deleteButton = async(req,res)=>{
+    try{
+        const  templateButton =await TempButton.destroy({
+            where:{
+                button_id : req.params.id
+            }
+        });
+        if(templateButton > 0){
+            res.status(200).json({status:"success",message:'button deleted successfully',row_Affected:templateButton[0]})
+        }
+        else{
+            res.status(404).json({status:"failure",message:"data not found"})
+        }
+    }catch(e){
+        res.status(404).json({status:"failure",message:"Internal server error"})
+        console.log(e.message);  
+    }
+}
 
-
+// DELETE CONTENT BY CONTENT ID
+const deleteContent = async(req,res)=>{
+    try{
+        const  templateContent =await TempContent.destroy({
+            where:{
+                content_id : req.params.id
+            }
+        });
+        if(templateContent > 0){
+            res.status(200).json({status:"success",message:'content deleted successfully',row_Affected:templateContent[0]})
+        }
+        else{
+            res.status(404).json({status:"failure",message:"data not found"})
+        }
+    }catch(e){
+        res.status(404).json({status:"failure",message:"Internal server error"})
+        console.log(e.message);  
+    }
+}
 
 // export methos
 module.exports = {
@@ -422,16 +459,21 @@ module.exports = {
     getTemplate,
     getAllTemplate,
     updateTemplate,
-    updateButton,
-    updateContent,
-    updateSubMenu,
     deleteTemplate,
+
+    // SUB MENU METHODS 
     craeteSubMenuTemplate,
     getSubMenuByTempId,
     getSubMenuByID,
     getAllSubMenu,
+    updateSubMenu,
     deleteSubMenu,
-    getContent,
-    getButton
 
+    // WIDGET METHODS
+    getContent,
+    getButton,
+    updateButton,
+    updateContent,
+    deleteContent,
+    deleteButton
 }

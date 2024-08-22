@@ -34,16 +34,16 @@ try {
         
 
         // SUB LINKS
-        var subMenus = req.body.submenus;
-        subMenus.forEach(subMenu => {
-            subMenu.temp_id = template.temp_id  
-        });
-        var tempSubMenu = await TempSubMenu.bulkCreate(subMenus);
-        console.log(tempSubMenu);
+        // var subMenus = req.body.submenus;
+        // subMenus.forEach(subMenu => {
+        //     subMenu.temp_id = template.temp_id  
+        // });
+        // var tempSubMenu = await TempSubMenu.bulkCreate(subMenus);
+        // console.log(tempSubMenu);
         
     
-        if(tempButton.length > 0 && tempContent.length > 0 && tempSubMenu.length > 0){
-            res.status(200).json({status:"success",data:[template,tempButton,tempContent,tempSubMenu]}) 
+        if(tempButton.length > 0 && tempContent.length > 0 ){
+            res.status(200).json({status:"success",data:[template,tempButton,tempContent],temp_Id:template.temp_id}) 
         }
         else{
             res.status(200).json({status:"failure",message:"template Widgets not created"})
@@ -136,7 +136,7 @@ const updateTemplate= async(req,res)=>{
             buttonColor: req.body.buttonColor,
         },{
             where: {
-                temp_id : req.body.temp_id
+                temp_id : req.params.id
             }
         })
         if(templateUpdate > 0){
@@ -166,30 +166,6 @@ const updateButton= async(req,res)=>{
             res.status(200).json({status:"success",row_Affected:butttonUpdate[0]})     
         } else {
             res.status(404).json({status:"failure",message:"button not updated"})
-        }
-    } catch (error) {
-        res.status(404).json({status:"failure",message:"Internal server error"})
-        console.log(error.message);
-        
-    }
-}
-
-// UPDATE SUB MENU 
-const updateSubMenu = async(req,res)=>{
-    try {
-        const  subMenutUpdate =await TempSubMenu.update({
-            menu_name : req.body.menu_name,
-            textColor : req.body.textColor,
-            link_url : req.body.link_url
-        },{
-            where: {
-                subMenu_id : req.body.subMenu_id
-            }
-        })
-        if(subMenutUpdate > 0){
-            res.status(200).json({status:"success",row_Affected:subMenutUpdate[0]})     
-        } else {
-            res.status(404).json({status:"failure",message:"submenu is not updated"})
         }
     } catch (error) {
         res.status(404).json({status:"failure",message:"Internal server error"})
@@ -258,6 +234,140 @@ const deleteTemplate= async(req,res)=>{
     }
 }
 
+// CREATE SUB MENU WITH TEMPLATE
+const craeteSubMenuTemplate= async(req,res)=>{
+    try {
+        const Temp = await Template.findOne({
+            where:{
+                temp_id : req.params.id
+            }
+        });
+        if(Temp){
+                const  tempSubMenu =await TempSubMenu.create({
+                temp_id : req.params.id,
+                menu_name : req.body.menu_name,
+                textColor : req.body.textColor,
+                link_url : req.body.link_url
+                });
+                console.log(tempSubMenu);
+            
+                if(tempSubMenu){
+                    res.status(200).json({status:"success",data:tempSubMenu,temp_Id:tempSubMenu.temp_id}) 
+                }
+                else{
+                    res.status(200).json({status:"failure",message:"sub menu is not created "})
+                }
+            } else{
+                res.status(200).json({status:"failure",message:`Template Id : ${req.params.id} is not exist`})
+            }
+        } catch (error) {
+            res.status(404).json({status:"failure",message:"Internal server error"})
+            console.log(error.message);
+            
+        }
+}
+
+// get submenu by submenu id
+const getSubMenuByID = async(req,res)=>{
+    try{
+        const  templateSubMenu =await TempSubMenu.findOne({
+            where:{
+                subMenu_id : req.params.id
+            }
+        });
+        if(templateSubMenu){
+            res.status(200).json({status:"success",data:templateSubMenu})
+        }
+        else{
+            res.status(404).json({status:"failure",message:"data not found"})
+        }
+    }catch(e){
+        res.status(404).json({status:"failure",message:"Internal server error"})
+        console.log(error.message);  
+    }
+}
+
+// get submenu by temp id 
+const getSubMenuByTempId = async(req,res)=>{
+    try{
+        const  templateSubMenu =await TempSubMenu.findAll({
+            where:{
+                temp_id : req.params.id
+            }
+        });
+        if(templateSubMenu){
+            res.status(200).json({status:"success",data:templateSubMenu})
+        }
+        else{
+            res.status(404).json({status:"failure",message:"data not found"})
+        }
+    }catch(e){
+        res.status(404).json({status:"failure",message:"Internal server error"})
+        console.log(error.message);  
+    }
+}
+
+// get  all submenu
+const getAllSubMenu = async(req,res)=>{
+    try{
+        const  templateSubMenu =await TempSubMenu.findAll({});
+        if(templateSubMenu){
+            res.status(200).json({status:"success",data:templateSubMenu})
+        }
+        else{
+            res.status(404).json({status:"failure",message:"data not found"})
+        }
+    }catch(e){
+        res.status(404).json({status:"failure",message:"Internal server error"})
+        console.log(error.message);  
+    }
+}
+// UPDATE SUB MENU 
+const updateSubMenu = async(req,res)=>{
+    try {
+        const  subMenutUpdate =await TempSubMenu.update({
+            menu_name : req.body.menu_name,
+            textColor : req.body.textColor,
+            link_url : req.body.link_url
+        },{
+            where: {
+                subMenu_id : req.params.id
+            }
+        })
+        console.log(subMenutUpdate > 0);
+        
+        if(subMenutUpdate){
+            res.status(200).json({status:"success",row_Affected:subMenutUpdate[0]})     
+        } else {
+            res.status(404).json({status:"failure",message:"submenu is not updated"})
+        }
+    } catch (error) {
+        res.status(404).json({status:"failure",message:"Internal server error"})
+        console.log(error.message)
+    }
+}
+
+// delete sub menu by id 
+const deleteSubMenu = async(req,res)=>{
+    try{
+        const  templateSubMenu =await TempSubMenu.destroy({
+            where:{
+                subMenu_id : req.params.id
+            }
+        });
+        if(templateSubMenu > 0 ){
+            res.status(200).json({status:"success",message:`sub menu ${req.params.id} deleted successfully`})
+        }
+        else{
+            res.status(404).json({status:"failure",message:"data not found"})
+        }
+    }catch(e){
+        res.status(404).json({status:"failure",message:"Internal server error"})
+        console.log(error.message);  
+    }
+}
+
+
 
 
 
@@ -271,4 +381,10 @@ module.exports = {
     updateContent,
     updateSubMenu,
     deleteTemplate,
+    craeteSubMenuTemplate,
+    getSubMenuByTempId,
+    getSubMenuByID,
+    getAllSubMenu,
+    deleteSubMenu,
+
 }

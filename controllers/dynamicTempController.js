@@ -271,6 +271,7 @@ const craeteSubMenuTemplate= async(req,res)=>{
 const getSubMenuByID = async(req,res)=>{
     try{
         const  templateSubMenu =await TempSubMenu.findOne({
+            attributes :["subMenu_id","temp_id","menu_name","textColor","link_url"],
             where:{
                 subMenu_id : req.params.id
             }
@@ -291,6 +292,7 @@ const getSubMenuByID = async(req,res)=>{
 const getSubMenuByTempId = async(req,res)=>{
     try{
         const  templateSubMenu =await TempSubMenu.findAll({
+            attributes :["subMenu_id","temp_id","menu_name","textColor","link_url"],
             where:{
                 temp_id : req.params.id
             }
@@ -310,7 +312,9 @@ const getSubMenuByTempId = async(req,res)=>{
 // get  all submenu
 const getAllSubMenu = async(req,res)=>{
     try{
-        const  templateSubMenu =await TempSubMenu.findAll({});
+        const  templateSubMenu =await TempSubMenu.findAll({
+            attributes :["subMenu_id","temp_id","menu_name","textColor","link_url"]
+        });
         if(templateSubMenu){
             res.status(200).json({status:"success",data:templateSubMenu})
         }
@@ -367,6 +371,47 @@ const deleteSubMenu = async(req,res)=>{
     }
 }
 
+// GET BUTTON BY BUTTON ID
+const getButton = async(req,res)=>{
+    try{
+        const  templateButton =await TempButton.findOne({
+            attributes :["button_id","temp_id","text","background_color","textColor","button_url"],
+            where:{
+                button_id : req.params.id
+            }
+        });
+        if(templateButton){
+            res.status(200).json({status:"success",data:templateButton})
+        }
+        else{
+            res.status(404).json({status:"failure",message:"data not found"})
+        }
+    }catch(e){
+        res.status(404).json({status:"failure",message:"Internal server error"})
+        console.log(e.message);  
+    }
+}
+
+// GET CONTENT BY CONTENT ID
+const getContent = async(req,res)=>{
+    try{
+        const  templateContent =await TempContent.findOne({
+            attributes : ["content_id","temp_id","text_content","background_color","textColor"],
+            where:{
+                content_id : req.params.id
+            }
+        });
+        if(templateContent){
+            res.status(200).json({status:"success",data:templateContent})
+        }
+        else{
+            res.status(404).json({status:"failure",message:"data not found"})
+        }
+    }catch(e){
+        res.status(404).json({status:"failure",message:"Internal server error"})
+        console.log(e.message);  
+    }
+}
 
 
 
@@ -386,5 +431,7 @@ module.exports = {
     getSubMenuByID,
     getAllSubMenu,
     deleteSubMenu,
+    getContent,
+    getButton
 
 }

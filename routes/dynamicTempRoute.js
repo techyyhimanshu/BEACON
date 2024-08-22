@@ -12,6 +12,8 @@ const {craeteTemplate,
     getSubMenuByTempId,
     getSubMenuByID,
     deleteSubMenu,
+    getButton,
+    getContent,
     getAllSubMenu,
     deleteTemplate}=require("../controllers/dynamicTempController")
 
@@ -20,10 +22,15 @@ router.post("/api/create/dynamicTemplate",craeteTemplate)
 router.get("/api/fetch/dynamicTemplate/:id",getTemplate)
 router.get("/api/fetch/dynamicTemplates",getAllTemplate)
 router.patch("/api/update/dynamicTemplate/:id",updateTemplate)
-router.patch("/api/update/dynamicContent",updateContent)
-router.patch("/api/update/dynamicButton",updateButton)
 router.put("/api/update/dynamicTemplate/:id",updateTemplate)
 router.delete("/api/delete/dynamicTemplate/:id",deleteTemplate)
+
+// widget routes
+router.patch("/api/update/dynamicContent",updateContent)
+router.patch("/api/update/dynamicButton",updateButton)
+router.get("/api/fetch/dynamicButton/:id",getButton)
+router.get("/api/fetch/dynamicContent/:id",getContent)
+
 // sub menu routes 
 router.get("/api/submenus",getAllSubMenu)
 router.get("/api/submenus/:id",getSubMenuByID)

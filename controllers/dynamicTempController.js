@@ -275,13 +275,13 @@ const getSubMenuByID = async(req,res)=>{
     try{
         const  templateSubMenu =await TempSubMenu.findOne({
             attributes :["subMenu_id","temp_id","menu_name","textColor","link_url"],
-            where:{
-                subMenu_id : req.params.id
-            },
             include : {
                 model : Template,
                 attributes : ['title']
-            }
+            },
+            where:{
+                subMenu_id : req.params.id
+            },
         });
         if(templateSubMenu){
             res.status(200).json({status:"success",data:templateSubMenu})
@@ -300,13 +300,14 @@ const getSubMenuByTempId = async(req,res)=>{
     try{
         const  templateSubMenu =await TempSubMenu.findAll({
             attributes :["subMenu_id","temp_id","menu_name","textColor","link_url"],
-            where:{
-                temp_id : req.params.id
-            },
             include : {
                 model : Template,
                 attributes : ['title']
-            }
+            },
+            where:{
+                temp_id : req.params.id
+            },
+           
         });
         if(templateSubMenu){
             res.status(200).json({status:"success",data:templateSubMenu})

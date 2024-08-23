@@ -18,6 +18,9 @@ module.exports = {
       imagePath: {
         type: Sequelize.STRING
       },
+      videoPath :{
+        type: Sequelize.STRING
+      },
       textColor: {
         type: Sequelize.STRING
       },

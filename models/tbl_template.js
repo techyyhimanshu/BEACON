@@ -24,6 +24,7 @@ module.exports = (sequelize, DataTypes) => {
     title: DataTypes.STRING,
     description: DataTypes.STRING,
     imagePath: DataTypes.STRING,
+    videoPath :DataTypes.STRING,
     textColor: DataTypes.STRING,
     backgroundColor: DataTypes.STRING,
     buttonColor: DataTypes.STRING,
@@ -31,7 +32,7 @@ module.exports = (sequelize, DataTypes) => {
     createdBy:DataTypes.STRING,
     updatedAt: DataTypes.DATE,
     updatedBy:DataTypes.STRING,
-    deletedAt:DataTypes.DATE
+    deletedAt:DataTypes.DATE   
     
   }, {
     sequelize,

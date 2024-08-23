@@ -10,7 +10,8 @@ try {
     const  template =await Template.create({
         title : req.body.title,
         description : req.body.description,
-        imagePath : req.body.imageUrl,
+        imagePath : req.body.imagePath,
+        videoPath : req.body.videoPath,
         textColor: req.body.textColor,
         backgroundColor: req.body.backgroundColor,
         buttonColor: req.body.buttonColor,
@@ -62,7 +63,7 @@ const getTemplate= async(req,res)=>{
         console.log(req.params.id);
         
         const  template =await Template.findAll({
-            attributes :['title','description','imagePath','textColor','backgroundColor','buttonColor'],
+            attributes :['title','description','imagePath','videoPath','textColor','backgroundColor','buttonColor'],
             include:[
                 {
                     model : TempContent,
@@ -97,7 +98,7 @@ const getTemplate= async(req,res)=>{
 const getAllTemplate= async(req,res)=>{
     try {
         const  {count, rows} =await Template.findAndCountAll({
-            attributes :['temp_id','title','description','imagePath','textColor','backgroundColor','buttonColor'],
+            attributes :['temp_id','title','description','imagePath','videoPath','textColor','backgroundColor','buttonColor'],
             include:[
                 {
                     model : TempContent,
@@ -131,9 +132,11 @@ const updateTemplate= async(req,res)=>{
             title : req.body.title,
             description : req.body.description,
             imagePath : req.body.imagePath,
+            videoPath : req.body.videoPath,
             textColor: req.body.textColor,
             backgroundColor: req.body.backgroundColor,
             buttonColor: req.body.buttonColor,
+
         },{
             where: {
                 temp_id : req.params.id
@@ -274,6 +277,10 @@ const getSubMenuByID = async(req,res)=>{
             attributes :["subMenu_id","temp_id","menu_name","textColor","link_url"],
             where:{
                 subMenu_id : req.params.id
+            },
+            include : {
+                model : Template,
+                attributes : ['title']
             }
         });
         if(templateSubMenu){
@@ -295,6 +302,10 @@ const getSubMenuByTempId = async(req,res)=>{
             attributes :["subMenu_id","temp_id","menu_name","textColor","link_url"],
             where:{
                 temp_id : req.params.id
+            },
+            include : {
+                model : Template,
+                attributes : ['title']
             }
         });
         if(templateSubMenu){
@@ -313,7 +324,11 @@ const getSubMenuByTempId = async(req,res)=>{
 const getAllSubMenu = async(req,res)=>{
     try{
         const  templateSubMenu =await TempSubMenu.findAll({
-            attributes :["subMenu_id","temp_id","menu_name","textColor","link_url"]
+            attributes :["subMenu_id","temp_id","menu_name","textColor","link_url"],
+            include : {
+                model : Template,
+                attributes : ['title']
+            }
         });
         if(templateSubMenu){
             res.status(200).json({status:"success",data:templateSubMenu})

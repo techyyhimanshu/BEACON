@@ -19,7 +19,8 @@ const beaconFire = async (req, res) => {
             if (beacon.template_id) {
                 // beacon found, process in parallel
                 beaconVisited(req.body); // Process in the background without waiting
-                const url = `https://beacon-cz70.onrender.com/api/fetch/dynamicTemplate/${beacon.template_id}`;
+                
+                const url = `https://beacon-git-main-ac-ankurs-projects.vercel.app/template/${beacon.template_id}`;
                 return res.status(200).json({ status: "success", url });
             } else {
                 return res.status(200).json({ status: "failure", message: "no template is assigned to this beacon" });

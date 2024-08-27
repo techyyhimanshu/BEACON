@@ -1,5 +1,6 @@
 const { Router } = require('express');
-const {createShop,getAllShops,getSingleShop,updateShop,deleteShop,shopLogin,getShopBeacon}=require("../controllers/shopController");
+const {createShop,getAllShops,getSingleShop,updateShop,shopNotification,
+    deleteShop,shopLogin,getShopBeacon}=require("../controllers/shopController");
 const verifyToken = require('../middlewares/authMiddleware');
 const router = Router();
 // Define your routes here
@@ -13,5 +14,7 @@ router.get("/api/shop/:id",verifyToken,getSingleShop)
 router.patch("/api/shop/:id",verifyToken,updateShop)
 router.delete("/api/shop/:id",verifyToken,deleteShop)
 router.get("/api/shop/:id/beacons/list",verifyToken,getShopBeacon)
+router.post("/api/shop/notification",shopNotification)
+
 
 module.exports = router;

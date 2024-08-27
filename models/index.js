@@ -52,7 +52,11 @@ db.tbl_template = require('./tbl_template')(sequelize, DataTypes);
 db.tbl_temp_content = require('./tbl_temp_content')(sequelize, DataTypes);
 db.tbl_temp_button = require('./tbl_temp_button')(sequelize, DataTypes);
 db.tbl_temp_menu = require('./tbl_temp_menu')(sequelize, DataTypes);
+db.tbl_temp_bg = require('./tbl_temp_bg')(sequelize, DataTypes);
 
+
+db.tbl_temp_bg.belongsTo(db.tbl_template,{foreignKey:'temp_id'})
+db.tbl_template.hasMany(db.tbl_temp_bg,{foreignKey:'temp_id'})
 
 db.tbl_temp_menu.belongsTo(db.tbl_template,{foreignKey:'temp_id'})
 db.tbl_template.hasMany(db.tbl_temp_menu,{foreignKey:'temp_id'})

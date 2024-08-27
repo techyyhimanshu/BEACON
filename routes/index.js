@@ -12,6 +12,8 @@ const menuRoute = require('./menuRoute');
 const orgMenuRoute = require('./orgMenuRoute');
 const dynamicTempRoute = require('./dynamicTempRoute');
 const dynamicBeaconRoute = require('./dynamicBeaconRoute');
+// const sp_user = require('./sp_user');
+
 
 
 
@@ -30,7 +32,8 @@ routes.use(orgMenuRoute);
 routes.use(dynamicBeaconRoute);
 routes.use(dynamicTempRoute);
 
-
+// extra
+// routes.use(sp_user);
 
 
 module.exports = routes;

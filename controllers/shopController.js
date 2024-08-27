@@ -234,6 +234,55 @@ const getShopBeacon = async (req, res) => {
 }
 
 
+const shopNotification = async (req, res) => {
+    try {
+        const { shop_id, hourTime,description } = req.body;
+
+        const query = `
+            SELECT DISTINCT user_mac 
+            FROM BeaconVisited
+            WHERE beacon_mac IN (SELECT mac FROM Beacons WHERE shop_id = ?)
+            AND createdAt > (CURDATE() - INTERVAL ? HOUR)
+            ORDER BY createdAt DESC;
+        `;
+
+        const replacements = [shop_id, hourTime];
+
+        const shopUsers = await db.sequelize.query(query, {
+            type: Sequelize.QueryTypes.SELECT,
+            replacements
+        });
+
+        if (shopUsers.length === 0) {
+            return res.status(404).json({ status: "Not found", message: "No users connected in this time interval" });
+        }
+
+        const shopDetail = await db.sequelize.query(
+           `SELECT shop_name,shop_no,ShopDetails.contact_number,org_name,address
+            FROM OrganizationDetails,ShopDetails
+            WHERE ShopDetails.org_id =OrganizationDetails.org_id 
+            AND ShopDetails.shop_id = ? `,
+            {
+                type: Sequelize.QueryTypes.SELECT,
+                replacements: [shop_id]
+            }
+        );
+
+        const { contact_number, shop_name, shop_no, org_name, address } = shopDetail[0];
+
+        const notification = `Dear Customer,Notification description here... ${description} Just dial: ${contact_number}  Go to: ${shop_name}, ${shop_no}, ${org_name}, ${address}`;
+
+        return res.status(200).json({ 
+            status: "success", 
+            Notification: notification, 
+            deviceUniqueIDs: shopUsers 
+        });
+
+    } catch (e) {
+        return res.status(400).json({ status: "failure", message: e.message });
+    }
+};
+
 module.exports = {
     createShop,
     getAllShops,
@@ -241,5 +290,6 @@ module.exports = {
     updateShop,
     deleteShop,
     shopLogin,
-    getShopBeacon
+    getShopBeacon,
+    shopNotification
 }

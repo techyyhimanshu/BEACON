@@ -3,6 +3,8 @@ const TempButton =db.tbl_temp_button;
 const TempContent =db.tbl_temp_content;
 const TempSubMenu =db.tbl_temp_menu;
 const Template =db.tbl_template;
+const TempBGImage =db.tbl_temp_bg;
+
 
 // CREATE NEW TEMPLATE
 const craeteTemplate= async(req,res)=>{
@@ -10,13 +12,20 @@ try {
     const  template =await Template.create({
         title : req.body.title,
         description : req.body.description,
-        imagePath : req.body.imagePath,
+        //imagePath : req.body.imagePath,
         videoPath : req.body.videoPath,
         textColor: req.body.textColor,
         backgroundColor: req.body.backgroundColor,
         buttonColor: req.body.buttonColor,
     })
     if (template){
+        // BEACKGROUND IMAGES
+        var bgs = req.body.bgs;
+        bgs.forEach(bg => {
+            bg.temp_id = template.temp_id  
+        });
+        var tempBGI = await TempBGImage.bulkCreate(bgs);
+        console.log(tempBGI);
         // BUTTONS
         var buttons = req.body.buttons;
         buttons.forEach(button => {
@@ -44,7 +53,7 @@ try {
         
     
         if(tempButton.length > 0 && tempContent.length > 0 ){
-            res.status(200).json({status:"success",data:[template,tempButton,tempContent],temp_Id:template.temp_id}) 
+            res.status(200).json({status:"success",data:[template,tempButton,tempContent,tempBGI],temp_Id:template.temp_id}) 
         }
         else{
             res.status(200).json({status:"failure",message:"template Widgets not created"})
@@ -63,7 +72,7 @@ const getTemplate= async(req,res)=>{
         console.log(req.params.id);
         
         const  template =await Template.findAll({
-            attributes :['title','description','imagePath','videoPath','textColor','backgroundColor','buttonColor'],
+            attributes :['title','description','videoPath','textColor','backgroundColor','buttonColor'],
             include:[
                 {
                     model : TempContent,
@@ -76,6 +85,10 @@ const getTemplate= async(req,res)=>{
                 {
                     model: TempSubMenu,
                     attributes: ['subMenu_id','menu_name','textColor','link_url']
+                },
+                {
+                    model: TempBGImage,
+                    attributes: ['imageUrl']
                 }
             ],
             where:{
@@ -98,7 +111,7 @@ const getTemplate= async(req,res)=>{
 const getAllTemplate= async(req,res)=>{
     try {
         const  {count, rows} =await Template.findAndCountAll({
-            attributes :['temp_id','title','description','imagePath','videoPath','textColor','backgroundColor','buttonColor'],
+            attributes :['temp_id','title','description','videoPath','textColor','backgroundColor','buttonColor'],
             include:[
                 {
                     model : TempContent,
@@ -111,6 +124,10 @@ const getAllTemplate= async(req,res)=>{
                 {
                     model: TempSubMenu,
                     attributes: ['subMenu_id','menu_name','textColor','link_url']
+                },
+                {
+                    model: TempBGImage,
+                    attributes: ['imageUrl']
                 }
             ]
         })
@@ -131,7 +148,7 @@ const updateTemplate= async(req,res)=>{
         const  templateUpdate =await Template.update({
             title : req.body.title,
             description : req.body.description,
-            imagePath : req.body.imagePath,
+            //imagePath : req.body.imagePath,
             videoPath : req.body.videoPath,
             textColor: req.body.textColor,
             backgroundColor: req.body.backgroundColor,

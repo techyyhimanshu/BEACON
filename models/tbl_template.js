@@ -22,6 +22,9 @@ module.exports = (sequelize, DataTypes) => {
 
     },
     title: DataTypes.STRING,
+    template_name: {
+      type: DataTypes.STRING
+    },
     description: DataTypes.STRING,
     imagePath: DataTypes.STRING,
     videoPath :DataTypes.STRING,

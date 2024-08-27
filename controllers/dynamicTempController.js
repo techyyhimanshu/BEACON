@@ -3,14 +3,19 @@ const TempButton =db.tbl_temp_button;
 const TempContent =db.tbl_temp_content;
 const TempSubMenu =db.tbl_temp_menu;
 const Template =db.tbl_template;
+<<<<<<< HEAD
 const TempBGImage =db.tbl_temp_bg;
 
+=======
+const bgTempImages =db.bgImages;
+>>>>>>> 7beeff936939e75e83f64646b7c808fa13b03587
 
 // CREATE NEW TEMPLATE
 const craeteTemplate= async(req,res)=>{
 try {
     const  template =await Template.create({
         title : req.body.title,
+        template_name : req.body.template_name,
         description : req.body.description,
         //imagePath : req.body.imagePath,
         videoPath : req.body.videoPath,
@@ -32,7 +37,6 @@ try {
             button.temp_id = template.temp_id  
         });
         var tempButton = await TempButton.bulkCreate(buttons);
-        console.log(tempButton);
         
         // CONTENTS
         var contents = req.body.texts;
@@ -40,9 +44,12 @@ try {
             content.temp_id = template.temp_id  
         });
         var tempContent = await TempContent.bulkCreate(contents);
-        console.log(tempContent);
-        
-
+    
+        var bgImages=req.body.bgs
+        bgImages.forEach(bg => {
+            bg.temp_id = template.temp_id
+        })        
+        await bgTempImages.bulkCreate(bgImages);
         // SUB LINKS
         // var subMenus = req.body.submenus;
         // subMenus.forEach(subMenu => {
@@ -53,7 +60,11 @@ try {
         
     
         if(tempButton.length > 0 && tempContent.length > 0 ){
+<<<<<<< HEAD
             res.status(200).json({status:"success",data:[template,tempButton,tempContent,tempBGI],temp_Id:template.temp_id}) 
+=======
+            res.status(200).json({status:"success",data:[template,bgImages,tempButton,tempContent],temp_Id:template.temp_id}) 
+>>>>>>> 7beeff936939e75e83f64646b7c808fa13b03587
         }
         else{
             res.status(200).json({status:"failure",message:"template Widgets not created"})
@@ -63,6 +74,8 @@ try {
     }
 } catch (error) {
     res.status(404).json({status:"failure",message:"Internal server error"})
+    console.log(error.message);
+    
 }
 }
 
@@ -72,7 +85,11 @@ const getTemplate= async(req,res)=>{
         console.log(req.params.id);
         
         const  template =await Template.findAll({
+<<<<<<< HEAD
             attributes :['title','description','videoPath','textColor','backgroundColor','buttonColor'],
+=======
+            attributes :['title','template_name','description','imagePath','videoPath','textColor','backgroundColor','buttonColor'],
+>>>>>>> 7beeff936939e75e83f64646b7c808fa13b03587
             include:[
                 {
                     model : TempContent,
@@ -87,8 +104,13 @@ const getTemplate= async(req,res)=>{
                     attributes: ['subMenu_id','menu_name','textColor','link_url']
                 },
                 {
+<<<<<<< HEAD
                     model: TempBGImage,
                     attributes: ['imageUrl']
+=======
+                    model: bgTempImages,
+                    attributes:["imageUrl"]
+>>>>>>> 7beeff936939e75e83f64646b7c808fa13b03587
                 }
             ],
             where:{
@@ -104,6 +126,8 @@ const getTemplate= async(req,res)=>{
         }
     } catch (error) {
         res.status(404).json({status:"failure",message:"Internal server error"})
+        console.log(error.message);
+        
     }
 }
 
@@ -111,7 +135,11 @@ const getTemplate= async(req,res)=>{
 const getAllTemplate= async(req,res)=>{
     try {
         const  {count, rows} =await Template.findAndCountAll({
+<<<<<<< HEAD
             attributes :['temp_id','title','description','videoPath','textColor','backgroundColor','buttonColor'],
+=======
+            attributes :['temp_id','template_name','title','description','videoPath','textColor','backgroundColor','buttonColor'],
+>>>>>>> 7beeff936939e75e83f64646b7c808fa13b03587
             include:[
                 {
                     model : TempContent,
@@ -126,8 +154,13 @@ const getAllTemplate= async(req,res)=>{
                     attributes: ['subMenu_id','menu_name','textColor','link_url']
                 },
                 {
+<<<<<<< HEAD
                     model: TempBGImage,
                     attributes: ['imageUrl']
+=======
+                    model: bgTempImages,
+                    attributes:["imageUrl"]
+>>>>>>> 7beeff936939e75e83f64646b7c808fa13b03587
                 }
             ]
         })
@@ -147,6 +180,7 @@ const updateTemplate= async(req,res)=>{
     try {
         const  templateUpdate =await Template.update({
             title : req.body.title,
+            template_name:req.body.template_name,
             description : req.body.description,
             //imagePath : req.body.imagePath,
             videoPath : req.body.videoPath,
@@ -291,10 +325,10 @@ const craeteSubMenuTemplate= async(req,res)=>{
 const getSubMenuByID = async(req,res)=>{
     try{
         const  templateSubMenu =await TempSubMenu.findOne({
-            attributes :["subMenu_id","temp_id","menu_name","textColor","link_url"],
+            attributes :["subMenu_id","menu_name","textColor","link_url"],
             include : {
                 model : Template,
-                attributes : ['title']
+                attributes : ['temp_id','template_name']
             },
             where:{
                 subMenu_id : req.params.id
@@ -315,11 +349,11 @@ const getSubMenuByID = async(req,res)=>{
 // get submenu by temp id 
 const getSubMenuByTempId = async(req,res)=>{
     try{
-        const  templateSubMenu =await TempSubMenu.findAll({
-            attributes :["subMenu_id","temp_id","menu_name","textColor","link_url"],
+        const  templateSubMenu =await Template.findAll({
+            attributes :["temp_id","template_name"],
             include : {
-                model : Template,
-                attributes : ['title']
+                model : TempSubMenu,
+                attributes :["subMenu_id","menu_name","textColor","link_url"],
             },
             where:{
                 temp_id : req.params.id
@@ -345,7 +379,7 @@ const getAllSubMenu = async(req,res)=>{
             attributes :["subMenu_id","temp_id","menu_name","textColor","link_url"],
             include : {
                 model : Template,
-                attributes : ['title']
+                attributes : ['temp_id','template_name']
             }
         });
         if(templateSubMenu){

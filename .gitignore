@@ -2,4 +2,8 @@ node_modules/
 routes/ankur_file.js
 controllers.zip
 routes.zip
+<<<<<<< HEAD
 controllers/SP.js
+=======
+/.env
+>>>>>>> 7beeff936939e75e83f64646b7c808fa13b03587

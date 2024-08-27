@@ -19,10 +19,12 @@ module.exports = {
         type: Sequelize.STRING
       },
       background_color: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        defaultValue:"#ffffff"
       },
       textColor: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        defaultValue:"#ff0000"
       },
       button_url: {
         type: Sequelize.STRING
@@ -41,6 +43,9 @@ module.exports = {
       },
       updatedBy: {
         type: Sequelize.STRING
+      },
+      deletedAt:{
+        type : Sequelize.DATE
       }
     });
   },

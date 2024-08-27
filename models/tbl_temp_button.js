@@ -22,8 +22,14 @@ module.exports = (sequelize, DataTypes) => {
     },
     temp_id: DataTypes.INTEGER,
     text: DataTypes.STRING,
-    background_color: DataTypes.STRING,
-    textColor: DataTypes.STRING,
+    background_color:{
+      type:DataTypes.STRING,
+        defaultValue:"#ffffff"
+    },
+    textColor: {
+      type: DataTypes.STRING,
+      defaultValue:"#ff0000"
+    },
     button_url: DataTypes.STRING,
     createdAt: {
       allowNull: false,
@@ -38,9 +44,6 @@ module.exports = (sequelize, DataTypes) => {
     },
     updatedBy: {
       type: DataTypes.STRING
-    },
-    deletedAt:{
-      type : DataTypes.DATE
     }
   }, {
     sequelize,

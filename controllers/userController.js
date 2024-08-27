@@ -37,7 +37,7 @@ const beaconTotalUser = async (req, res) => {
             b.beacon_id,
             b.beacon_name,
             bv.beacon_mac AS beacon_mac,
-            COUNT(bv.user_mac) AS counts
+            COUNT(distinct bv.user_mac) AS connectedUsers
             FROM 
              beaconDB.Beacons b
             JOIN 
@@ -99,7 +99,7 @@ const beaconTodayUser = async (req, res) => {
 }
 
 
-const beaconWeekUser = async (req, res) => {
+const beaconWeeklUsers = async (req, res) => {
     try {
         const beaconWeekUser = await db.sequelize.query(`
                 SELECT COUNT(distinct BeaconVisited.user_mac) as count
@@ -119,7 +119,63 @@ const beaconWeekUser = async (req, res) => {
         res.status(404).json({ status: "failure", message: "Internal server error", Error: error.message })
     }
 }
-
+const beaconMonthlyUsers = async (req, res) => {
+    try {
+        if(!req.body.org_id || !req.body.month){
+            return res.status(404).json({ status: "failure", message: "Please provide org_id and month"})
+        }
+        const monthlyOrgData = await db.sequelize.query(`
+                SELECT 
+    o.org_name,
+    o.org_id,
+    COUNT(bv.user_mac) AS total_user_visited
+FROM 
+    beaconDB.OrganizationDetails o
+JOIN 
+    beaconDB.ShopDetails s ON o.org_id = s.org_id
+JOIN 
+    beaconDB.Beacons b ON s.shop_id = b.shop_id
+JOIN 
+    beaconDB.BeaconVisited bv ON b.mac = bv.beacon_mac
+WHERE 
+    o.org_id = ?
+    and month(bv.createdAt)=?
+GROUP BY 
+    o.org_id, o.org_name;
+ `,
+            {
+                type: Sequelize.QueryTypes.SELECT,
+                replacements: [req.body.org_id,req.body.month]
+            })
+        if (monthlyOrgData.length===0 || !monthlyOrgData) {
+           return res.status(404).json({ status: "failure", message: "Not data found for selected month or beacon" })
+        }
+        const beaconData=await db.sequelize.query(`SELECT 
+            b.beacon_id,
+            b.beacon_name,
+            COUNT(bv.user_mac) AS user_visited
+            FROM 
+            beaconDB.OrganizationDetails o
+            JOIN 
+                beaconDB.ShopDetails s ON o.org_id = s.org_id
+            JOIN 
+                beaconDB.Beacons b ON s.shop_id = b.shop_id
+            JOIN 
+                beaconDB.BeaconVisited bv ON b.mac = bv.beacon_mac
+            WHERE 
+                o.org_id = ?
+                and month(bv.createdAt)=?
+            GROUP BY 
+                b.mac`,{
+                type: Sequelize.QueryTypes.SELECT,
+                replacements:[req.body.org_id,req.body.month]
+    })
+    monthlyOrgData[0].beacons=beaconData
+        res.status(200).json({ status: "success",data: monthlyOrgData })
+    } catch (error) {
+        res.status(404).json({ status: "failure", message: "Internal server error", Error: error.message })
+    }
+}
 const getAllUsers = async (req, res) => {
 
     try {
@@ -142,7 +198,8 @@ const getAllUsers = async (req, res) => {
 module.exports = {
     trackUser,
     beaconTodayUser,
-    beaconWeekUser,
+    beaconWeeklUsers,
     beaconTotalUser,
-    getAllUsers
+    getAllUsers,
+    beaconMonthlyUsers
 }

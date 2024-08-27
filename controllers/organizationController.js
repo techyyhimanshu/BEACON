@@ -11,7 +11,7 @@ const Sequelize = require("sequelize")
 
 const createOrganization = async (req, res) => {
     try {
-        
+
         const username = req.username
         if (username === "cit_superadmin") {
             console.log(req.body);
@@ -108,7 +108,7 @@ const deleteOrganization = async (req, res) => {
 const getShopsByOrganization = async (req, res) => {
     try {
         const data = await Shop.findAll({
-            attributes: ['shop_id','shop_name', 'shop_no'],
+            attributes: ['shop_id', 'shop_name', 'shop_no'],
             where: {
                 org_id: req.body.org_id
             },
@@ -124,11 +124,11 @@ const getShopsByOrganization = async (req, res) => {
         //     category: catName
         // }));
         console.log(data);
-        
-        if (data.length===0) {
+
+        if (data.length === 0) {
             // if(data.length==0)
             // {
-                res.status(200).json({ status: "failure", data: "organization not found" })
+            res.status(200).json({ status: "failure", data: "organization not found" })
             // }
         }
         else {
@@ -159,13 +159,13 @@ function getDifference(date_1, date_2) {
 
 // Function to find the URL for a beacon based on its MAC address
 async function findUrl(macAddress) {
-    
+
     try {
         // Find the beacon data by its MAC address
         console.log("find url call");
         console.log(macAddress);
-        
-    
+
+
         const beaconData = await Beacon.findOne({
             attributes: ["template_id"],
             where: { mac: macAddress },
@@ -175,7 +175,7 @@ async function findUrl(macAddress) {
             }
         });
         console.log("beacon data");
-        
+
         console.log(beaconData);
 
         // If beacon data is found, proceed to find the associated template
@@ -215,7 +215,7 @@ async function findUrl(macAddress) {
 
                     // Construct the URL using the template path and offer data
                     //console.log(staticPath);
-                    
+
                     var launchUrlOrg = {}
                     if (staticPath) {
                         if (templateData.offer_data_1 && templateData.offer_data_2) {
@@ -227,14 +227,14 @@ async function findUrl(macAddress) {
                             launchUrl = staticPath + '&&offerdata=' + templateData.offer_data_2;
                         } else {
                             launchUrl = staticPath;
-                        }                                                
+                        }
                     }
                     launchUrlOrg = {
                         url: launchUrl,
                         org_id: beaconData.ShopDetail.dataValues.org_id
                     }
                     //console.log(launchUrlOrg);
-                    
+
                     return launchUrlOrg;
                 } else {
                     // Return a message if there is no valid offer today
@@ -305,38 +305,60 @@ const getOrganizationBeacons2 = async (req, res) => {
                 replacements: [req.params.id]
             });
 
-            //console.log(orgBeacons);
+        //console.log(orgBeacons);
 
-            var orgBeaconsData = [];
+        var orgBeaconsData = [];
 
-            async function processBeacons(orgBeacons) {
-                const beaconPromises = orgBeacons.map(async beacon => {
-                    const { url, org_id } = await findUrl(beacon.mac);
-                    return { ...beacon, orgId: org_id, url: url };
-                });
-            
-                orgBeaconsData = await Promise.all(beaconPromises);
-                return orgBeaconsData
-            }
-            
-            // Call the function with your orgBeacons array
-            console.log("out of loop");
-            
-            processBeacons(orgBeacons).then(data => {
-                if (data.length !== 0) {
-                    res.status(200).json({ status: "success", data: data })
-                } else {
-                    res.status(404).json({ status: "Not found", message: "no beacon added to this org" })
-                }
+        async function processBeacons(orgBeacons) {
+            const beaconPromises = orgBeacons.map(async beacon => {
+                const { url, org_id } = await findUrl(beacon.mac);
+                return { ...beacon, orgId: org_id, url: url };
             });
-    } catch (e) { 
-        res.status(400).json({ status: "failure", message: e.message }); }
+
+            orgBeaconsData = await Promise.all(beaconPromises);
+            return orgBeaconsData
+        }
+
+        // Call the function with your orgBeacons array
+        console.log("out of loop");
+
+        processBeacons(orgBeacons).then(data => {
+            if (data.length !== 0) {
+                res.status(200).json({ status: "success", data: data })
+            } else {
+                res.status(404).json({ status: "Not found", message: "no beacon added to this org" })
+            }
+        });
+    } catch (e) {
+        res.status(400).json({ status: "failure", message: e.message });
+    }
 }
 
 
-const getOrganizationBeacons = async (req,res) => {
-    try{
-        const buildUrl = await db.sequelize.query(`
+const getOrganizationBeacons = async (req, res) => {
+    try {
+        let orgDetails = await db.sequelize.query(`SELECT 
+    o.org_name,
+    o.org_id,
+    COUNT(b.beacon_id) AS beacon_count
+FROM 
+    beaconDB.OrganizationDetails o
+JOIN 
+    beaconDB.ShopDetails s ON o.org_id = s.org_id
+JOIN 
+    beaconDB.Beacons b ON s.shop_id = b.shop_id
+WHERE 
+    o.org_id = ?
+GROUP BY 
+    o.org_id, o.org_name;`,{
+        type:Sequelize.QueryTypes.SELECT,
+        replacements: [req.params.id]
+    })
+        if (!orgDetails) {
+            return res.status(404).json({ status: "Not found", message: "Organization not found" })
+        }
+        
+        const beacons = await db.sequelize.query(`
             SELECT
                 Beacons.beacon_id,
                 Beacons.mac,
@@ -363,24 +385,23 @@ const getOrganizationBeacons = async (req,res) => {
             {
                 type: Sequelize.QueryTypes.SELECT,
                 replacements: [req.params.id]
-            });
-
-            if(buildUrl)
-            {
-                res.status(200).json({ status: "success", data: buildUrl })
-            }
-            else{
-                res.status(404).json({ status: "failure", message: "technical issue in url fetching" })
-            }
+            });            
+         orgDetails[0].beacons = beacons
+        if (beacons) {
+            res.status(200).json({ status: "success",data:orgDetails })
+        }
+        else {
+            res.status(404).json({ status: "failure", message: "technical issue in url fetching" })
+        }
     }
-    catch(e){
+    catch (e) {
         res.status(404).json({ status: "failure", message: e.message })
     }
 }
 
 
-const getOrganizationMenu = async (req,res) => {
-    try{
+const getOrganizationMenu = async (req, res) => {
+    try {
         const buildUrl = await db.sequelize.query(`
             SELECT
                 BeaconTemplates.parent,
@@ -412,15 +433,14 @@ const getOrganizationMenu = async (req,res) => {
                 replacements: [req.params.id]
             });
 
-            if(buildUrl)
-            {
-                res.status(200).json({ status: "success", data: buildUrl })
-            }
-            else{
-                res.status(404).json({ status: "failure", message: "technical issue in url fetching" })
-            }
+        if (buildUrl) {
+            res.status(200).json({ status: "success", data: buildUrl })
+        }
+        else {
+            res.status(404).json({ status: "failure", message: "technical issue in url fetching" })
+        }
     }
-    catch(e){
+    catch (e) {
         res.status(404).json({ status: "failure", message: e.message })
     }
 }

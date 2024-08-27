@@ -2,3 +2,4 @@ node_modules/
 routes/ankur_file.js
 controllers.zip
 routes.zip
+.env

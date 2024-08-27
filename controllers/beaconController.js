@@ -5,7 +5,6 @@ const Shop = db.Shop;
 const Template = db.template;
 const TemplateType = db.temptype;
 const BeaconVisited = db.BeaconVisited;
-const BeaconTemplate = db.BeaconTemplate;
 const User = db.user;
 
 const Sequelize = require("sequelize");

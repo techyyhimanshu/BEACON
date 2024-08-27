@@ -12,6 +12,9 @@ module.exports = {
       title: {
         type: Sequelize.STRING
       },
+      template_name: {
+        type: Sequelize.STRING
+      },
       description: {
         type: Sequelize.STRING
       },
@@ -43,7 +46,10 @@ module.exports = {
       },
       updatedBy: {
         type: Sequelize.STRING
-      }
+      },
+      deletedAt: {
+        type: Sequelize.DATE
+      },
     });
   },
   async down(queryInterface, Sequelize) {

@@ -49,8 +49,8 @@ const beaconTotalUser = async (req, res) => {
              b.beacon_name, 
                 bv.beacon_mac;
 `, {
-    type:Sequelize.QueryTypes.SELECT
-})
+            type: Sequelize.QueryTypes.SELECT
+        })
         // const beaconTotalUser = await db.sequelize.query(`
         //     SELECT COUNT(DISTINCT BeaconVisited.user_mac) as count
         //     FROM BeaconVisited 
@@ -68,7 +68,7 @@ const beaconTotalUser = async (req, res) => {
         //         replacements: [req.body.mac]
         //     })
         if (totalBeaconsWithCount) {
-            res.status(200).json({ status: "success", data:totalBeaconsWithCount })
+            res.status(200).json({ status: "success", data: totalBeaconsWithCount })
         } else {
             res.status(404).json({ status: "failure", message: "Not found" })
         }
@@ -100,29 +100,66 @@ const beaconTodayUser = async (req, res) => {
 
 
 const orgWeeklyUsers = async (req, res) => {
+    const now = new Date();
+    const currentDate = now.toISOString().split('T')[0];
     try {
-        const beaconWeekUser = await db.sequelize.query(`
-                SELECT COUNT(distinct BeaconVisited.user_mac) as count
-                FROM BeaconVisited
-                WHERE BeaconVisited.beacon_mac = ?
-                AND DATE(BeaconVisited.createdAt) > (CURDATE()- INTERVAL 7 DAY); `,
+        const {start_date,end_date}=req.body
+        if (req.body.start_date === req.body.end_date) {
+            return res.status(200).json({ status: "success", message: "start_date and end_date must not be same" })
+        }
+        if (end_date >currentDate || start_date>end_date) {
+            return res.status(200).json({ status: "success", message: "Invalid date range"})
+        }
+        const beaconWeekUserCount = await db.sequelize.query(`
+                select o.org_name,o.org_id,count(bv.user_mac) as user_count
+                from OrganizationDetails o
+                join 
+                    ShopDetails s on s.org_id=o.org_id
+                join 
+                    Beacons b on b.shop_id=s.shop_id
+                join
+                    BeaconVisited bv on bv.beacon_mac=b.mac
+                where o.org_id=?
+                     and bv.createdAt between ? and ?
+                group by
+                    o.org_id `,
             {
                 type: Sequelize.QueryTypes.SELECT,
-                replacements: [req.body.mac]
+                replacements: [req.body.org_id, req.body.start_date, req.body.end_date]
             })
-        if (beaconWeekUser) {
-            res.status(200).json({ status: "success", count: beaconWeekUser[0].count })
-        } else {
-            res.status(404).json({ status: "failure", message: "Not found" })
+
+        if (!beaconWeekUserCount || beaconWeekUserCount.length === 0) {
+            return res.status(404).json({ status: "failure", message: "Not found" })
         }
+        const weeklyBeacons = await db.sequelize.query(`
+            select b.beacon_name,b.beacon_id,count(bv.user_mac) as user_count
+                from OrganizationDetails o
+                join 
+                    ShopDetails s on s.org_id=o.org_id
+                join 
+                    Beacons b on b.shop_id=s.shop_id
+                join
+                    BeaconVisited bv on bv.beacon_mac=b.mac
+                where o.org_id=?
+                     and bv.createdAt between ? and ?
+                group by
+                    o.org_id,b.mac `,
+            {
+                type: Sequelize.QueryTypes.SELECT,
+                replacements: [req.body.org_id, req.body.start_date, req.body.end_date]
+            })
+        beaconWeekUserCount[0].beacons = weeklyBeacons
+        res.status(200).json({ status: "success", data: beaconWeekUserCount })
     } catch (error) {
-        res.status(404).json({ status: "failure", message: "Internal server error", Error: error.message })
+        res.status(500).json({ status: "failure", message: "Internal server error" })
+        console.log(error);
+
     }
 }
 const orgMonthlyUsers = async (req, res) => {
     try {
-        if(!req.body.org_id || !req.body.month){
-            return res.status(404).json({ status: "failure", message: "Please provide org_id and month"})
+        if (!req.body.org_id || !req.body.month) {
+            return res.status(404).json({ status: "failure", message: "Please provide org_id and month" })
         }
         const monthlyOrgData = await db.sequelize.query(`
                 SELECT 
@@ -144,12 +181,12 @@ const orgMonthlyUsers = async (req, res) => {
                     o.org_id, o.org_name;`,
             {
                 type: Sequelize.QueryTypes.SELECT,
-                replacements: [req.body.org_id,req.body.month]
+                replacements: [req.body.org_id, req.body.month]
             })
-        if (monthlyOrgData.length===0 || !monthlyOrgData) {
-           return res.status(404).json({ status: "failure", message: "Not data found for selected month or beacon" })
+        if (monthlyOrgData.length === 0 || !monthlyOrgData) {
+            return res.status(404).json({ status: "failure", message: "Not data found for selected month or beacon" })
         }
-        const beaconData=await db.sequelize.query(`SELECT 
+        const beaconData = await db.sequelize.query(`SELECT 
             b.beacon_id,
             b.beacon_name,
             COUNT(bv.user_mac) AS user_visited
@@ -165,12 +202,12 @@ const orgMonthlyUsers = async (req, res) => {
                 o.org_id = ?
                 and month(bv.createdAt)=?
             GROUP BY 
-                b.mac`,{
-                type: Sequelize.QueryTypes.SELECT,
-                replacements:[req.body.org_id,req.body.month]
-    })
-    monthlyOrgData[0].beacons=beaconData
-        res.status(200).json({ status: "success",data: monthlyOrgData })
+                b.mac`, {
+            type: Sequelize.QueryTypes.SELECT,
+            replacements: [req.body.org_id, req.body.month]
+        })
+        monthlyOrgData[0].beacons = beaconData
+        res.status(200).json({ status: "success", data: monthlyOrgData })
     } catch (error) {
         res.status(404).json({ status: "failure", message: "Internal server error", Error: error.message })
     }

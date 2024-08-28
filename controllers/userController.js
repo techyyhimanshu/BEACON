@@ -1,6 +1,8 @@
 const db = require("../models");
 const Sequelize = require('sequelize');
 const User = db.user
+const DeviceFcmToken = db.DeviceFcmToken
+
 
 const trackUser = async (req, res) => {
     try {
@@ -103,12 +105,12 @@ const orgWeeklyUsers = async (req, res) => {
     const now = new Date();
     const currentDate = now.toISOString().split('T')[0];
     try {
-        const {start_date,end_date}=req.body
+        const { start_date, end_date } = req.body
         if (req.body.start_date === req.body.end_date) {
             return res.status(200).json({ status: "success", message: "start_date and end_date must not be same" })
         }
-        if (end_date >currentDate || start_date>end_date) {
-            return res.status(200).json({ status: "success", message: "Invalid date range"})
+        if (end_date > currentDate || start_date > end_date) {
+            return res.status(200).json({ status: "success", message: "Invalid date range" })
         }
         const beaconWeekUserCount = await db.sequelize.query(`
                 select o.org_name,o.org_id,count(distinct bv.user_mac) as total_user_count
@@ -231,11 +233,70 @@ const getAllUsers = async (req, res) => {
 
 }
 
+const registerUser = async (req, res) => {
+    try {
+        const userRegistered = await User.create(req.body)
+        if (!userRegistered) {
+            return res.status(400).send({ status: "failure", message: "Error occured" })
+        }
+        return res.status(200).send({ status: "success", message: "User registered successfully" })
+    } catch (error) {
+        if(error instanceof Sequelize.ValidationError){
+            const messages=error.errors.map(err=>err.message)
+            return res.status(400).send({ status: "failure", message: messages})
+        }
+        
+        return res.status(500).send({ status: "failure", message: "Internal server error"})
+
+    }
+}
+const registerFCM = async (req, res) => {
+    try {
+        const {device_uniqueID,fcm_token}=req.body
+        const userFcm=await DeviceFcmToken.findOne({
+            attributes:["fcm_token"],
+            where:{
+                device_id:device_uniqueID
+            }
+        })
+        
+        if(userFcm===null||!userFcm || userFcm.fcm_token.length===0){
+            const createdFCM = await DeviceFcmToken.create({
+                device_id: device_uniqueID,
+                fcm_token: fcm_token
+            })
+    
+            if (!createdFCM){
+                return res.status(400).send({ status: "failure", message: "Error occured"})
+            }
+            return res.status(200).send({ status: "success", message: "FCM token created"})
+        }
+        if(fcm_token===userFcm.fcm_token){
+            return res.status(200).send({ status: "success", message: "FCM token no-change"})
+        }
+        const fcmUpdate = await DeviceFcmToken.update({
+            fcm_token:fcm_token
+        },{
+            where:{
+                device_id:device_uniqueID
+            }
+        })
+        if(!fcmUpdate){
+            return res.status(400).send({ status: "failure", message: "Error occured"})
+        }
+        return res.status(200).send({ status: "success", message: "FCM token updated"})
+    } catch (error) {
+        console.log(error);
+        return false
+    }
+}
 module.exports = {
     trackUser,
     beaconTodayUser,
     orgWeeklyUsers,
     beaconTotalUser,
     getAllUsers,
-    orgMonthlyUsers
+    orgMonthlyUsers,
+    registerUser,
+    registerFCM
 }

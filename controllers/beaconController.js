@@ -1,4 +1,3 @@
-const { Logger } = require("sequelize/lib/utils/logger");
 const db = require("../models");
 const Beacon = db.Beacon;
 const Shop = db.Shop;
@@ -6,6 +5,8 @@ const Template = db.template;
 const TemplateType = db.temptype;
 const BeaconVisited = db.BeaconVisited;
 const User = db.user;
+const DeviceFcmToken = db.DeviceFcmToken
+const admin = require("../config/firebase");
 
 const Sequelize = require("sequelize");
 // const beacon = require("../models/beacon");
@@ -182,7 +183,7 @@ async function findUrl(macAddress) {
                             launchUrl = staticPath + '&&offerdata=' + templateData.offer_data_2;
                         } else {
                             launchUrl = staticPath;
-                        }                                                
+                        }
                     }
                     launchUrlOrg = {
                         url: launchUrl,
@@ -209,6 +210,7 @@ async function findUrl(macAddress) {
 
 // Function to handle login and find the URL for a beacon
 const login = async (req, res) => {
+    //#region 
     // try {
     //     const data = await Beacon.findOne({
     //         attributes: ["beacon_id"],
@@ -238,26 +240,27 @@ const login = async (req, res) => {
     //     console.log(error.message);
 
     // }
+    //#endregion
+
     try {
-        // Find the beacon data by its MAC address
-    const data = await Beacon.findOne({
-        where: { mac: req.body.mac }
-    });
-
-        // If beacon data is found, find the associated URL
+        const data = await Beacon.findOne({
+            where: { mac: req.body.mac }
+        });
         if (data) {
-            const {url,org_id} = await findUrl(req.body.mac);
-            const visitedData = beaconVisited(req.body)
-            //console.log(visitedData);
-
+            const { url, org_id } = await findUrl(req.body.mac);
+            const visitedData = await beaconVisited(req.body)
+            const userFcm=await DeviceFcmToken.findOne({
+                attributes:["fcm_token"],
+                where:{
+                    device_id:req.body.user_mac
+                }
+            })            
             if (visitedData) {
-                res.status(200).json({ status: "success", url: url || "https://www.google.com", org_id: org_id });
-            } else {
-                res.status(200).json({ status: "failure", message: "Error Occured" });
+                await sendMessageToUser(userFcm.fcm_token, 'Welcome to Our Beacon Zone!"', "Hi there! You've entered our beacon zone. Tap here to unlock your exclusive offer before it’s gone!");
+                return res.status(200).json({ status: "success", url: url || "https://www.google.com", org_id: org_id });
             }
-            // Send the URL as part of the response, defaulting to Google if no URL is built
+            return res.status(500).json({ status: "failure", message: "Error occured" });
         } else {
-            // Return a message if the beacon is not added yet
             res.status(200).json({ status: "beacon is not added yet" });
         }
     } catch (error) {
@@ -339,7 +342,7 @@ const deleteBeacon = async (req, res) => {
         );
 
         // If the beacon is created successfully, return a success response
-        if (data > 0 ) {
+        if (data > 0) {
             res.status(200).json({ status: "success", message: "DELETED successfully" });
         }
         else {
@@ -396,42 +399,73 @@ const beaconVisited = async (data) => {
             user_mac: data.user_mac,
             location: data.location
         })
-        if (data2) {
-            try {
-                var user = await User.create({
-                    user_mac: data.user_mac,
-                    last_location: data.location
-                })
-                return data2
-            } catch (e) {
-                // console.log("error name :" + e.message);
-
-                if (e instanceof Sequelize.ValidationError) {
-                    //console.log("validation false");
-
-                    const updatedresult = await db.sequelize.query(`
-                        UPDATE Users SET 
-                        last_location = ? 
-                        WHERE user_mac = ? ;`,
-                        {
-                            type: Sequelize.QueryTypes.UPDATE,
-                            replacements: [data.location, data.user_mac]
-                        })
-                    // console.log("update result :" + updatedresult);
-
-                } else {
-                    return null
-                }
-            }
-        } else {
-            return null
-        }
+        return data2;
     } catch (error) {
         console.log(error);
         return null
     }
 }
 
+// const createFcmTokenEntry = async (user_mac, fcm_token) => {
+//     try {
+//         const userFcm=await DeviceFcmToken.findOne({
+//             attributes:["fcm_token"],
+//             where:{
+//                 device_id:user_mac
+//             }
+//         })
+        
+//         if(userFcm===null||!userFcm || userFcm.fcm_token.length===0){
+//             const data = await DeviceFcmToken.create({
+//                 device_id: user_mac,
+//                 fcm_token: fcm_token
+//             })
+    
+//             if (!data) {
+//                 return false
+//             }
+//             return true
+//         }
+//         if(userFcm.fcm_token===fcm_token){
+//             return true
+//         }
+//         const fcmUpdate = await DeviceFcmToken.update({
+//             fcm_token:fcm_token
+//         },{
+//             where:{
+//                 device_id:user_mac
+//             }
+//         })
+//         if(!fcmUpdate){
+//             return false
+//         }
+//         return true
+//     } catch (error) {
+//         console.log(error);
+//         return false
+//     }
+// }
+const sendMessageToUser = async (token, title, body) => {
+    try {
+        const message = {
+            notification: {
+                title: title,
+                body: body
+            },
+            token: token
+        };
+    
+        try {
+            const response = await admin.messaging().send(message);
+            console.log('Successfully sent message:', response);
+        } catch (error) {
+            console.error('Error sending message:', error);
+        }
+    } catch (error) {
+        console.log(error.message);
+        
+    }
+};
 // Exporting the functions to be used in other files
 module.exports = {
     addBeacon,

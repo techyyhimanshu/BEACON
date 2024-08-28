@@ -1,4 +1,5 @@
 const jwt=require('jsonwebtoken')
+
 const adminLogin = async (req, res) => {
     try {
         const { username, password } = req.body

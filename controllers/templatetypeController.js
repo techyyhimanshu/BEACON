@@ -28,6 +28,7 @@ const createTempType = async (req, res) => {
     }
 
 }
+
 const getAllTemplateType = async (req, res) => {
     try {
         const data = await TemplateType.findAll({
@@ -73,7 +74,6 @@ const categoryTemplate = async (req, res) => {
     }
 }
 
-
 const updateTemplate = async (req, res) => {
     try {
         const [affectedRow] = await TemplateType.update({
@@ -96,7 +96,6 @@ const updateTemplate = async (req, res) => {
     }
 }
 
-
 const deleteTemplate = async (req, res) => {
     try {
         const affectedRow = await TemplateType.destroy({
@@ -117,40 +116,10 @@ const deleteTemplate = async (req, res) => {
 
 }
 
-
-const callSP = async (req, res) => {
-    try {
-        const bodyData = req.bodyData
-        const data = await db.sequelize.query(`
-            call sp_mngUser(?,?,?)
-            `,
-            { replacements : [req.body.empID,req.body.empName,req.body.empAddress] }
-            , (err , result) => {
-                if(err)
-                {
-                    return res.status(400).json({ status: "failure", message: err.message})
-                } else{
-                    return  res.status(200).json({ status: "success", message: "sp run successfully" ,data:result})
-                }
-            }
-            )
-        if (data) {
-            return res.status(200).json({ status: "success", message: "Created successfully" ,data:data})
-        }
-        else{
-            return res.status(200).json({ status: "fail", message: "data is not found"  })
-        }
-
-    } catch (error) {
-        return res.status(400).json({ status: "failure", message: error.message });
-    }
-
-}
 module.exports = {
     createTempType,
     getAllTemplateType,
     categoryTemplate,
     updateTemplate,
     deleteTemplate,
-    callSP
 }

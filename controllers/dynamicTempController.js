@@ -24,7 +24,7 @@ try {
         bgs.forEach(bg => {
             bg.temp_id = template.temp_id  
         });
-        var tempBGI = await TempBGImage.bulkCreate(bgs);
+        var tempBGI = await bgTempImages.bulkCreate(bgs);
         console.log(tempBGI);
         // BUTTONS
         var buttons = req.body.buttons;
@@ -55,17 +55,18 @@ try {
         
     
         if(tempButton.length > 0 && tempContent.length > 0 ){
-            res.status(200).json({status:"success",data:[template,bgImages,tempButton,tempContent],temp_Id:template.temp_id}) 
+            return res.status(200).json({status:"success",data:[template,bgImages,tempButton,tempContent],temp_Id:template.temp_id}) 
         }
         else{
-            res.status(200).json({status:"failure",message:"template Widgets not created"})
+            return  res.status(200).json({status:"failure",message:"template Widgets not created"})
         }
     } else {
-        res.status(404).json({status:"failure",message:"template not created"})
+        return res.status(404).json({status:"failure",message:"template not created"})
     }
 } catch (error) {
-    res.status(404).json({status:"failure",message:"Internal server error"})
     console.log(error.message);
+    return res.status(404).json({status:"failure",message:"Internal server error"})
+    
     
 }
 }

@@ -102,7 +102,6 @@ const beaconTodayUser = async (req, res) => {
     }
 }
 
-
 const orgWeeklyUsers = async (req, res) => {
     const now = new Date();
     const currentDate = now.toISOString().split('T')[0];
@@ -160,6 +159,7 @@ const orgWeeklyUsers = async (req, res) => {
 
     }
 }
+
 const orgMonthlyUsers = async (req, res) => {
     try {
         if (!req.body.org_id || !req.body.month) {
@@ -216,6 +216,7 @@ const orgMonthlyUsers = async (req, res) => {
         res.status(404).json({ status: "failure", message: "Internal server error", Error: error.message })
     }
 }
+
 const getAllUsers = async (req, res) => {
 
     try {
@@ -252,6 +253,7 @@ const registerUser = async (req, res) => {
 
     }
 }
+
 const registerFCM = async (req, res) => {
     try {
         const {device_uniqueID,fcm_token}=req.body
@@ -296,6 +298,7 @@ const registerFCM = async (req, res) => {
         return false
     }
 }
+
 const sendMessageToUser = async (title, body, token) => {
     try {
         console.log(token);
@@ -319,6 +322,36 @@ const sendMessageToUser = async (title, body, token) => {
         
     }
 };
+
+const viewTime = async (req, res) => {
+    try {
+        const bodyData = req.bodyData
+        const data = await db.sequelize.query(`
+            call sp_viewTime(?,?)
+            `,
+            { replacements : [req.body.user_uniqueID,req.body.date] }
+            , (err , result) => {
+                if(err)
+                {
+                    return res.status(400).json({ status: "failure", message: err.message})
+                } else{
+                    return  res.status(200).json({ status: "success", message: "sp run successfully" ,data:result})
+                }
+            }
+            )
+        if (data) {
+            return res.status(200).json({ status: "success", message: "Created successfully" ,data:data})
+        }
+        else{
+            return res.status(200).json({ status: "fail", message: "data is not found"  })
+        }
+
+    } catch (error) {
+        return res.status(400).json({ status: "failure", message: error.message });
+    }
+
+}
+
 module.exports = {
     trackUser,
     beaconTodayUser,
@@ -327,5 +360,6 @@ module.exports = {
     getAllUsers,
     orgMonthlyUsers,
     registerUser,
-    registerFCM
+    registerFCM,
+    viewTime
 }

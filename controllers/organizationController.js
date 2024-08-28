@@ -338,19 +338,19 @@ const getOrganizationBeacons2 = async (req, res) => {
 const getOrganizationBeacons = async (req, res) => {
     try {
         let orgDetails = await db.sequelize.query(`SELECT 
-    o.org_name,
-    o.org_id,
-    COUNT(b.beacon_id) AS beacon_count
-FROM 
-    beaconDB.OrganizationDetails o
-JOIN 
-    beaconDB.ShopDetails s ON o.org_id = s.org_id
-JOIN 
-    beaconDB.Beacons b ON s.shop_id = b.shop_id
-WHERE 
-    o.org_id = ?
-GROUP BY 
-    o.org_id, o.org_name;`,{
+            o.org_name,
+            o.org_id,
+            COUNT(b.beacon_id) AS beacon_count
+        FROM 
+            beaconDB.OrganizationDetails o
+        JOIN 
+            beaconDB.ShopDetails s ON o.org_id = s.org_id
+        JOIN 
+            beaconDB.Beacons b ON s.shop_id = b.shop_id
+        WHERE 
+            o.org_id = ?
+        GROUP BY 
+            o.org_id, o.org_name;`,{
         type:Sequelize.QueryTypes.SELECT,
         replacements: [req.params.id]
     })

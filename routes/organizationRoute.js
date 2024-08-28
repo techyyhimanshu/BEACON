@@ -1,5 +1,7 @@
 const { Router } = require('express');
-const {createOrganization,getAllOrganization,getSingleOrganization,updateOrganization,getOrganizationMenu,deleteOrganization,getShopsByOrganization, getOrganizationBeacons}=require('../controllers/organizationController');
+const {createOrganization,getAllOrganization,getSingleOrganization,updateOrganization,
+    getOrganizationMenu,deleteOrganization,getShopsByOrganization, getAllBeaconOrgWise,
+    getOrganizationBeacons}=require('../controllers/organizationController');
 const verifyToken = require('../middlewares/authMiddleware');
 const router = Router();
 // Define your routes here
@@ -7,6 +9,7 @@ const router = Router();
 router.post("/api/organization",verifyToken,createOrganization)
 router.get("/api/organizations",verifyToken,getAllOrganization)
 // router.post("/api/organization/login",organizationLogin)
+router.get("/api/organization/beacons",getAllBeaconOrgWise)
 
 
 router.get("/api/organization/:id",getSingleOrganization)

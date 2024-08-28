@@ -21,7 +21,10 @@ module.exports = (sequelize, DataTypes) => {
       allowNull : true
 
     },
-    title: DataTypes.STRING,
+    title: {
+      type : DataTypes.STRING,
+      unique:true
+    },
     template_name: {
       type: DataTypes.STRING
     },

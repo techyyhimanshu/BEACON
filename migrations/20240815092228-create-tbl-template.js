@@ -10,7 +10,8 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       title: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        unique :ture
       },
       template_name: {
         type: Sequelize.STRING

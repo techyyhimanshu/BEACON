@@ -1,6 +1,7 @@
 const db = require("../models")
 const Shop = db.Shop
 const Beacon = db.Beacon
+const Organization = db.Organization
 const Sequelize = require("sequelize")
 const argon2 = require('argon2')
 const jwt = require('jsonwebtoken')
@@ -232,8 +233,6 @@ const getShopBeacon = async (req, res) => {
         }
     } catch (e) { res.status(400).json({ status: "failure", message: e.message }); }
 }
-
-
 const shopNotification = async (req, res) => {
     try {
         const { shop_id, hourTime,description } = req.body;
@@ -282,6 +281,48 @@ const shopNotification = async (req, res) => {
         return res.status(400).json({ status: "failure", message: e.message });
     }
 };
+const getAllBeaconDivisionWise = async (req, res) => {
+    try {
+        const data = await Organization.findOne({
+            attributes: ['org_id'],
+            where: {
+                org_id: req.params.id
+            }
+        });
+        if (!data) {
+            return res.status(200).json({ status: "failure",message : "organization ID is not valid" })
+        }
+        const orgBeaconShopWise = await db.sequelize.query(`
+            SELECT ShopDetails.shop_id AS div_ID,
+            ShopDetails.shop_name AS division,
+            (SELECT COUNT(*) FROM Beacons 
+            WHERE Beacons.shop_id = ShopDetails.shop_id
+            AND Beacons.deletedAt IS NULL) AS beacons_of_shop,
+            Beacons.beacon_id, Beacons.beacon_name FROM ShopDetails
+            JOIN Beacons ON Beacons.shop_id = ShopDetails.shop_id
+            WHERE ShopDetails.org_id = ?
+            AND Beacons.deletedAt IS NULL
+            GROUP BY ShopDetails.shop_id,
+            ShopDetails.shop_name,
+            Beacons.beacon_id,
+            Beacons.beacon_name
+            ORDER BY ShopDetails.shop_id,
+            Beacons.beacon_name;
+        `,
+            {
+                type: Sequelize.QueryTypes.SELECT,
+                replacements : [req.params.id]
+            })
+        if (orgBeaconShopWise) {
+            return res.status(200).json({ status: "success", data: orgBeaconShopWise })
+        } else {
+            return res.status(404).json({ status: "failure", message: "Not found" })
+        }
+    } catch (error) {
+        return res.status(404).json({ status: "failure", message: "Internal server error", Error: error.message })
+    }
+}
+
 
 module.exports = {
     createShop,
@@ -291,5 +332,6 @@ module.exports = {
     deleteShop,
     shopLogin,
     getShopBeacon,
-    shopNotification
+    shopNotification,
+    getAllBeaconDivisionWise
 }

@@ -445,6 +445,46 @@ const getOrganizationMenu = async (req, res) => {
     }
 }
 
+const getAllBeaconOrgWise = async (req, res) => {
+    try {
+        const orgBeaconData = await db.sequelize.query(`
+        SELECT 
+            OrganizationDetails.org_id,
+            OrganizationDetails.org_name,
+            ShopDetails.shop_name as division,
+            (SELECT COUNT(*) FROM Beacons
+            JOIN ShopDetails ON Beacons.shop_id = ShopDetails.shop_id
+            WHERE ShopDetails.org_id = OrganizationDetails.org_id
+            AND Beacons.deletedAt IS NULL) AS beacons_of_org,
+            Beacons.beacon_id,
+            Beacons.beacon_name
+        FROM 
+            OrganizationDetails
+        JOIN 
+            ShopDetails ON ShopDetails.org_id = OrganizationDetails.org_id
+        JOIN 
+            Beacons ON Beacons.shop_id = ShopDetails.shop_id
+        WHERE 
+            Beacons.deletedAt IS NULL
+        GROUP BY 
+            OrganizationDetails.org_id,
+            Beacons.beacon_id
+        ORDER BY 
+            OrganizationDetails.org_id,
+            Beacons.beacon_name;
+        `,
+            {
+                type: Sequelize.QueryTypes.SELECT
+            })
+        if (orgBeaconData) {
+            return res.status(200).json({ status: "success", data: orgBeaconData })
+        } else {
+            return res.status(404).json({ status: "failure", message: "Not found" })
+        }
+    } catch (error) {
+        return res.status(404).json({ status: "failure", message: "Internal server error", Error: error.message })
+    }
+}
 
 module.exports = {
     createOrganization,
@@ -454,5 +494,7 @@ module.exports = {
     deleteOrganization,
     getShopsByOrganization,
     getOrganizationBeacons,
-    getOrganizationMenu
+    getOrganizationMenu,
+    getAllBeaconOrgWise
+
 }

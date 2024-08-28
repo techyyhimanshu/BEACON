@@ -111,7 +111,7 @@ const orgWeeklyUsers = async (req, res) => {
             return res.status(200).json({ status: "success", message: "Invalid date range"})
         }
         const beaconWeekUserCount = await db.sequelize.query(`
-                select o.org_name,o.org_id,count(bv.user_mac) as user_count
+                select o.org_name,o.org_id,count(distinct bv.user_mac) as total_user_count
                 from OrganizationDetails o
                 join 
                     ShopDetails s on s.org_id=o.org_id
@@ -122,7 +122,7 @@ const orgWeeklyUsers = async (req, res) => {
                 where o.org_id=?
                      and bv.createdAt between ? and ?
                 group by
-                    o.org_id `,
+                    o.org_id,o.org_name `,
             {
                 type: Sequelize.QueryTypes.SELECT,
                 replacements: [req.body.org_id, req.body.start_date, req.body.end_date]
@@ -132,7 +132,7 @@ const orgWeeklyUsers = async (req, res) => {
             return res.status(404).json({ status: "failure", message: "Not found" })
         }
         const weeklyBeacons = await db.sequelize.query(`
-            select b.beacon_name,b.beacon_id,count(bv.user_mac) as user_count
+            select b.beacon_name,b.beacon_id,count(distinct bv.user_mac) as user_count
                 from OrganizationDetails o
                 join 
                     ShopDetails s on s.org_id=o.org_id
@@ -165,7 +165,7 @@ const orgMonthlyUsers = async (req, res) => {
                 SELECT 
                 o.org_name,
                 o.org_id,
-                COUNT(bv.user_mac) AS total_user_visited
+                COUNT(distinct bv.user_mac) AS total_user_visited
                 FROM 
                     beaconDB.OrganizationDetails o
                 JOIN 
@@ -189,7 +189,7 @@ const orgMonthlyUsers = async (req, res) => {
         const beaconData = await db.sequelize.query(`SELECT 
             b.beacon_id,
             b.beacon_name,
-            COUNT(bv.user_mac) AS user_visited
+            COUNT(distinct bv.user_mac) AS user_visited
             FROM 
             beaconDB.OrganizationDetails o
             JOIN 

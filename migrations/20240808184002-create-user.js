@@ -6,25 +6,42 @@ const { sequelize } = require('../models');
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('Users', {
-      id: {
+      user_id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      user_mac: {
+      device_id: {
         type: Sequelize.STRING,
         allowNull : false,
         unique : true
       },
-      last_location: {
+      full_name:{
+        type: Sequelize.STRING,
+        allowNull:false
+      },
+      gender:{
+        type: Sequelize.STRING,
+        allowNull:false
+      },
+      dob:{
+        type: Sequelize.DATE,
+        allowNull:false
+      },
+      phone:{
         type: Sequelize.STRING
       },
       email: {
         type: Sequelize.STRING,
-        unique : true
+        unique : true,
+        allowNull:false
       },
       password: {
+        type: Sequelize.STRING,
+        allowNull:false
+      },
+      last_location: {
         type: Sequelize.STRING
       },
       createdAt: {
@@ -33,6 +50,10 @@ module.exports = {
         //defaultValue : sequelize.literal('CURRENT_TIMESTAMP')
       },
       updatedAt: {
+        allowNull: true,
+        type: Sequelize.DATE
+      },
+      deletedAt: {
         allowNull: true,
         type: Sequelize.DATE
       }

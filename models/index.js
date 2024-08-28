@@ -54,6 +54,7 @@ db.tbl_temp_button = require('./tbl_temp_button')(sequelize, DataTypes);
 db.tbl_temp_menu = require('./tbl_temp_menu')(sequelize, DataTypes);
 db.tbl_temp_bg = require('./tbl_temp_bg')(sequelize, DataTypes);
 db.bgImages = require('./tbl_temp_bg')(sequelize, DataTypes);
+db.DeviceFcmToken = require('./devicefcmtoken')(sequelize, DataTypes);
 
 
 db.tbl_temp_bg.belongsTo(db.tbl_template,{foreignKey:'temp_id'})

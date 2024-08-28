@@ -3,12 +3,7 @@ const TempButton =db.tbl_temp_button;
 const TempContent =db.tbl_temp_content;
 const TempSubMenu =db.tbl_temp_menu;
 const Template =db.tbl_template;
-<<<<<<< HEAD
-const TempBGImage =db.tbl_temp_bg;
-
-=======
 const bgTempImages =db.bgImages;
->>>>>>> 7beeff936939e75e83f64646b7c808fa13b03587
 
 // CREATE NEW TEMPLATE
 const craeteTemplate= async(req,res)=>{
@@ -60,11 +55,7 @@ try {
         
     
         if(tempButton.length > 0 && tempContent.length > 0 ){
-<<<<<<< HEAD
-            res.status(200).json({status:"success",data:[template,tempButton,tempContent,tempBGI],temp_Id:template.temp_id}) 
-=======
             res.status(200).json({status:"success",data:[template,bgImages,tempButton,tempContent],temp_Id:template.temp_id}) 
->>>>>>> 7beeff936939e75e83f64646b7c808fa13b03587
         }
         else{
             res.status(200).json({status:"failure",message:"template Widgets not created"})
@@ -85,11 +76,7 @@ const getTemplate= async(req,res)=>{
         console.log(req.params.id);
         
         const  template =await Template.findAll({
-<<<<<<< HEAD
-            attributes :['title','description','videoPath','textColor','backgroundColor','buttonColor'],
-=======
             attributes :['title','template_name','description','imagePath','videoPath','textColor','backgroundColor','buttonColor'],
->>>>>>> 7beeff936939e75e83f64646b7c808fa13b03587
             include:[
                 {
                     model : TempContent,
@@ -104,13 +91,8 @@ const getTemplate= async(req,res)=>{
                     attributes: ['subMenu_id','menu_name','textColor','link_url']
                 },
                 {
-<<<<<<< HEAD
-                    model: TempBGImage,
-                    attributes: ['imageUrl']
-=======
                     model: bgTempImages,
                     attributes:["imageUrl"]
->>>>>>> 7beeff936939e75e83f64646b7c808fa13b03587
                 }
             ],
             where:{
@@ -135,11 +117,7 @@ const getTemplate= async(req,res)=>{
 const getAllTemplate= async(req,res)=>{
     try {
         const  {count, rows} =await Template.findAndCountAll({
-<<<<<<< HEAD
-            attributes :['temp_id','title','description','videoPath','textColor','backgroundColor','buttonColor'],
-=======
             attributes :['temp_id','template_name','title','description','videoPath','textColor','backgroundColor','buttonColor'],
->>>>>>> 7beeff936939e75e83f64646b7c808fa13b03587
             include:[
                 {
                     model : TempContent,
@@ -154,13 +132,8 @@ const getAllTemplate= async(req,res)=>{
                     attributes: ['subMenu_id','menu_name','textColor','link_url']
                 },
                 {
-<<<<<<< HEAD
-                    model: TempBGImage,
-                    attributes: ['imageUrl']
-=======
                     model: bgTempImages,
                     attributes:["imageUrl"]
->>>>>>> 7beeff936939e75e83f64646b7c808fa13b03587
                 }
             ]
         })
@@ -171,7 +144,9 @@ const getAllTemplate= async(req,res)=>{
             res.status(404).json({status:"failure",message:"data not found"})
         }
     } catch (error) {
-        res.status(404).json({status:"failure",message:"Internal server error"})
+        console.log(error.message);
+        
+        res.status(500).json({status:"failure",message:"Internal server error"})
     }
 }
 

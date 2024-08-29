@@ -13,75 +13,62 @@ const Beacon = db.Beacon;
 
 // CREATE NEW TEMPLATE
 const craeteTemplate = async (req, res) => {
+    const transaction = await db.sequelize.transaction();
     try {
         const template = await Template.create({
             title: req.body.title,
             template_name: req.body.template_name,
             description: req.body.description,
-            //imagePath : req.body.imagePath,
             videoPath: req.body.videoPath,
             textColor: req.body.textColor,
             backgroundColor: req.body.backgroundColor,
             buttonColor: req.body.buttonColor,
-        })
+        }, { transaction }); // Correct transaction passing
+
         if (template) {
             // BEACKGROUND IMAGES
-            var bgs = req.body.bgs;
-            bgs.forEach(bg => {
-                bg.temp_id = template.temp_id
-            });
-            var tempBGI = await bgTempImages.bulkCreate(bgs);
-            console.log(tempBGI);
+            const bgs = req.body.bgs.map(bg => ({
+                ...bg,
+                temp_id: template.temp_id
+            }));
+            const tempBGI = await bgTempImages.bulkCreate(bgs, { transaction });
 
             // BUTTONS
-            var buttons = req.body.buttons;
-            buttons.forEach(button => {
-                button.temp_id = template.temp_id
-            });
-            var tempButton = await TempButton.bulkCreate(buttons);
+            const buttons = req.body.buttons.map(button => ({
+                ...button,
+                temp_id: template.temp_id
+            }));
+            const tempButton = await TempButton.bulkCreate(buttons, { transaction });
 
             // CONTENTS
-            var contents = req.body.texts;
-            contents.forEach(content => {
-                content.temp_id = template.temp_id
-            });
-            var tempContent = await TempContent.bulkCreate(contents);
-
-            // var bgImages = req.body.bgs
-            // bgImages.forEach(bg => {
-            //     bg.temp_id = template.temp_id
-            // });
-            // await bgTempImages.bulkCreate(bgImages);
-            // SUB LINKS
-            // var subMenus = req.body.submenus;
-            // subMenus.forEach(subMenu => {
-            //     subMenu.temp_id = template.temp_id  
-            // });
-            // var tempSubMenu = await TempSubMenu.bulkCreate(subMenus);
-            // console.log(tempSubMenu);
-
+            const contents = req.body.texts.map(content => ({
+                ...content,
+                temp_id: template.temp_id
+            }));
+            const tempContent = await TempContent.bulkCreate(contents, { transaction });
 
             if (tempButton.length > 0 && tempContent.length > 0) {
-                return res.status(200).json({ status: "success", data: [template, tempBGI, tempButton, tempContent], temp_Id: template.temp_id })
-            }
-            else {
-                return res.status(200).json({ status: "failure", message: "template Widgets not created" })
+                await transaction.commit(); // Commit transaction
+                return res.status(200).json({ status: "success", data: [template, tempBGI, tempButton, tempContent], temp_Id: template.temp_id });
+            } else {
+                await transaction.rollback(); // Rollback transaction
+                return res.status(200).json({ status: "failure", message: "template Widgets not created" });
             }
         } else {
-            return res.status(404).json({ status: "failure", message: "template not created" })
+            await transaction.rollback(); // Rollback transaction
+            return res.status(200).json({ status: "failure", message: "template not created" });
         }
     } catch (error) {
+        await transaction.rollback(); // Rollback transaction on error
         if (error instanceof Sequelize.ValidationError) {
-            const errorMessages = error.errors.map(err => err.message)
-            return res.status(400).json({ status: "failure", message: errorMessages })
+            const errorMessages = error.errors.map(err => err.message);
+            return res.status(400).json({ status: "failure", message: errorMessages });
         }
-        console.log(error.message);
-        
-        return res.status(500).json({ status: "failure", message: "Internal server error" })
-
-
+        console.error(error.message);
+        return res.status(500).json({ status: "failure", message: "Internal server error" });
     }
-}
+};
+
 
 // SELECT ALL DATA OF A TEMPLATE
 const getTemplate = async (req, res) => {
@@ -117,10 +104,10 @@ const getTemplate = async (req, res) => {
             res.status(200).json({ status: "success", data: template })
         }
         else {
-            res.status(404).json({ status: "failure", message: "data not found" })
+            res.status(200).json({ status: "failure", message: "data not found" })
         }
     } catch (error) {
-        res.status(404).json({ status: "failure", message: "Internal server error" })
+        res.status(500).json({ status: "failure", message: "Internal server error" })
         console.log(error.message);
 
     }
@@ -185,10 +172,10 @@ const updateTemplate = async (req, res) => {
         if (templateUpdate > 0) {
             res.status(200).json({ status: "success", row_Affected: templateUpdate[0] })
         } else {
-            res.status(404).json({ status: "failure", message: "template not Updated" })
+            res.status(200).json({ status: "failure", message: "Template not updated" })
         }
     } catch (error) {
-        res.status(404).json({ status: "failure", message: "Internal server error" })
+        res.status(500).json({ status: "failure", message: "Internal server error" })
     }
 }
 
@@ -208,10 +195,10 @@ const updateButton = async (req, res) => {
         if (butttonUpdate > 0) {
             res.status(200).json({ status: "success", row_Affected: butttonUpdate[0] })
         } else {
-            res.status(404).json({ status: "failure", message: "button not updated" })
+            res.status(200).json({ status: "failure", message: "Button not updated" })
         }
     } catch (error) {
-        res.status(404).json({ status: "failure", message: "Internal server error" })
+        res.status(500).json({ status: "failure", message: "Internal server error" })
         console.log(error.message);
 
     }
@@ -232,10 +219,10 @@ const updateContent = async (req, res) => {
         if (contentUpdate > 0) {
             res.status(200).json({ status: "success", row_Affected: contentUpdate[0] })
         } else {
-            res.status(404).json({ status: "failure", message: "content is not updated" })
+            res.status(200).json({ status: "failure", message: "Content is not updated" })
         }
     } catch (error) {
-        res.status(404).json({ status: "failure", message: "Internal server error" })
+        res.status(500).json({ status: "failure", message: "Internal server error" })
         console.log(error.message);
 
     }
@@ -243,11 +230,13 @@ const updateContent = async (req, res) => {
 
 // delete template - not completed
 const deleteTemplate = async (req, res) => {
+    const transaction = await db.sequelize.transaction()
     try {
         const template = await Template.destroy({
             where: {
                 temp_id: req.params.id
-            }
+            },
+            transaction
         });
         const templateButton = await TempButton.destroy({
             where: {
@@ -257,21 +246,25 @@ const deleteTemplate = async (req, res) => {
         const templateContent = await TempContent.destroy({
             where: {
                 temp_id: req.params.id
-            }
+            },
+            transaction
         });
         const templateSubMenu = await TempSubMenu.destroy({
             where: {
                 temp_id: req.params.id
-            }
+            },
+            transaction
         });
 
         const beaconTemplate = await Beacon.update(
-            {template_id : null},{
+            { template_id: null }, {
             where: {
                 template_id: req.params.id
-            }}
+            },
+            transaction
+        }
         );
-        
+
         if (template > 0) {
             res.status(200).json({ status: "success", message: "data deleted" })
         }
@@ -279,7 +272,7 @@ const deleteTemplate = async (req, res) => {
             res.status(404).json({ status: "failure", message: "data not found" })
         }
     } catch (error) {
-        res.status(404).json({ status: "failure", message: "Internal server error" })
+        res.status(500).json({ status: "failure", message: "Internal server error" })
         console.log(error.message);
     }
 }
@@ -311,7 +304,7 @@ const craeteSubMenuTemplate = async (req, res) => {
             res.status(200).json({ status: "failure", message: `Template Id : ${req.params.id} is not exist` })
         }
     } catch (error) {
-        res.status(404).json({ status: "failure", message: "Internal server error" })
+        res.status(500).json({ status: "failure", message: "Internal server error" })
         console.log(error.message);
 
     }
@@ -337,7 +330,7 @@ const getSubMenuByID = async (req, res) => {
             res.status(404).json({ status: "failure", message: "data not found" })
         }
     } catch (e) {
-        res.status(404).json({ status: "failure", message: "Internal server error" })
+        res.status(500).json({ status: "failure", message: "Internal server error" })
         console.log(error.message);
     }
 }
@@ -406,10 +399,10 @@ const updateSubMenu = async (req, res) => {
         if (subMenutUpdate) {
             res.status(200).json({ status: "success", row_Affected: subMenutUpdate[0] })
         } else {
-            res.status(404).json({ status: "failure", message: "submenu is not updated" })
+            res.status(200).json({ status: "failure", message: "submenu is not updated" })
         }
     } catch (error) {
-        res.status(404).json({ status: "failure", message: "Internal server error" })
+        res.status(500).json({ status: "failure", message: "Internal server error" })
         console.log(error.message)
     }
 }
@@ -426,7 +419,7 @@ const deleteSubMenu = async (req, res) => {
             res.status(200).json({ status: "success", message: `sub menu ${req.params.id} deleted successfully` })
         }
         else {
-            res.status(404).json({ status: "failure", message: "data not found" })
+            res.status(200).json({ status: "failure", message: "data not found" })
         }
     } catch (e) {
         res.status(404).json({ status: "failure", message: "Internal server error" })
@@ -447,10 +440,10 @@ const getButton = async (req, res) => {
             res.status(200).json({ status: "success", data: templateButton })
         }
         else {
-            res.status(404).json({ status: "failure", message: "data not found" })
+            res.status(200).json({ status: "failure", message: "data not found" })
         }
     } catch (e) {
-        res.status(404).json({ status: "failure", message: "Internal server error" })
+        res.status(500).json({ status: "failure", message: "Internal server error" })
         console.log(e.message);
     }
 }
@@ -468,10 +461,10 @@ const getContent = async (req, res) => {
             res.status(200).json({ status: "success", data: templateContent })
         }
         else {
-            res.status(404).json({ status: "failure", message: "data not found" })
+            res.status(200).json({ status: "failure", message: "data not found" })
         }
     } catch (e) {
-        res.status(404).json({ status: "failure", message: "Internal server error" })
+        res.status(500).json({ status: "failure", message: "Internal server error" })
         console.log(e.message);
     }
 }
@@ -488,10 +481,10 @@ const deleteButton = async (req, res) => {
             res.status(200).json({ status: "success", message: 'button deleted successfully', row_Affected: templateButton[0] })
         }
         else {
-            res.status(404).json({ status: "failure", message: "data not found" })
+            res.status(200).json({ status: "failure", message: "data not found" })
         }
     } catch (e) {
-        res.status(404).json({ status: "failure", message: "Internal server error" })
+        res.status(500).json({ status: "failure", message: "Internal server error" })
         console.log(e.message);
     }
 }
@@ -508,10 +501,10 @@ const deleteContent = async (req, res) => {
             res.status(200).json({ status: "success", message: 'content deleted successfully', row_Affected: templateContent[0] })
         }
         else {
-            res.status(404).json({ status: "failure", message: "data not found" })
+            res.status(200).json({ status: "failure", message: "data not found" })
         }
     } catch (e) {
-        res.status(404).json({ status: "failure", message: "Internal server error" })
+        res.status(500).json({ status: "failure", message: "Internal server error" })
         console.log(e.message);
     }
 }
@@ -536,7 +529,7 @@ const templateView = async (req, res) => {
         }
     } catch (e) {
         console.log(e.message);
-        return res.status(404).json({ status: "failure", message: "Internal server error" })
+        return res.status(500).json({ status: "failure", message: "Internal server error" })
     }
 }
 

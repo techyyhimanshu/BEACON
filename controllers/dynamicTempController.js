@@ -7,6 +7,8 @@ const TempSubMenu = db.tbl_temp_menu;
 const Template = db.tbl_template;
 const bgTempImages = db.bgImages;
 const BeaconVisited = db.BeaconVisited;
+const Beacon = db.Beacon;
+
 
 
 // CREATE NEW TEMPLATE
@@ -30,7 +32,7 @@ const craeteTemplate = async (req, res) => {
             });
             var tempBGI = await bgTempImages.bulkCreate(bgs);
             console.log(tempBGI);
-            
+
             // BUTTONS
             var buttons = req.body.buttons;
             buttons.forEach(button => {
@@ -259,7 +261,13 @@ const deleteTemplate = async (req, res) => {
             where: {
                 temp_id: req.params.id
             }
-        })
+        });
+        const beaconTemplate = await Beacon.update({
+            temp_id : null,
+            where: {
+                temp_id: req.params.id
+            }
+        });
 
         if (template > 0) {
             res.status(200).json({ status: "success", message: "data deleted" })

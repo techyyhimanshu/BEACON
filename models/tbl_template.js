@@ -22,11 +22,11 @@ module.exports = (sequelize, DataTypes) => {
 
     },
     title: {
-      type : DataTypes.STRING,
-      unique:true
+      type : DataTypes.STRING
     },
     template_name: {
-      type: DataTypes.STRING
+      type: DataTypes.STRING,
+      unique:true
     },
     description: DataTypes.STRING,
     imagePath: DataTypes.STRING,

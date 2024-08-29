@@ -3,7 +3,7 @@ const Shop = db.Shop
 const Beacon = db.Beacon
 const Organization = db.Organization
 const Sequelize = require("sequelize")
-const argon2 = require('argon2')
+const argon2 = require('argon2') 
 const jwt = require('jsonwebtoken')
 
 const createShop = async (req, res) => {

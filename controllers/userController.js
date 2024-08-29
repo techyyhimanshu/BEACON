@@ -5,7 +5,6 @@ const DeviceFcmToken = db.DeviceFcmToken
 const admin = require("../config/firebase");
 
 
-
 const trackUser = async (req, res) => {
     try {
         const userBeaconData = await db.sequelize.query(`

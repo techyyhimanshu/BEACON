@@ -26,7 +26,10 @@ module.exports = (sequelize, DataTypes) => {
     },
     template_name: {
       type: DataTypes.STRING,
-      unique:true
+      unique: {
+        name: 'template_name_UNIQUE',
+        msg: 'The template name must be unique.'
+      }
     },
     description: DataTypes.STRING,
     imagePath: DataTypes.STRING,

@@ -62,7 +62,7 @@ const craeteTemplate = async (req, res) => {
 
 
             if (tempButton.length > 0 && tempContent.length > 0) {
-                return res.status(200).json({ status: "success", data: [template, bgImages, tempButton, tempContent], temp_Id: template.temp_id })
+                return res.status(200).json({ status: "success", data: [template, tempBGI, tempButton, tempContent], temp_Id: template.temp_id })
             }
             else {
                 return res.status(200).json({ status: "failure", message: "template Widgets not created" })
@@ -75,6 +75,8 @@ const craeteTemplate = async (req, res) => {
             const errorMessages = error.errors.map(err => err.message)
             return res.status(400).json({ status: "failure", message: errorMessages })
         }
+        console.log(error.message);
+        
         return res.status(500).json({ status: "failure", message: "Internal server error" })
 
 

@@ -264,12 +264,12 @@ const deleteTemplate = async (req, res) => {
                 temp_id: req.params.id
             }
         });
-        const beaconTemplate = await Beacon.update({
-            temp_id : null,
+        const beaconTemplate = await Beacon.update(
+            {template_id : null},{
             where: {
-                temp_id: req.params.id
-            }
-        });
+                template_id: req.params.id
+            }}
+        );
 
         if (template > 0) {
             res.status(200).json({ status: "success", message: "data deleted" })

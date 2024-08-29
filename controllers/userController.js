@@ -135,7 +135,7 @@ const orgWeeklyUsers = async (req, res) => {
             return res.status(404).json({ status: "failure", message: "Not found" })
         }
         const weeklyBeacons = await db.sequelize.query(`
-            select b.beacon_name,b.beacon_id,count(distinct bv.user_mac) as user_count
+            select b.beacon_name,s.shop_name as division_name,b.beacon_id,count(distinct bv.user_mac) as user_count
                 from OrganizationDetails o
                 join 
                     ShopDetails s on s.org_id=o.org_id
@@ -193,6 +193,7 @@ const orgMonthlyUsers = async (req, res) => {
         const beaconData = await db.sequelize.query(`SELECT 
             b.beacon_id,
             b.beacon_name,
+            s.shop_name as division_name,
             COUNT(distinct bv.user_mac) AS user_visited
             FROM 
             beaconDB.OrganizationDetails o

@@ -30,6 +30,7 @@ const craeteTemplate = async (req, res) => {
             });
             var tempBGI = await bgTempImages.bulkCreate(bgs);
             console.log(tempBGI);
+            
             // BUTTONS
             var buttons = req.body.buttons;
             buttons.forEach(button => {
@@ -44,11 +45,11 @@ const craeteTemplate = async (req, res) => {
             });
             var tempContent = await TempContent.bulkCreate(contents);
 
-            var bgImages = req.body.bgs
-            bgImages.forEach(bg => {
-                bg.temp_id = template.temp_id
-            })
-            await bgTempImages.bulkCreate(bgImages);
+            // var bgImages = req.body.bgs
+            // bgImages.forEach(bg => {
+            //     bg.temp_id = template.temp_id
+            // });
+            // await bgTempImages.bulkCreate(bgImages);
             // SUB LINKS
             // var subMenus = req.body.submenus;
             // subMenus.forEach(subMenu => {

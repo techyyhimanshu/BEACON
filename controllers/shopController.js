@@ -238,11 +238,12 @@ const shopNotification = async (req, res) => {
         const { shop_id, hourTime,description } = req.body;
 
         const query = `
-            SELECT DISTINCT user_mac 
-            FROM BeaconVisited
+            SELECT DISTINCT device_id 
+            FROM BeaconVisited,DeviceFcmTokens
             WHERE beacon_mac IN (SELECT mac FROM Beacons WHERE shop_id = ?)
-            AND createdAt > (CURDATE() - INTERVAL ? HOUR)
-            ORDER BY createdAt DESC;
+            AND BeaconVisited.createdAt > (CURDATE() - INTERVAL ? HOUR)
+            AND DeviceFcmTokens.device_id = BeaconVisited.user_mac
+            ORDER BY BeaconVisited.createdAt DESC;
         `;
 
         const replacements = [shop_id, hourTime];
@@ -297,7 +298,7 @@ const getAllBeaconDivisionWise = async (req, res) => {
             ShopDetails.shop_name AS division,
             (SELECT COUNT(*) FROM Beacons 
             WHERE Beacons.shop_id = ShopDetails.shop_id
-            AND Beacons.deletedAt IS NULL) AS beacons_of_shop,
+            AND Beacons.deletedAt IS NULL) AS beacons_in_division,
             Beacons.beacon_id, Beacons.beacon_name FROM ShopDetails
             JOIN Beacons ON Beacons.shop_id = ShopDetails.shop_id
             WHERE ShopDetails.org_id = ?

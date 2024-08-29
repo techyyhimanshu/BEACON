@@ -57,6 +57,9 @@ db.bgImages = require('./tbl_temp_bg')(sequelize, DataTypes);
 db.DeviceFcmToken = require('./devicefcmtoken')(sequelize, DataTypes);
 
 
+db.BeaconVisited.hasMany(db.tbl_template,{foreignKey:'temp_id'})
+db.tbl_template.belongsTo(db.BeaconVisited,{foreignKey:'temp_id'})
+
 db.tbl_temp_bg.belongsTo(db.tbl_template,{foreignKey:'temp_id'})
 db.tbl_template.hasMany(db.tbl_temp_bg,{foreignKey:'temp_id'})
 

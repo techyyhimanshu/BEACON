@@ -22,6 +22,10 @@ module.exports = {
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE
+      },
+      temp_id : {
+        type: Sequelize.INTEGER,
+        allowNull:false
       }
     });
   },

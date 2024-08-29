@@ -22,6 +22,10 @@ module.exports = (sequelize, DataTypes) => {
     location: {
       type: DataTypes.STRING
     },
+    temp_id : {
+      type: DataTypes.INTEGER,
+      allowNull : false
+    }
   }, {
     sequelize,
     modelName: 'BeaconVisited',

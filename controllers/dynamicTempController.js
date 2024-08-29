@@ -1,9 +1,13 @@
 const db = require("../models");
+const Sequelize = require('sequelize')
+const beaconvisited = require("../models/beaconvisited");
 const TempButton =db.tbl_temp_button;
 const TempContent =db.tbl_temp_content;
 const TempSubMenu =db.tbl_temp_menu;
 const Template =db.tbl_template;
 const bgTempImages =db.bgImages;
+const BeaconVisited =db.BeaconVisited;
+
 
 // CREATE NEW TEMPLATE
 const craeteTemplate= async(req,res)=>{
@@ -496,6 +500,31 @@ const deleteContent = async(req,res)=>{
     }
 }
 
+const templateView = async(req,res)=>{
+    try{
+        const tempExist = await Template.findByPk(req.params.id);
+        if (!tempExist){
+            return res.status(404).json({status:"failure",message:`Template ID ${req.params.id} is not exists`})
+        }
+        const {count , rows} =await BeaconVisited.findAndCountAll({
+            attributes : ["user_mac"],
+            where:{
+                temp_id : req.params.id
+            }
+        });
+        if(count > 0){
+            return res.status(200).json({status:"success",view:count,data:rows})
+        }
+        else{
+            return res.status(200).json({status:"success",view:0})
+        }
+    }catch(e){
+        console.log(e.message);  
+        return res.status(404).json({status:"failure",message:"Internal server error"})
+    }
+}
+
+
 // export methos
 module.exports = {
     craeteTemplate,
@@ -518,5 +547,8 @@ module.exports = {
     updateButton,
     updateContent,
     deleteContent,
-    deleteButton
+    deleteButton,
+    
+    // template
+    templateView
 }

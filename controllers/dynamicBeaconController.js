@@ -18,6 +18,9 @@ const beaconFire = async (req, res) => {
         if (beacon) {
             if (beacon.template_id) {
                 // beacon found, process in parallel
+                req.body.temp_id = beacon.template_id;
+                console.log(req.body);
+                
                 beaconVisited(req.body); // Process in the background without waiting
                 
                 const url = `https://beacon-git-main-ac-ankurs-projects.vercel.app/template/${beacon.template_id}`;
@@ -43,7 +46,8 @@ const beaconVisited = async (data) => {
             BeaconVisited.create({
                 beacon_mac: data.mac,
                 user_mac: uniqueId,
-                location: data.location
+                location: data.location,
+                temp_id : data.temp_id
             }),
             User.findOne({
                 attributes: ['user_mac', 'last_location'],

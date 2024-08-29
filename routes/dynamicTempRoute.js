@@ -1,25 +1,35 @@
 const { Router } = require('express');
 const router = Router();
-const {craeteTemplate,
-    getTemplate,
-    getAllTemplate,
-    updateTemplate,
-    updateButton,
-    updateContent,
-    updateSubMenu,
-    //updateFullTemplate,
-    craeteSubMenuTemplate,
-    getSubMenuByTempId,
-    getSubMenuByID,
-    deleteSubMenu,
-    getButton,
-    getContent,
-    getAllSubMenu,
-    deleteButton,
-    deleteContent,
-    deleteTemplate}=require("../controllers/dynamicTempController")
+const { craeteTemplate,
+        getTemplate,
+        getAllTemplate,
+        updateTemplate,
+        deleteTemplate,
 
-    // Define your routes here
+        // buttons 
+        getButton,
+        updateButton,
+        deleteButton,
+
+        // content
+        updateContent,
+        getContent,
+        deleteContent, 
+        
+        // submenu
+        updateSubMenu,
+        getAllSubMenu,
+        craeteSubMenuTemplate,
+        getSubMenuByTempId,
+        getSubMenuByID,
+        deleteSubMenu,
+        
+        // view
+        templateView
+
+}=require("../controllers/dynamicTempController")
+
+// Define your routes here
 router.post("/api/create/dynamicTemplate",craeteTemplate)
 router.get("/api/fetch/dynamicTemplate/:id",getTemplate)
 router.get("/api/fetch/dynamicTemplates",getAllTemplate)
@@ -44,9 +54,7 @@ router.patch("/api/submenus/:id",updateSubMenu)
 router.put("/api/submenus/:id",updateSubMenu)
 router.delete("/api/submenus/:id",deleteSubMenu)
 
-
-
-
-
+// view
+router.get("/api/temp/:id/view",templateView)
 
 module.exports = router;

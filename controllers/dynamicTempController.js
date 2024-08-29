@@ -122,6 +122,7 @@ const getTemplate= async(req,res)=>{
 const getAllTemplate= async(req,res)=>{
     try {
         const  {count, rows} =await Template.findAndCountAll({
+            distinct:true,
             attributes :['temp_id','template_name','title','description','videoPath','textColor','backgroundColor','buttonColor'],
             include:[
                 {
@@ -146,7 +147,7 @@ const getAllTemplate= async(req,res)=>{
             res.status(200).json({status:"success",count:count, data:rows})
         }
         else{
-            res.status(404).json({status:"failure",message:"data not found"})
+            res.status(200).json({status:"failure",data:rows})
         }
     } catch (error) {
         console.log(error.message);

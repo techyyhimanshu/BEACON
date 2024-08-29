@@ -533,6 +533,25 @@ const templateView = async (req, res) => {
     }
 }
 
+const TempHistory = async (req, res) => {
+    try {
+        const historydata = await db.sequelize.query(`
+            select user_mac, SEC_TO_TIME(timestampdiff(second,createdAt,current_timestamp())) as Time_Ago 
+            from beaconDB.BeaconVisited where temp_id = ? order by Time_Ago ASC;
+            `,
+            { replacements : [req.params.id]}
+            );
+        if (historydata) {
+            return res.status(200).json({ status: "success" ,data:historydata[0]})
+        }
+        else{
+            return res.status(404).json({ status: "fail", message: "data is not found"  })
+        }
+    } catch (error) {
+        return res.status(500).json({ status: "failure", message: error.message });
+    }
+
+}
 
 // export methos
 module.exports = {
@@ -559,5 +578,6 @@ module.exports = {
     deleteButton,
 
     // template
-    templateView
+    templateView,
+    TempHistory
 }

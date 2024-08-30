@@ -4,6 +4,8 @@ const argon2 = require('argon2');
 const User = db.user
 const DeviceFcmToken = db.DeviceFcmToken
 const admin = require("../config/firebase");
+const { FirebaseAppError } = require("firebase-admin/app");
+const { FirebaseMessagingError } = require("firebase-admin/messaging");
 
 
 const trackUser = async (req, res) => {
@@ -239,99 +241,111 @@ const getAllUsers = async (req, res) => {
 
 const registerUser = async (req, res) => {
     try {
-        const {password}=req.body
-        const hashedPassword=await argon2.hash(password)
+        const { password } = req.body
+        const hashedPassword = await argon2.hash(password)
         console.log(hashedPassword);
-        
+
         const userRegistered = await User.create({
             ...req.body,
-            password:hashedPassword
+            password: hashedPassword
         })
         if (!userRegistered) {
             return res.status(400).send({ status: "failure", message: "Error occured" })
         }
         return res.status(200).send({ status: "success", message: "User registered successfully" })
     } catch (error) {
-        if(error instanceof Sequelize.ValidationError){
-            const messages=error.errors.map(err=>err.message)
-            return res.status(400).send({ status: "failure", message: messages})
+        if (error instanceof Sequelize.ValidationError) {
+            const messages = error.errors.map(err => err.message)
+            return res.status(400).send({ status: "failure", message: messages })
         }
-        
-        return res.status(500).send({ status: "failure", message: "Internal server error"})
+
+        return res.status(500).send({ status: "failure", message: "Internal server error" })
 
     }
 }
 
 const loginUser = async (req, res) => {
     try {
-        const {password,email}=req.body
+        const { password, email } = req.body
         const userFound = await User.findOne({
-            attributes:["email","password"],
-           where:{
-            email:email,
-           }
+            attributes: ["email", "password"],
+            where: {
+                email: email,
+            }
         })
         if (!userFound) {
             return res.status(200).send({ status: "failure", message: "User not found with this email" })
         }
-        const verifiedPassword=await argon2.verify(userFound.password,password)
+        const verifiedPassword = await argon2.verify(userFound.password, password)
         console.log(verifiedPassword);
-                
-        if(!verifiedPassword){
-            return res.status(200).send({ status: "failure", message: "Invalid password"})
+
+        if (!verifiedPassword) {
+            return res.status(200).send({ status: "failure", message: "Invalid password" })
         }
         return res.status(200).send({ status: "success", message: "Login successfully" })
     } catch (error) {
-        if(error instanceof Sequelize.ValidationError){
-            const messages=error.errors.map(err=>err.message)
-            return res.status(400).send({ status: "failure", message: messages})
+        if (error instanceof Sequelize.ValidationError) {
+            const messages = error.errors.map(err => err.message)
+            return res.status(400).send({ status: "failure", message: messages })
         }
         console.log(error.message);
-        
-        return res.status(500).send({ status: "failure", message: "Internal server error"})
+
+        return res.status(500).send({ status: "failure", message: "Internal server error" })
 
     }
 }
 
 const registerFCM = async (req, res) => {
     try {
-        const {device_uniqueID,fcm_token}=req.body
-        const userFcm=await DeviceFcmToken.findOne({
-            attributes:["fcm_token"],
-            where:{
-                device_id:device_uniqueID
+        const { device_uniqueID, fcm_token } = req.body
+        const userFcm = await DeviceFcmToken.findOne({
+            attributes: ["fcm_token"],
+            where: {
+                device_id: device_uniqueID
             }
         })
-        
-        if(userFcm===null||!userFcm || userFcm.fcm_token.length===0){
+
+        if (userFcm === null || !userFcm || userFcm.fcm_token.length === 0) {
             const createdFCM = await DeviceFcmToken.create({
                 device_id: device_uniqueID,
                 fcm_token: fcm_token
             })
-    
-            if (!createdFCM){
-                return res.status(400).send({ status: "failure", message: "Error occured"})
+
+            if (!createdFCM) {
+                return res.status(400).send({ status: "failure", message: "Error occured" })
             }
-            await sendMessageToUser("Welcome","you are in beacon zone ",req.body.fcm_token)
-            return res.status(200).send({ status: "success", message: "FCM token created"})
-           
+            const error = await sendMessageToUser("Welcome", "you are in beacon zone ", req.body.fcm_token)
+            if (error instanceof FirebaseMessagingError) {
+                const errorMessages = error.errors ? error.errors.map(err => err.message) : [error.message];
+                return res.status(400).json({ status: "failure", message: errorMessages });
+            }
+            return res.status(200).send({ status: "success", message: "FCM token created" })
+
         }
-        if(fcm_token===userFcm.fcm_token){            
-           await sendMessageToUser("Welcome","you are in beacon zone ",req.body.fcm_token)
-            return res.status(200).send({ status: "success", message: "FCM token no-change"})
+        if (fcm_token === userFcm.fcm_token) {
+            const error = await sendMessageToUser("Welcome", "you are in beacon zone ", req.body.fcm_token)
+            if (error instanceof FirebaseMessagingError) {
+                const errorMessages = error.errors ? error.errors.map(err => err.message) : [error.message];
+                return res.status(400).json({ status: "failure", message: errorMessages });
+            }
+            return res.status(200).send({ status: "success", message: "FCM token no-change" })
         }
         const fcmUpdate = await DeviceFcmToken.update({
-            fcm_token:fcm_token
-        },{
-            where:{
-                device_id:device_uniqueID
+            fcm_token: fcm_token
+        }, {
+            where: {
+                device_id: device_uniqueID
             }
         })
-        if(!fcmUpdate){
-            return res.status(400).send({ status: "failure", message: "Error occured"})
+        if (!fcmUpdate) {
+            return res.status(400).send({ status: "failure", message: "Error occured" })
         }
-        await sendMessageToUser("Welcome","you are in beacon zone ",req.body.fcm_token)
-        return res.status(200).send({ status: "success", message: "FCM token updated"})
+        const error = await sendMessageToUser("Welcome", "you are in beacon zone ", req.body.fcm_token)
+        if (error instanceof FirebaseMessagingError) {
+            const errorMessages = error.errors ? error.errors.map(err => err.message) : [error.message];
+            return res.status(400).json({ status: "failure", message: errorMessages });
+        }
+        return res.status(200).send({ status: "success", message: "FCM token updated" })
     } catch (error) {
         console.log(error);
         return false
@@ -343,21 +357,20 @@ const viewTime = async (req, res) => {
         const data = await db.sequelize.query(`
             call sp_viewTime(?,?)
             `,
-            { replacements : [bodyData.user_uniqueID,bodyData.date] }
-            , (err , result) => {
-                if(err)
-                {
-                    return res.status(400).json({ status: "failure", message: err.message})
-                } else{
-                    return res.status(200).json({ status: "success", message: "sp run successfully" ,data:result})
+            { replacements: [bodyData.user_uniqueID, bodyData.date] }
+            , (err, result) => {
+                if (err) {
+                    return res.status(400).json({ status: "failure", message: err.message })
+                } else {
+                    return res.status(200).json({ status: "success", message: "sp run successfully", data: result })
                 }
             }
-            )
+        )
         if (data) {
-            return res.status(200).json({ status: "success", message: "Created successfully" ,data:data})
+            return res.status(200).json({ status: "success", message: "Created successfully", data: data })
         }
-        else{
-            return res.status(200).json({ status: "fail", message: "data is not found"  })
+        else {
+            return res.status(200).json({ status: "fail", message: "data is not found" })
         }
 
     } catch (error) {
@@ -376,15 +389,15 @@ const userHistory = async (req, res) => {
             latest ON bv.temp_id = latest.temp_id AND bv.createdAt = latest.latestCreatedAt WHERE bv.user_mac = ? 
             order by Time_Ago;
             `,
-            { replacements : [bodyData.user_uniqueID,bodyData.user_uniqueID]}
-            );
-            // console.log(userdata);
-            
+            { replacements: [bodyData.user_uniqueID, bodyData.user_uniqueID] }
+        );
+        // console.log(userdata);
+
         if (userdata) {
-            return res.status(200).json({ status: "success" ,data:userdata[0]})
+            return res.status(200).json({ status: "success", data: userdata[0] })
         }
-        else{
-            return res.status(404).json({ status: "fail", message: "data is not found"  })
+        else {
+            return res.status(404).json({ status: "fail", message: "data is not found" })
         }
 
     } catch (error) {
@@ -393,20 +406,41 @@ const userHistory = async (req, res) => {
 
 }
 
-const countRegisteredUsers=async (req,res)=>{
+const countRegisteredUsers = async (req, res) => {
     try {
-        const registeredCount=await User.count({
-            attributes:["email"]
+        const registeredCount = await User.count({
+            attributes: ["email"]
         })
-        if(!registeredCount){
-            return res.status(200).json({ status: "failure", message: "No registered users"})
+        if (!registeredCount) {
+            return res.status(200).json({ status: "failure", message: "No registered users" })
         }
-        return res.status(200).json({ status: "success", user_registered:registeredCount})
+        return res.status(200).json({ status: "success", user_registered: registeredCount })
     } catch (error) {
         console.log(error.message);
-        return res.status(500).json({ status: "failure", message:"Internal server error" });    
+        return res.status(500).json({ status: "failure", message: "Internal server error" });
     }
 }
+const sendMessageToUser = async (token, title, body, res) => {
+    try {
+        const message = {
+            notification: {
+                title: title,
+                body: body
+            },
+            token: token
+        };
+
+        try {
+            const response = await admin.messaging().send(message);
+            console.log('Successfully sent message:', response);
+        } catch (error) {
+            return error
+        }
+    } catch (error) {
+        console.log(error.message);
+
+    }
+};
 module.exports = {
     trackUser,
     beaconTodayUser,

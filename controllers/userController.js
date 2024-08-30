@@ -424,9 +424,7 @@ const countRegisteredUsers = async (req, res) => {
         return res.status(500).json({ status: "failure", message: "Internal server error" });
     }
 }
-const sendMessageToUser = async ( title, body,token) => {
-    console.log();
-    
+const sendMessageToUser = async (title, body,token) => {    
     try {
         const message = {
             notification: {
@@ -442,7 +440,7 @@ const sendMessageToUser = async ( title, body,token) => {
 
     } catch (error) {
         console.log(error.message);
-
+        return error
     }
 };
 module.exports = {

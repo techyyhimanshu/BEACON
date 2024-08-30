@@ -354,33 +354,6 @@ const userHistory = async (req, res) => {
 
 }
 
-const userHistory = async (req, res) => {
-    try {
-        const bodyData = req.body;
-        const userdata = await db.sequelize.query(`
-            SELECT bv.temp_id,SEC_TO_TIME( timestampdiff(second, bv.createdAt, current_timestamp()) ) as Time_Ago 
-            FROM beaconDB.BeaconVisited bv INNER JOIN 
-            ( SELECT temp_id,MAX(createdAt) as latestCreatedAt FROM beaconDB.BeaconVisited WHERE user_mac = ? GROUP BY temp_id )
-            latest ON bv.temp_id = latest.temp_id AND bv.createdAt = latest.latestCreatedAt WHERE bv.user_mac = ? 
-            order by Time_Ago;
-            `,
-            { replacements : [bodyData.user_uniqueID,bodyData.user_uniqueID]}
-            );
-            // console.log(userdata);
-            
-        if (userdata) {
-            return res.status(200).json({ status: "success" ,data:userdata[0]})
-        }
-        else{
-            return res.status(404).json({ status: "fail", message: "data is not found"  })
-        }
-
-    } catch (error) {
-        return res.status(500).json({ status: "failure", message: error.message });
-    }
-
-}
-
 const countRegisteredUsers=async (req,res)=>{
     try {
         const registeredCount=await User.count({

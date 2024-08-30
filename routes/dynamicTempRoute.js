@@ -25,7 +25,8 @@ const { craeteTemplate,
         deleteSubMenu,
         
         // view
-        templateView
+        templateView,
+        TempHistory
 
 }=require("../controllers/dynamicTempController")
 
@@ -56,5 +57,7 @@ router.delete("/api/submenus/:id",deleteSubMenu)
 
 // view
 router.get("/api/temp/:id/view",templateView)
+router.get("/api/temp/:id/history",TempHistory)
+
 
 module.exports = router;

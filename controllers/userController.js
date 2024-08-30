@@ -25,12 +25,12 @@ const trackUser = async (req, res) => {
                 replacements: [req.body.user_mac]
             })
         if (userBeaconData) {
-            res.status(200).json({ status: "success", data: userBeaconData })
+            return res.status(200).json({ status: "success", data: userBeaconData })
         } else {
-            res.status(404).json({ status: "failure", message: "Not found" })
+            return res.status(404).json({ status: "failure", message: "Not found" })
         }
     } catch (error) {
-        res.status(404).json({ status: "failure", message: "Internal server error", Error: error.message })
+        return res.status(404).json({ status: "failure", message: "Internal server error", Error: error.message })
     }
 }
 
@@ -71,12 +71,12 @@ const beaconTotalUser = async (req, res) => {
         //         replacements: [req.body.mac]
         //     })
         if (totalBeaconsWithCount) {
-            res.status(200).json({ status: "success", data: totalBeaconsWithCount })
+            return res.status(200).json({ status: "success", data: totalBeaconsWithCount })
         } else {
-            res.status(404).json({ status: "failure", message: "Not found" })
+            return res.status(404).json({ status: "failure", message: "Not found" })
         }
     } catch (error) {
-        res.status(404).json({ status: "failure", message: "Internal server error", Error: error.message })
+        return res.status(404).json({ status: "failure", message: "Internal server error", Error: error.message })
     }
 }
 
@@ -92,12 +92,12 @@ const beaconTodayUser = async (req, res) => {
                 replacements: [req.body.mac]
             })
         if (beaconTodayUser) {
-            res.status(200).json({ status: "success", count: beaconTodayUser[0].count })
+            return res.status(200).json({ status: "success", count: beaconTodayUser[0].count })
         } else {
-            res.status(404).json({ status: "failure", message: "Not found" })
+            return res.status(404).json({ status: "failure", message: "Not found" })
         }
     } catch (error) {
-        res.status(404).json({ status: "failure", message: "Internal server error", Error: error.message })
+        return res.status(404).json({ status: "failure", message: "Internal server error", Error: error.message })
     }
 }
 
@@ -151,9 +151,9 @@ const orgWeeklyUsers = async (req, res) => {
                 replacements: [req.body.org_id, req.body.start_date, req.body.end_date]
             })
         beaconWeekUserCount[0].beacons = weeklyBeacons
-        res.status(200).json({ status: "success", data: beaconWeekUserCount })
+        return res.status(200).json({ status: "success", data: beaconWeekUserCount })
     } catch (error) {
-        res.status(500).json({ status: "failure", message: "Internal server error" })
+        return res.status(500).json({ status: "failure", message: "Internal server error" })
         console.log(error);
 
     }
@@ -211,9 +211,9 @@ const orgMonthlyUsers = async (req, res) => {
             replacements: [req.body.org_id, req.body.month]
         })
         monthlyOrgData[0].beacons = beaconData
-        res.status(200).json({ status: "success", data: monthlyOrgData })
+        return res.status(200).json({ status: "success", data: monthlyOrgData })
     } catch (error) {
-        res.status(404).json({ status: "failure", message: "Internal server error", Error: error.message })
+        return res.status(404).json({ status: "failure", message: "Internal server error", Error: error.message })
     }
 }
 
@@ -223,15 +223,15 @@ const getAllUsers = async (req, res) => {
         if (req.username === 'cit_superadmin') {
             const users = await User.findAll({})
             if (users) {
-                res.status(200).json({ status: "success", data: users })
+                return res.status(200).json({ status: "success", data: users })
             } else {
-                res.status(404).json({ status: "failure", message: "Not found" })
+                return res.status(404).json({ status: "failure", message: "Not found" })
             }
         } else {
-            res.status(403).json({ status: "failure", message: "Unauthorized" })
+            return res.status(403).json({ status: "failure", message: "Unauthorized" })
         }
     } catch (error) {
-        res.status(500).json({ status: "failure", message: "Internal server error" })
+        return res.status(500).json({ status: "failure", message: "Internal server error" })
     }
 
 }
@@ -300,17 +300,17 @@ const registerFCM = async (req, res) => {
 }
 const viewTime = async (req, res) => {
     try {
-        const bodyData = req.bodyData
+        const bodyData = req.body
         const data = await db.sequelize.query(`
             call sp_viewTime(?,?)
             `,
-            { replacements : [req.body.user_uniqueID,req.body.date] }
+            { replacements : [bodyData.user_uniqueID,bodyData.date] }
             , (err , result) => {
                 if(err)
                 {
                     return res.status(400).json({ status: "failure", message: err.message})
                 } else{
-                    return  res.status(200).json({ status: "success", message: "sp run successfully" ,data:result})
+                    return res.status(200).json({ status: "success", message: "sp run successfully" ,data:result})
                 }
             }
             )
@@ -326,6 +326,61 @@ const viewTime = async (req, res) => {
     }
 
 }
+
+const userHistory = async (req, res) => {
+    try {
+        const bodyData = req.body;
+        const userdata = await db.sequelize.query(`
+            SELECT bv.temp_id,SEC_TO_TIME( timestampdiff(second, bv.createdAt, current_timestamp()) ) as Time_Ago 
+            FROM beaconDB.BeaconVisited bv INNER JOIN 
+            ( SELECT temp_id,MAX(createdAt) as latestCreatedAt FROM beaconDB.BeaconVisited WHERE user_mac = ? GROUP BY temp_id )
+            latest ON bv.temp_id = latest.temp_id AND bv.createdAt = latest.latestCreatedAt WHERE bv.user_mac = ? 
+            order by Time_Ago;
+            `,
+            { replacements : [bodyData.user_uniqueID,bodyData.user_uniqueID]}
+            );
+            // console.log(userdata);
+            
+        if (userdata) {
+            return res.status(200).json({ status: "success" ,data:userdata[0]})
+        }
+        else{
+            return res.status(404).json({ status: "fail", message: "data is not found"  })
+        }
+
+    } catch (error) {
+        return res.status(500).json({ status: "failure", message: error.message });
+    }
+
+}
+
+const userHistory = async (req, res) => {
+    try {
+        const bodyData = req.body;
+        const userdata = await db.sequelize.query(`
+            SELECT bv.temp_id,SEC_TO_TIME( timestampdiff(second, bv.createdAt, current_timestamp()) ) as Time_Ago 
+            FROM beaconDB.BeaconVisited bv INNER JOIN 
+            ( SELECT temp_id,MAX(createdAt) as latestCreatedAt FROM beaconDB.BeaconVisited WHERE user_mac = ? GROUP BY temp_id )
+            latest ON bv.temp_id = latest.temp_id AND bv.createdAt = latest.latestCreatedAt WHERE bv.user_mac = ? 
+            order by Time_Ago;
+            `,
+            { replacements : [bodyData.user_uniqueID,bodyData.user_uniqueID]}
+            );
+            // console.log(userdata);
+            
+        if (userdata) {
+            return res.status(200).json({ status: "success" ,data:userdata[0]})
+        }
+        else{
+            return res.status(404).json({ status: "fail", message: "data is not found"  })
+        }
+
+    } catch (error) {
+        return res.status(500).json({ status: "failure", message: error.message });
+    }
+
+}
+
 const countRegisteredUsers=async (req,res)=>{
     try {
         const registeredCount=await User.count({
@@ -350,5 +405,6 @@ module.exports = {
     registerUser,
     registerFCM,
     viewTime,
+    userHistory,
     countRegisteredUsers
 }

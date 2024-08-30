@@ -12,6 +12,8 @@ const menuRoute = require('./menuRoute');
 const orgMenuRoute = require('./orgMenuRoute');
 const dynamicTempRoute = require('./dynamicTempRoute');
 const dynamicBeaconRoute = require('./dynamicBeaconRoute');
+const likeRoute = require('./likeRoute');
+
 // const sp_user = require('./sp_user');
 
 
@@ -22,6 +24,7 @@ const routes = Router();
 routes.use(organizationRoute);
 routes.use(shopRoute);
 routes.use(beaconRoute);
+routes.use(likeRoute);
 routes.use(templateTypeRoute);
 routes.use(templateRoute);
 routes.use(adminRoute);

@@ -534,7 +534,7 @@ const templateView = async (req, res) => {
 const TempHistory = async (req, res) => {
     try {
         const historydata = await db.sequelize.query(`
-            select user_mac, SEC_TO_TIME(timestampdiff(second,createdAt,current_timestamp())) as Time_Ago 
+            select user_mac as device_uniqueID, SEC_TO_TIME(timestampdiff(second,createdAt,current_timestamp())) as Time_Ago 
             from beaconDB.BeaconVisited where temp_id = ? order by Time_Ago ASC;
             `,
             { replacements : [req.params.id]}
@@ -548,7 +548,6 @@ const TempHistory = async (req, res) => {
     } catch (error) {
         return res.status(500).json({ status: "failure", message: error.message });
     }
-
 }
 
 // export methos

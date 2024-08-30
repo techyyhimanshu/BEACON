@@ -323,8 +323,12 @@ const registerFCM = async (req, res) => {
 
         }
         if (fcm_token === userFcm.fcm_token) {
+            console.log("no change area");
+
             const error = await sendMessageToUser("Welcome", "you are in beacon zone ", req.body.fcm_token)
             if (error instanceof FirebaseMessagingError) {
+                console.log("error message area");
+
                 const errorMessages = error.errors ? error.errors.map(err => err.message) : [error.message];
                 return res.status(400).json({ status: "failure", message: errorMessages });
             }
@@ -420,7 +424,9 @@ const countRegisteredUsers = async (req, res) => {
         return res.status(500).json({ status: "failure", message: "Internal server error" });
     }
 }
-const sendMessageToUser = async (token, title, body, res) => {
+const sendMessageToUser = async ( title, body,token) => {
+    console.log();
+    
     try {
         const message = {
             notification: {
@@ -430,12 +436,10 @@ const sendMessageToUser = async (token, title, body, res) => {
             token: token
         };
 
-        try {
-            const response = await admin.messaging().send(message);
-            console.log('Successfully sent message:', response);
-        } catch (error) {
-            return error
-        }
+
+        const response = await admin.messaging().send(message);
+        console.log('Successfully sent message:', response);
+
     } catch (error) {
         console.log(error.message);
 

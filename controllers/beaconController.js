@@ -78,6 +78,7 @@ const getAllBeacons = async (req, res) => {
                 tbl_templates ON Beacons.template_id = tbl_templates.temp_id
             LEFT JOIN 
                 beaconDB.BeaconVisited ON BeaconVisited.beacon_mac = Beacons.mac
+            WHERE beaconDB.Beacons.deletedAt IS NULL
             GROUP BY 
                 Beacons.beacon_id,
                 Beacons.shop_id,
@@ -397,7 +398,7 @@ const getSingleBeacon = async (req, res) => {
         LEFT JOIN 
             beaconDB.BeaconVisited ON BeaconVisited.beacon_mac = Beacons.mac
         WHERE 
-            Beacons.beacon_id = ?
+            Beacons.beacon_id = ? and Beacons.deletedAt is null
         GROUP BY 
             Beacons.beacon_id,
             Beacons.shop_id,

@@ -1,5 +1,6 @@
 const db = require("../models");
 const Sequelize = require('sequelize');
+const argon2 = require('argon2');
 const User = db.user
 const DeviceFcmToken = db.DeviceFcmToken
 const admin = require("../config/firebase");
@@ -238,7 +239,14 @@ const getAllUsers = async (req, res) => {
 
 const registerUser = async (req, res) => {
     try {
-        const userRegistered = await User.create(req.body)
+        const {password}=req.body
+        const hashedPassword=await argon2.hash(password)
+        console.log(hashedPassword);
+        
+        const userRegistered = await User.create({
+            ...req.body,
+            password:hashedPassword
+        })
         if (!userRegistered) {
             return res.status(400).send({ status: "failure", message: "Error occured" })
         }
@@ -248,6 +256,37 @@ const registerUser = async (req, res) => {
             const messages=error.errors.map(err=>err.message)
             return res.status(400).send({ status: "failure", message: messages})
         }
+        
+        return res.status(500).send({ status: "failure", message: "Internal server error"})
+
+    }
+}
+
+const loginUser = async (req, res) => {
+    try {
+        const {password,email}=req.body
+        const userFound = await User.findOne({
+            attributes:["email","password"],
+           where:{
+            email:email,
+           }
+        })
+        if (!userFound) {
+            return res.status(200).send({ status: "failure", message: "User not found with this email" })
+        }
+        const verifiedPassword=await argon2.verify(userFound.password,password)
+        console.log(verifiedPassword);
+                
+        if(!verifiedPassword){
+            return res.status(200).send({ status: "failure", message: "Invalid password"})
+        }
+        return res.status(200).send({ status: "success", message: "Login successfully" })
+    } catch (error) {
+        if(error instanceof Sequelize.ValidationError){
+            const messages=error.errors.map(err=>err.message)
+            return res.status(400).send({ status: "failure", message: messages})
+        }
+        console.log(error.message);
         
         return res.status(500).send({ status: "failure", message: "Internal server error"})
 
@@ -379,5 +418,6 @@ module.exports = {
     registerFCM,
     viewTime,
     userHistory,
-    countRegisteredUsers
+    countRegisteredUsers,
+    loginUser
 }

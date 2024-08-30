@@ -55,6 +55,8 @@ db.tbl_temp_menu = require('./tbl_temp_menu')(sequelize, DataTypes);
 db.tbl_temp_bg = require('./tbl_temp_bg')(sequelize, DataTypes);
 db.bgImages = require('./tbl_temp_bg')(sequelize, DataTypes);
 db.DeviceFcmToken = require('./devicefcmtoken')(sequelize, DataTypes);
+db.tbl_temp_like = require('./tbl_temp_like')(sequelize, DataTypes);
+
 
 
 db.BeaconVisited.hasMany(db.tbl_template,{foreignKey:'temp_id'})

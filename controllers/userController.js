@@ -298,31 +298,6 @@ const registerFCM = async (req, res) => {
         return false
     }
 }
-
-const sendMessageToUser = async (title, body, token) => {
-    try {
-        console.log(token);
-        
-        const message = {
-            notification: {
-                title: title,
-                body: body
-            },
-            token: token
-        };
-    
-        try {
-            const response = await admin.messaging().send(message);
-            console.log('Successfully sent message:', response);
-        } catch (error) {
-            console.error('Error sending message:', error);
-        }
-    } catch (error) {
-        console.log(error.message);
-        
-    }
-};
-
 const viewTime = async (req, res) => {
     try {
         const bodyData = req.bodyData
@@ -351,7 +326,20 @@ const viewTime = async (req, res) => {
     }
 
 }
-
+const countRegisteredUsers=async (req,res)=>{
+    try {
+        const registeredCount=await User.count({
+            attributes:["email"]
+        })
+        if(!registeredCount){
+            return res.status(200).json({ status: "failure", message: "No registered users"})
+        }
+        return res.status(200).json({ status: "success", user_registered:registeredCount})
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ status: "failure", message:"Internal server error" });    
+    }
+}
 module.exports = {
     trackUser,
     beaconTodayUser,
@@ -361,5 +349,6 @@ module.exports = {
     orgMonthlyUsers,
     registerUser,
     registerFCM,
-    viewTime
+    viewTime,
+    countRegisteredUsers
 }

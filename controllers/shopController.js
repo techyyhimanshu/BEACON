@@ -41,8 +41,9 @@ const createShop = async (req, res) => {
     } catch (error) {
         if (error instanceof Sequelize.ValidationError) {
             const errorMessages = error.errors.map(err => err.message);
-            res.status(400).json({ status: "failure", message: errorMessages });
+            return res.status(400).json({ status: "failure", message: errorMessages });
         }
+        return res.status(500).json({ status: "failure", message: "Internal Server Error"})
     }
 
 }
@@ -63,7 +64,7 @@ const getAllShops = async (req, res) => {
         }
     } catch (error) {
         console.log(error.message);
-        res.status(500).json({ status: "failure" });
+        res.status(500).json({ status: "failure", message: "Internal Server Error" });
     }
 
 }
@@ -82,7 +83,7 @@ const getSingleShop = async (req, res) => {
             res.status(404).json({ status: "failure", message: "Not found" })
         }
     } catch (error) {
-        res.status(500).json({ status: "failure" });
+        res.status(500).json({ status: "failure", message: "Internal Server Error" });
     }
 
 }
@@ -120,7 +121,7 @@ const updateShop = async (req, res) => {
                                 res.status(200).json({ status: "success", message: "Updated successfully" })
                             }
                             else {
-                                res.status(404).json({ status: "failure", message: "Record not found" })
+                                res.status(200).json({ status: "failure", message: "Record not found" })
                             }
                         }
                     }else{
@@ -179,7 +180,7 @@ const deleteShop = async (req, res) => {
         }
     } catch (error) {
         console.log(error.message);
-        res.status(500).json({ status: "failure" });
+        res.status(500).json({ status: "failure", message: "Internal Server Error" });
     }
 
 }
@@ -231,7 +232,7 @@ const getShopBeacon = async (req, res) => {
         } else {
             res.status(404).json({ status: "Not found", message: "no beacon added to this shop" })
         }
-    } catch (e) { res.status(400).json({ status: "failure", message: e.message }); }
+    } catch (e) { res.status(500).json({ status: "failure", message: "Internal Server Error" }); }
 }
 const shopNotification = async (req, res) => {
     try {
@@ -279,7 +280,7 @@ const shopNotification = async (req, res) => {
         });
 
     } catch (e) {
-        return res.status(400).json({ status: "failure", message: e.message });
+        return res.status(500).json({ status: "failure", message: "Internal Server Error"});
     }
 };
 const getAllBeaconDivisionWise = async (req, res) => {
@@ -320,7 +321,7 @@ const getAllBeaconDivisionWise = async (req, res) => {
             return res.status(404).json({ status: "failure", message: "Not found" })
         }
     } catch (error) {
-        return res.status(404).json({ status: "failure", message: "Internal server error", Error: error.message })
+        return res.status(500).json({ status: "failure", message: "Internal server error", Error: error.message })
     }
 }
 

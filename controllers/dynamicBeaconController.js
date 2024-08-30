@@ -33,7 +33,7 @@ const beaconFire = async (req, res) => {
         }
     } catch (error) {
         console.log(error.name, error.message);
-        return res.status(404).json({ status: "failure", message: "error occurred on beacon fire" });
+        return res.status(500).json({ status: "failure", message: "Internal server error" });
     }
 };
 
@@ -116,7 +116,7 @@ const templateAsignToBeacon = async(req,res)=>{
             res.status(404).json({status:"failue",message:"template " + req.body.template_id + " is Not asign to beacon "+ req.body.beacon_id})
         }
     }catch(error){
-        res.status(404).json({status:"failure",message:"error occur on beacon fire"})
+        res.status(500).json({status:"failure",message:"Internal server error"})
         console.log(error.name,error.message);
     }
 }

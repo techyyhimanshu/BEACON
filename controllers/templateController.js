@@ -153,7 +153,7 @@ const createTemplate = async (req, res) => {
             const errorMessages = error.errors.map(err => err.message);
             res.status(400).json({ status: "failure", message: errorMessages });
         } else {
-            res.status(400).json({ status: "failure", message: error.message });
+            res.status(500).json({ status: "failure", message: "Internal Server Error" });
         }
     }
 }
@@ -172,7 +172,7 @@ const getShopBeacon = async (req, res) => {
         } else {
             res.status(404).json({ status: "Not found", message: "no beacon added to this shop" })
         }
-    } catch (e) { res.status(400).json({ status: "failure", message: e.message }); }
+    } catch (e) { res.status(500).json({ status: "failure", message: "Internal Server Error" }); }
 }
 
 
@@ -193,11 +193,11 @@ const getAllTemplate = async (req, res) => {
             res.status(200).json({ status: "success", data: data })
         }
         else {
-            res.status(404).json({ status: "failure", message: "Not found" })
+            res.status(200).json({ status: "failure", message: "Not found" })
         }
     } catch (error) {
         console.log(error.message);
-        res.status(500).json({ status: "failure" });
+        res.status(500).json({ status: "failure", message: "Internal Server Error" });
     }
 }
 
@@ -227,11 +227,11 @@ const getMyTemplate = async (req, res) => {
             res.status(200).json({ status: "success", data: data })
         }
         else {
-            res.status(404).json({ status: "failure", message: "Not found" })
+            res.status(200).json({ status: "failure", message: "Not found" })
         }
     } catch (error) {
         console.log(error.message);
-        res.status(500).json({ status: "failure" });
+        res.status(500).json({ status: "failure", message: "Internal Server Error" });
     }
 
 }
@@ -260,11 +260,11 @@ const updateMyTemplate = async (req, res) => {
             res.status(200).json({ status: "success", message: "Updated successfully" })
         }
         else {
-            // res.status(404).json({ status: "failure", message: "Record not found!!!" })
+             res.status(200).json({ status: "failure", message: "Record not found!!!" })
         }
     } catch (error) {
         console.log(error.message);
-        res.status(500).json({ status: "failure" });
+        res.status(500).json({ status: "failure", message: "Internal Server Error" });
     }
 
 }
@@ -280,11 +280,11 @@ const deleteMyTemplate = async (req, res) => {
             res.status(200).json({ status: "success", message: "Deleted successfully" })
         }
         else {
-            res.status(404).json({ status: "failure", message: "Record not found for delete" })
+            res.status(200).json({ status: "failure", message: "Record not found for delete" })
         }
     } catch (error) {
         console.log(error.message);
-        res.status(500).json({ status: "failure" });
+        res.status(500).json({ status: "failure", message: "Internal Server Error" });
     }
 }
 

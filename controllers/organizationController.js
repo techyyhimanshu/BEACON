@@ -62,7 +62,7 @@ const getSingleOrganization = async (req, res) => {
             res.status(404).json({ status: "failure", message: "Not found" })
         }
     } catch (error) {
-        res.status(500).json({ status: "failure" });
+        res.status(500).json({ status: "failure",message:"Internal  Server Error" });
     }
 
 }
@@ -81,7 +81,7 @@ const updateOrganization = async (req, res) => {
         }
     } catch (error) {
         console.log(error.message);
-        res.status(500).json({ status: "failure" });
+        res.status(500).json({ status: "failure",message:"Internal  Server Error" });
     }
 
 }
@@ -100,7 +100,7 @@ const deleteOrganization = async (req, res) => {
         }
     } catch (error) {
         console.log(error.message);
-        res.status(500).json({ status: "failure" });
+        res.status(500).json({ status: "failure",message:"Internal  Server Error" });
     }
 
 }
@@ -482,7 +482,7 @@ const getAllBeaconOrgWise = async (req, res) => {
             return res.status(404).json({ status: "failure", message: "Not found" })
         }
     } catch (error) {
-        return res.status(404).json({ status: "failure", message: "Internal server error", Error: error.message })
+        return res.status(404).json({ status: "failure", message: "Internal server error"})
     }
 }
 

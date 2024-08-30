@@ -343,7 +343,7 @@ const deleteBeacon = async (req, res) => {
 
         // If the beacon is created successfully, return a success response
         if (data > 0) {
-            res.status(200).json({ status: "success", message: "DELETED successfully" });
+            res.status(200).json({ status: "success", message: "Deleted successfully" });
         }
         else {
             res.status(200).json({ status: "failure", message: "Something went wrong !!! beacon not DELETED successfully" });

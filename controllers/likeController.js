@@ -64,9 +64,31 @@ const templateLikes = async (req, res) => {
         console.log(error.message);
         res.status(500).json({ status: "failure", message: "Internal Server Error" });
     }
+};
+
+const userLikes = async (req, res) => {
+    try {
+        const data = await TemplatesLike.findAll({
+            attributes: ['temp_id',['createdAt','liked_At']],
+            where:{
+                user_uniqueID : req.body.user_uniqueID,
+                status : 1
+            }
+        });
+        if (data.length > 0) {
+            res.status(200).json({ status: "success", data: data })
+        }
+        else {
+            res.status(200).json({ status: "success", data: '0 Temp'  })
+        }
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).json({ status: "failure", message: "Internal Server Error" });
+    }
 }
 
 module.exports = {
     likeTemplate,
-    templateLikes
+    templateLikes,
+    userLikes
 }

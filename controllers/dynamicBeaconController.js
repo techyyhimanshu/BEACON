@@ -56,7 +56,7 @@ const beaconFire = async (req, res) => {
                 const url = `https://beacon-git-main-ac-ankurs-projects.vercel.app/template/${beacon.template_id}`;
 
                 // Respond with the success status, template URL, and like/dislike data
-                return res.status(200).json({ status: "success", url: url, like_Data: likeData });
+                return res.status(200).json({ status: "success", url: url,templateId:beacon.template_id , like_Data: likeData });
             } else {
                 // Handle the case where the beacon does not have an associated template
                 return res.status(200).json({ status: "failure", message: "No template is assigned to this beacon" });

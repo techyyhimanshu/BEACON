@@ -1,5 +1,6 @@
 const db = require("../models");
 const Sequelize = require('sequelize');
+const argon2 = require('argon2');
 const User = db.user
 const DeviceFcmToken = db.DeviceFcmToken
 const admin = require("../config/firebase");
@@ -238,7 +239,14 @@ const getAllUsers = async (req, res) => {
 
 const registerUser = async (req, res) => {
     try {
-        const userRegistered = await User.create(req.body)
+        const {password}=req.body
+        const hashedPassword=await argon2.hash(password)
+        console.log(hashedPassword);
+        
+        const userRegistered = await User.create({
+            ...req.body,
+            password:hashedPassword
+        })
         if (!userRegistered) {
             return res.status(400).send({ status: "failure", message: "Error occured" })
         }
@@ -248,6 +256,37 @@ const registerUser = async (req, res) => {
             const messages=error.errors.map(err=>err.message)
             return res.status(400).send({ status: "failure", message: messages})
         }
+        
+        return res.status(500).send({ status: "failure", message: "Internal server error"})
+
+    }
+}
+
+const loginUser = async (req, res) => {
+    try {
+        const {password,email}=req.body
+        const userFound = await User.findOne({
+            attributes:["email","password"],
+           where:{
+            email:email,
+           }
+        })
+        if (!userFound) {
+            return res.status(200).send({ status: "failure", message: "User not found with this email" })
+        }
+        const verifiedPassword=await argon2.verify(userFound.password,password)
+        console.log(verifiedPassword);
+                
+        if(!verifiedPassword){
+            return res.status(200).send({ status: "failure", message: "Invalid password"})
+        }
+        return res.status(200).send({ status: "success", message: "Login successfully" })
+    } catch (error) {
+        if(error instanceof Sequelize.ValidationError){
+            const messages=error.errors.map(err=>err.message)
+            return res.status(400).send({ status: "failure", message: messages})
+        }
+        console.log(error.message);
         
         return res.status(500).send({ status: "failure", message: "Internal server error"})
 
@@ -298,31 +337,6 @@ const registerFCM = async (req, res) => {
         return false
     }
 }
-
-const sendMessageToUser = async (title, body, token) => {
-    try {
-        console.log(token);
-        
-        const message = {
-            notification: {
-                title: title,
-                body: body
-            },
-            token: token
-        };
-    
-        try {
-            const response = await admin.messaging().send(message);
-            console.log('Successfully sent message:', response);
-        } catch (error) {
-            console.error('Error sending message:', error);
-        }
-    } catch (error) {
-        console.log(error.message);
-        
-    }
-};
-
 const viewTime = async (req, res) => {
     try {
         const bodyData = req.body
@@ -379,6 +393,20 @@ const userHistory = async (req, res) => {
 
 }
 
+const countRegisteredUsers=async (req,res)=>{
+    try {
+        const registeredCount=await User.count({
+            attributes:["email"]
+        })
+        if(!registeredCount){
+            return res.status(200).json({ status: "failure", message: "No registered users"})
+        }
+        return res.status(200).json({ status: "success", user_registered:registeredCount})
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ status: "failure", message:"Internal server error" });    
+    }
+}
 module.exports = {
     trackUser,
     beaconTodayUser,
@@ -389,5 +417,7 @@ module.exports = {
     registerUser,
     registerFCM,
     viewTime,
-    userHistory
+    userHistory,
+    countRegisteredUsers,
+    loginUser
 }

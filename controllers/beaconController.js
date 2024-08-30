@@ -78,6 +78,7 @@ const getAllBeacons = async (req, res) => {
                 tbl_templates ON Beacons.template_id = tbl_templates.temp_id
             LEFT JOIN 
                 beaconDB.BeaconVisited ON BeaconVisited.beacon_mac = Beacons.mac
+            WHERE beaconDB.Beacons.deletedAt IS NULL
             GROUP BY 
                 Beacons.beacon_id,
                 Beacons.shop_id,
@@ -362,7 +363,7 @@ const deleteBeacon = async (req, res) => {
 
         // If the beacon is created successfully, return a success response
         if (data > 0) {
-            res.status(200).json({ status: "success", message: "DELETED successfully" });
+            res.status(200).json({ status: "success", message: "Deleted successfully" });
         }
         else {
             res.status(200).json({ status: "failure", message: "Something went wrong !!! beacon not DELETED successfully" });
@@ -397,7 +398,7 @@ const getSingleBeacon = async (req, res) => {
         LEFT JOIN 
             beaconDB.BeaconVisited ON BeaconVisited.beacon_mac = Beacons.mac
         WHERE 
-            Beacons.beacon_id = ?
+            Beacons.beacon_id = ? and Beacons.deletedAt is null
         GROUP BY 
             Beacons.beacon_id,
             Beacons.shop_id,

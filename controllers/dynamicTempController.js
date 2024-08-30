@@ -292,8 +292,6 @@ const craeteSubMenuTemplate = async (req, res) => {
                 textColor: req.body.textColor,
                 link_url: req.body.link_url
             });
-            console.log(tempSubMenu);
-
             if (tempSubMenu) {
                 res.status(200).json({ status: "success", data: tempSubMenu, temp_Id: tempSubMenu.temp_id })
             }

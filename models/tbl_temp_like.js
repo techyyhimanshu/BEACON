@@ -38,7 +38,6 @@ module.exports = (sequelize, DataTypes) => {
     },
   }, {
     sequelize,
-    paranoid : true,
     modelName: 'tbl_temp_like',
   });
   return tbl_temp_like;

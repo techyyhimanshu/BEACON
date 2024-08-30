@@ -7,9 +7,12 @@ const Template =db.tbl_template;
 const Beacon =db.Beacon;
 const BeaconVisited =db.BeaconVisited;
 const User =db.user;
+const TempLikes =db.tbl_temp_like;
+
 
 const beaconFire = async (req, res) => {
     try {
+        // Fetch the beacon with the associated template_id based on the provided MAC address
         const beacon = await Beacon.findOne({
             attributes: ['template_id'],
             where: { mac: req.body.mac }
@@ -17,56 +20,90 @@ const beaconFire = async (req, res) => {
 
         if (beacon) {
             if (beacon.template_id) {
-                // beacon found, process in parallel
+                // If the beacon has a template_id, proceed with further operations
                 req.body.temp_id = beacon.template_id;
-                console.log(req.body);
-                
-                beaconVisited(req.body); // Process in the background without waiting
-                
+
+                // Process beaconVisited in the background without waiting for it to complete
+                beaconVisited(req.body);
+
+                // Fetch the user's like/dislike status for the template associated with the beacon
+                const tempLikeData = await TempLikes.findOne({
+                    attributes: ['status'],
+                    where: { user_uniqueID: req.body.device_uniqueID, temp_id: beacon.template_id }
+                });
+
+                // Initialize likeData with default values
+                let likeData = { liked: 0, disliked: 0 };
+
+                // Determine the like/dislike status based on the fetched data
+                if (tempLikeData) {
+                    switch (tempLikeData.status) {
+                        case 1:
+                            likeData = { liked: 1, disliked: 0 };
+                            break;
+                        case 2:
+                            likeData = { liked: 0, disliked: 0 };
+                            break;
+                        case 0:
+                            likeData = { liked: 0, disliked: 1 };
+                            break;
+                        default:
+                            likeData = { liked: 0, disliked: 0 };
+                    }
+                }
+
+                // Construct the URL for the template
                 const url = `https://beacon-git-main-ac-ankurs-projects.vercel.app/template/${beacon.template_id}`;
-                return res.status(200).json({ status: "success", url });
+
+                // Respond with the success status, template URL, and like/dislike data
+                return res.status(200).json({ status: "success", url: url, like_Data: likeData });
             } else {
-                return res.status(200).json({ status: "failure", message: "no template is assigned to this beacon" });
+                // Handle the case where the beacon does not have an associated template
+                return res.status(200).json({ status: "failure", message: "No template is assigned to this beacon" });
             }
         } else {
-            return res.status(200).json({ status: "failure", message: "beacon not found" });
+            // Handle the case where the beacon was not found in the database
+            return res.status(200).json({ status: "failure", message: "Beacon not found" });
         }
     } catch (error) {
+        // Log the error details and return an internal server error response
         console.log(error.name, error.message);
         return res.status(500).json({ status: "failure", message: "Internal server error" });
     }
 };
 
+
 // USER IS SAVED TO BEACON VISITED
 const beaconVisited = async (data) => {
-    try {
-        const uniqueId = data.device_uniqueID;
+    const uniqueId = data.device_uniqueID;
+    const locationChanged = user => user && user.last_location !== data.location;
 
+    try {
+        // Create BeaconVisited record and fetch user data in parallel
         const [data2, user] = await Promise.all([
             BeaconVisited.create({
                 beacon_mac: data.mac,
-                user_mac: uniqueId,
+                device_id: uniqueId,
                 location: data.location,
-                temp_id : data.temp_id
+                temp_id: data.temp_id
             }),
             User.findOne({
-                attributes: ['user_mac', 'last_location'],
-                where: { user_mac: uniqueId }
+                attributes: ['device_id', 'last_location'],
+                where: { device_id: uniqueId }
             })
         ]);
 
+        // Handle user creation or update based on whether the location has changed
         if (user) {
-            // USER IS OLD, update only if location has changed
-            if (user.last_location !== data.location) {
+            if (locationChanged(user)) {
                 await User.update(
                     { last_location: data.location },
-                    { where: { user_mac: uniqueId } }
+                    { where: { device_id: uniqueId } }
                 );
             }
         } else {
-            // USER IS NEW
             await User.create({
-                user_mac: uniqueId,
+                device_id: uniqueId,
                 last_location: data.location
             });
         }
@@ -78,6 +115,7 @@ const beaconVisited = async (data) => {
     }
 };
 
+
 const templateAsignToBeacon = async(req,res)=>{
     try{
         // CHECK BEACON EXISTANCE
@@ -88,7 +126,7 @@ const templateAsignToBeacon = async(req,res)=>{
             }
         })
         if(!beacon)
-            {   res.status(404).json({status:"failure",message:"beacon not found"})
+            {   return res.status(404).json({status:"failure",message:"beacon not found"})
         }
         // CHECK TEMPLATE EXISTANCE
         const template = await Beacon.findOne({
@@ -98,7 +136,7 @@ const templateAsignToBeacon = async(req,res)=>{
             }
         })
         if(!template)
-            {   res.status(404).json({status:"failure",message:"template not found"})
+            {   return res.status(404).json({status:"failure",message:"template not found"})
         }
         // set TEMPLATE TO BEACON
         var beaconUpdate =  await Beacon.update({
@@ -108,15 +146,15 @@ const templateAsignToBeacon = async(req,res)=>{
                     beacon_id: req.body.beacon_id
                 }
             })
-            console.log(beaconUpdate);
+            // console.log(beaconUpdate);
             
         if(beaconUpdate > 0){
-            res.status(200).json({status:"success",message:"template " + req.body.template_id + " is asign to beacon "+ req.body.beacon_id})
+            return res.status(200).json({status:"success",message:"template " + req.body.template_id + " is asign to beacon "+ req.body.beacon_id})
         } else {
-            res.status(404).json({status:"failue",message:"template " + req.body.template_id + " is Not asign to beacon "+ req.body.beacon_id})
+            return res.status(404).json({status:"failue",message:"template " + req.body.template_id + " is Not asign to beacon "+ req.body.beacon_id})
         }
     }catch(error){
-        res.status(500).json({status:"failure",message:"Internal server error"})
+        return res.status(500).json({status:"failure",message:"Internal server error"})
         console.log(error.name,error.message);
     }
 }

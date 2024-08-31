@@ -20,7 +20,8 @@ const addBeacon = async (req, res) => {
     try {
         // Retrieve the shop by its primary key (shop_id) from the request body
         const shop = await Shop.findByPk(req.body.shop_id);
-
+        if(req.body.beacon_org == undefined )
+        { req.body.beacon_org = null  }
         // If the shop is not found, return a 404 error response
         if (!shop) {
             return res.status(404).json({ status: "failure", message: "Shop not found" });

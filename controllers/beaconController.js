@@ -44,6 +44,7 @@ const addBeacon = async (req, res) => {
         // Handle Sequelize validation errors
         if (error instanceof Sequelize.ValidationError) {
             const errorMessages = error.errors.map(err => err.message);
+          try{  
             if (errorMessages == 'mac must be unique')
             {
                 const Data = await db.sequelize.query(`
@@ -74,6 +75,10 @@ const addBeacon = async (req, res) => {
                 }
             };
             return res.status(400).json({ status: "failure", message: errorMessages });
+          } catch(e) {
+            console.log(e.message);
+            return res.status(400).json({ status: "failure", message: "something went wrong" });
+          }
         } else {
             // Log any other errors and return a 500 internal server error response
             // console.log(error);
@@ -89,6 +94,7 @@ const getAllBeacons = async (req, res) => {
                 Beacons.beacon_id,
                 Beacons.beacon_name,
                 Beacons.mac,
+                Beacons.beacon_org,
                 COUNT(BeaconVisited.beacon_mac) as connectedUsers,
                 Beacons.shop_id AS div_Id,
                 ShopDetails.shop_name as div_name,
@@ -130,7 +136,6 @@ const getAllBeacons = async (req, res) => {
 }
 
 const getBeaconsList = async (req, res) => {
-
     try {
         const { count, rows } = await Beacon.findAndCountAll({
             attributes: ['beacon_id', 'beacon_name', 'mac', 'beacon_org'],
@@ -344,6 +349,7 @@ const updateBeacon = async (req, res) => {
         const data = await Beacon.update({
             beacon_name: req.body.beacon_name,
             shop_id: req.body.shop_id,
+            beacon_org : req.body.beacon_org,
         }, {
             where: {
                 beacon_id: req.body.beacon_id
@@ -408,6 +414,7 @@ const getSingleBeacon = async (req, res) => {
             Beacons.beacon_id,
             Beacons.beacon_name,
             Beacons.mac,
+            Beacons.beacon_org,
             COUNT(BeaconVisited.beacon_mac) as connectedUsers,
             Beacons.shop_id AS div_Id,
             ShopDetails.shop_name as div_name,

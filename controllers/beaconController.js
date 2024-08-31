@@ -25,27 +25,55 @@ const addBeacon = async (req, res) => {
         if (!shop) {
             return res.status(404).json({ status: "failure", message: "Shop not found" });
         }
-
         // Create a new beacon entry using the data from the request body
         const data = await Beacon.create({
             beacon_name: req.body.beacon_name,
             mac: req.body.mac,
             shop_id: req.body.shop_id,
-        });
+            beacon_org : req.body.beacon_org
 
+        });
         // If the beacon is created successfully, return a success response
         if (data) {
-            res.status(200).json({ status: "success", message: "Created successfully" });
+            return res.status(200).json({ status: "success", message: "Created successfully" });
         }
         else {
-            res.status(404).json({ status: "failure", message: "Not Created successfully" });
-
+            return res.status(404).json({ status: "failure", message: "Not Created successfully" });
         }
     } catch (error) {
         // Handle Sequelize validation errors
         if (error instanceof Sequelize.ValidationError) {
             const errorMessages = error.errors.map(err => err.message);
-            res.status(400).json({ status: "failure", message: errorMessages });
+            if (errorMessages == 'mac must be unique')
+            {
+                const Data = await db.sequelize.query(`
+                    SELECT deletedAt FROM Beacons
+                    WHERE Beacons.mac = ? ;
+                    `, { 
+                    type: Sequelize.QueryTypes.SELECT,
+                    replacements : [req.body.mac]
+                });
+                console.log("deleted data",Data[0].deletedAt);
+                
+                if(Data[0].deletedAt == null){
+                    // beacon is already in table
+                    return res.status(400).json({ status: "failure", message: errorMessages });
+                };
+                const revokeData = await db.sequelize.query(`
+                    UPDATE beaconDB.Beacons 
+                    SET shop_id = ?, template_id = null ,
+                    createdAt = CURRENT_TIMESTAMP(), deletedAt = null,
+                    beacon_org = ?, beacon_name = ? WHERE (mac = ?);
+                    `, { 
+                    type: Sequelize.QueryTypes.UPDATE,
+                    replacements : [req.body.shop_id,req.body.beacon_org,req.body.beacon_name,req.body.mac,]
+                });
+                console.log("revoke data" ,revokeData[1]);
+                if(revokeData[1] > 0){
+                    return res.status(200).json({ status: "success", message: "Created successfully" });
+                }
+            };
+            return res.status(400).json({ status: "failure", message: errorMessages });
         } else {
             // Log any other errors and return a 500 internal server error response
             // console.log(error);

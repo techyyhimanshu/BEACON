@@ -1,5 +1,6 @@
 const db = require("../models");
 const Sequelize = require('sequelize');
+const tbl_template = require("../models/tbl_template");
 const TempButton =db.tbl_temp_button;
 const TempContent =db.tbl_temp_content;
 const TempSubMenu =db.tbl_temp_menu;
@@ -128,13 +129,15 @@ const templateAsignToBeacon = async(req,res)=>{
         if(!beacon)
             {   return res.status(404).json({status:"failure",message:"beacon not found"})
         }
-        // CHECK TEMPLATE EXISTANCE
-        const template = await Beacon.findOne({
-            attributes : ['template_id'],
+        // CHECK TEMPLATE EXISTANCEs
+        const template = await Template.findOne({
+            attributes : ['temp_id'],
             where:{
-                template_id: req.body.template_id
+                temp_id: req.body.template_id
             }
-        })
+        });
+        console.log(template);
+        
         if(!template)
             {   return res.status(404).json({status:"failure",message:"template not found"})
         }
@@ -154,8 +157,9 @@ const templateAsignToBeacon = async(req,res)=>{
             return res.status(404).json({status:"failue",message:"template " + req.body.template_id + " is Not asign to beacon "+ req.body.beacon_id})
         }
     }catch(error){
-        return res.status(500).json({status:"failure",message:"Internal server error"})
         console.log(error.name,error.message);
+        return res.status(500).json({status:"failure",message:"Internal server error"})
+        
     }
 }
 

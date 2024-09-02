@@ -15,8 +15,84 @@ const Sequelize = require("sequelize");
 // const beacon = require("../models/beacon");
 // const appclass = require("../appClass");
 
-// Function to add a new beacon
+
+
 const addBeacon = async (req, res) => {
+    const transaction = await db.sequelize.transaction(); // Start a transaction
+
+    try {
+        // Input validation (Example: ensure required fields are present)
+        const { shop_id, beacon_name, mac, beacon_org } = req.body;
+        if (!shop_id || !beacon_name || !mac || !beacon_org) {
+            return res.status(400).json({ status: "failure", message: "Missing required fields" });
+        }
+
+        // Retrieve the shop by its primary key
+        const shop = await Shop.findByPk(shop_id, { transaction });
+
+        if (!shop) {
+            await transaction.rollback();
+            return res.status(404).json({ status: "failure", message: "Shop not found" });
+        }
+
+        // Attempt to create a new beacon entry
+        try {
+            const data = await Beacon.create({
+                beacon_name,
+                mac,
+                shop_id,
+                beacon_org
+            }, { transaction });
+
+            await transaction.commit();
+            return res.status(200).json({ status: "success", message: "Created successfully 1" });
+
+        } catch (error) {
+            // Handle unique constraint error (mac must be unique)
+            if (error instanceof Sequelize.ValidationError) {
+                const existingBeacon = await Beacon.findOne({
+                    where: { mac },
+                    paranoid: false, // Retrieve even soft-deleted records
+                    transaction
+                });
+                console.log(existingBeacon); 
+                
+                if (existingBeacon && existingBeacon.deletedAt) {
+                    // Revoke soft delete
+                    existingBeacon.shop_id = shop_id;
+                    existingBeacon.beacon_org = beacon_org;
+                    existingBeacon.beacon_name = beacon_name;
+                    existingBeacon.deletedAt = null; // Restore the record
+                    existingBeacon.createdAt = new Date(); // Update creation date
+                    const obj =    await existingBeacon.save({ transaction });
+                    
+                    await transaction.commit();
+                    return res.status(200).json({ status: "success", message: "Created successfully 2" });
+                } else {
+                    await transaction.rollback();
+                    return res.status(400).json({ status: "failure", message: "MAC address already in use" });
+                }
+            } else {
+                throw error; // Rethrow if it's not a unique constraint error
+            }
+        }
+    } catch (error) {
+        await transaction.rollback();
+
+        // Differentiate between validation errors and unexpected errors
+        if (error instanceof Sequelize.ValidationError) {
+            const errorMessages = error.errors.map(err => err.message);
+            return res.status(400).json({ status: "failure", message: errorMessages });
+        } else {
+            // Log unexpected errors for debugging
+            console.error("Unexpected error: ", error);
+            return res.status(500).json({ status: "failure", message: "Internal Server Error" });
+        }
+    }
+};
+
+// Function to add a new beacon
+const addBeacon2 = async (req, res) => {
     try {
         // Retrieve the shop by its primary key (shop_id) from the request body
         const shop = await Shop.findByPk(req.body.shop_id);
@@ -46,7 +122,7 @@ const addBeacon = async (req, res) => {
         if (error instanceof Sequelize.ValidationError) {
             const errorMessages = error.errors.map(err => err.message);
           try{  
-            if (errorMessages == 'mac must be unique')
+            if (errorMessages.includes('mac must be unique'))
             {
                 const Data = await db.sequelize.query(`
                     SELECT deletedAt FROM Beacons
@@ -70,7 +146,7 @@ const addBeacon = async (req, res) => {
                     type: Sequelize.QueryTypes.UPDATE,
                     replacements : [req.body.shop_id,req.body.beacon_org,req.body.beacon_name,req.body.mac,]
                 });
-                console.log("revoke data" ,revokeData[1]);
+                console.log("revoke data" ,revokeData[0]);
                 if(revokeData[1] > 0){
                     return res.status(200).json({ status: "success", message: "Created successfully" });
                 }

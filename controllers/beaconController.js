@@ -17,7 +17,7 @@ const Sequelize = require("sequelize");
 
 
 
-const addBeacon = async (req, res) => {
+const addBeacon2 = async (req, res) => {
     const transaction = await db.sequelize.transaction(); // Start a transaction
 
     try {
@@ -92,7 +92,7 @@ const addBeacon = async (req, res) => {
 };
 
 // Function to add a new beacon
-const addBeacon2 = async (req, res) => {
+const addBeacon = async (req, res) => {
     try {
         // Retrieve the shop by its primary key (shop_id) from the request body
         const shop = await Shop.findByPk(req.body.shop_id);

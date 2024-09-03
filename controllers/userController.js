@@ -224,7 +224,9 @@ const getAllUsers = async (req, res) => {
 
     try {
         if (req.username === 'cit_superadmin') {
-            const users = await User.findAll({})
+            const users = await User.findAll({
+                attributes:["user_id","full_name","gender","dob","phone","email","device_id"],
+            })
             if (users) {
                 return res.status(200).json({ status: "success", data: users })
             } else {
@@ -234,6 +236,8 @@ const getAllUsers = async (req, res) => {
             return res.status(403).json({ status: "failure", message: "Unauthorized" })
         }
     } catch (error) {
+        console.log(error.message);
+        
         return res.status(500).json({ status: "failure", message: "Internal server error" })
     }
 
@@ -371,7 +375,7 @@ const viewTime = async (req, res) => {
             }
         )
         if (data) {
-            return res.status(200).json({ status: "success", message: "Created successfully", data: data })
+            return res.status(200).json({ status: "success", data: data })
         }
         else {
             return res.status(200).json({ status: "fail", message: "data is not found" })

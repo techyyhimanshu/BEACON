@@ -45,8 +45,8 @@ const createDivision = async (req, res) => {
                 if (errorMessages.includes('email must be unique'))
                     {
                         const Data = await db.sequelize.query(`
-                            SELECT deletedAt FROM OrganizationDetails
-                            WHERE OrganizationDetails.email = ? ;
+                            SELECT deletedAt FROM divisionDetails
+                            WHERE divisionDetails.email = ? ;
                             `, { 
                             type: Sequelize.QueryTypes.SELECT,
                             replacements : [req.body.email]
@@ -58,7 +58,7 @@ const createDivision = async (req, res) => {
                             return res.status(400).json({ status: "failure", message: "Email address already in use" });
                         };
                         const revokeData = await db.sequelize.query(`
-                            UPDATE beaconDB.OrganizationDetails 
+                            UPDATE beaconDB.divisionDetails 
                             SET org_name = ?, address = ? ,
                             createdAt = CURRENT_TIMESTAMP(), deletedAt = null,
                             contact_number = ? WHERE (email = ?);
@@ -273,11 +273,11 @@ const divNotification = async (req, res) => {
         const { div_id, hourTime,description } = req.body;
 
         const query = `
-            SELECT DISTINCT device_id 
+            SELECT DISTINCT DeviceFcmTokens.fcm_token 
             FROM BeaconVisited,DeviceFcmTokens
             WHERE beacon_mac IN (SELECT mac FROM Beacons WHERE div_id = ?)
             AND BeaconVisited.createdAt > (CURDATE() - INTERVAL ? HOUR)
-            AND DeviceFcmTokens.device_id = BeaconVisited.user_mac
+            AND DeviceFcmTokens.device_id = BeaconVisited.device_id
             ORDER BY BeaconVisited.createdAt DESC;
         `;
 

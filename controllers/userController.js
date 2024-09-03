@@ -143,9 +143,7 @@ const orgWeeklyUsers = async (req, res) => {
                 from OrganizationDetails o
                 join 
                     divisionDetails s on s.org_id=o.org_id
-                    divisionDetails s on s.org_id=o.org_id
                 join 
-                    Beacons b on b.div_id=s.div_id
                     Beacons b on b.div_id=s.div_id
                 join
                     BeaconVisited bv on bv.beacon_mac=b.mac
@@ -205,9 +203,7 @@ const orgMonthlyUsers = async (req, res) => {
             beaconDB.OrganizationDetails o
             JOIN 
                 beaconDB.divisionDetails s ON o.org_id = s.org_id
-                beaconDB.divisionDetails s ON o.org_id = s.org_id
             JOIN 
-                beaconDB.Beacons b ON s.div_id = b.div_id
                 beaconDB.Beacons b ON s.div_id = b.div_id
             JOIN 
                 beaconDB.BeaconVisited bv ON b.mac = bv.beacon_mac

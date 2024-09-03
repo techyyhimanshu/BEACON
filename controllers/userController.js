@@ -236,6 +236,8 @@ const getAllUsers = async (req, res) => {
             return res.status(403).json({ status: "failure", message: "Unauthorized" })
         }
     } catch (error) {
+        console.log(error.message);
+        
         return res.status(500).json({ status: "failure", message: "Internal server error" })
     }
 
@@ -373,7 +375,7 @@ const viewTime = async (req, res) => {
             }
         )
         if (data) {
-            return res.status(200).json({ status: "success", message: "Created successfully", data: data })
+            return res.status(200).json({ status: "success", data: data })
         }
         else {
             return res.status(200).json({ status: "fail", message: "data is not found" })

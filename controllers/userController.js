@@ -12,7 +12,7 @@ const trackUser = async (req, res) => {
     try {
         const userBeaconData = await db.sequelize.query(`
         SELECT Beacons.beacon_name,
-        ShopDetails.shop_name,
+        divisionDetails.div_name,
         OrganizationDetails.org_name,
         OrganizationDetails.address,
         BeaconVisited.location,

@@ -1,6 +1,6 @@
 const { Router } = require('express');
 const {createOrganization,getAllOrganization,getSingleOrganization,updateOrganization,
-    getOrganizationMenu,deleteOrganization,getShopsByOrganization, getAllBeaconOrgWise,
+    getOrganizationMenu,deleteOrganization,getDivisionByOrganization, getAllBeaconOrgWise,
     getOrganizationBeacons}=require('../controllers/organizationController');
 const verifyToken = require('../middlewares/authMiddleware');
 const router = Router();
@@ -13,7 +13,7 @@ router.get("/api/organization/beacons",getAllBeaconOrgWise)
 
 
 router.get("/api/organization/:id",getSingleOrganization)
-router.post("/api/organization/shops",getShopsByOrganization)
+router.post("/api/organization/divisions",getDivisionByOrganization)
 router.patch("/api/organization/:id",verifyToken,updateOrganization)
 router.delete("/api/organization/:id",verifyToken,deleteOrganization)
 router.get("/api/organization/:id/beacons",verifyToken,getOrganizationBeacons)

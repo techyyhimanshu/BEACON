@@ -5,7 +5,7 @@ const {
 const Category = require('./index');
 const organizationDetail = require('./index');
 module.exports = (sequelize, DataTypes) => {
-  class ShopDetails extends Model {
+  class DivisionDetails extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -15,8 +15,8 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
     }
   }
-  ShopDetails.init({
-    shop_id: {
+  DivisionDetails.init({
+    div_id: {
       type:DataTypes.INTEGER,
       primaryKey:true,
       autoIncrement:true
@@ -34,21 +34,21 @@ module.exports = (sequelize, DataTypes) => {
         }
       }
     },
-    shop_name: {
+    div_name: {
       type:DataTypes.STRING,
       allowNull:false,
       validate:{
         notNull:{
-          msg:"Shop name cannot be empty"
+          msg:"div name cannot be empty"
         }
       }
     },
-    shop_no:{
+    div_no:{
       type:DataTypes.STRING,
       allowNull:false,
       validate:{
         notNull:{
-          msg:"Shop number cannot be empty"
+          msg:"div number cannot be empty"
         }
       }
     },
@@ -97,7 +97,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     paranoid:true,
-    modelName: 'ShopDetails',
+    modelName: 'divisionDetails',
   });
-  return ShopDetails;
+  return DivisionDetails;
 };

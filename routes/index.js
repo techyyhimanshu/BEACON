@@ -1,7 +1,7 @@
 // routes/index.js
 const { Router } = require('express');
 const organizationRoute = require('./organizationRoute');
-const shopRoute = require('./shopRoute');
+const divisionRoute = require('./divisionRoute');
 const beaconRoute = require('./beaconRoute');
 const templateTypeRoute = require('./templateTypeRoute');
 const templateRoute = require('./templateRoute');
@@ -22,7 +22,7 @@ const likeRoute = require('./likeRoute');
 
 const routes = Router();
 routes.use(organizationRoute);
-routes.use(shopRoute);
+routes.use(divisionRoute);
 routes.use(beaconRoute);
 routes.use(likeRoute);
 routes.use(templateTypeRoute);

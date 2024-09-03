@@ -1,6 +1,6 @@
 const db = require("../models");
 const Beacon = db.Beacon;
-const Shop = db.Shop;
+const Division = db.Division
 const Template = db.template;
 const TemplateType = db.temptype;
 const BeaconVisited = db.BeaconVisited;
@@ -22,17 +22,17 @@ const addBeacon2 = async (req, res) => {
 
     try {
         // Input validation (Example: ensure required fields are present)
-        const { shop_id, beacon_name, mac, beacon_org } = req.body;
-        if (!shop_id || !beacon_name || !mac || !beacon_org) {
+        const { div_id, beacon_name, mac, beacon_org } = req.body;
+        if (!div_id || !beacon_name || !mac || !beacon_org) {
             return res.status(400).json({ status: "failure", message: "Missing required fields" });
         }
 
-        // Retrieve the shop by its primary key
-        const shop = await Shop.findByPk(shop_id, { transaction });
+        // Retrieve the div by its primary key
+        const div = await Division.findByPk(div_id, { transaction });
 
-        if (!shop) {
+        if (!div) {
             await transaction.rollback();
-            return res.status(404).json({ status: "failure", message: "Shop not found" });
+            return res.status(404).json({ status: "failure", message: "div not found" });
         }
 
         // Attempt to create a new beacon entry
@@ -40,7 +40,7 @@ const addBeacon2 = async (req, res) => {
             const data = await Beacon.create({
                 beacon_name,
                 mac,
-                shop_id,
+                div_id,
                 beacon_org
             }, { transaction });
 
@@ -59,7 +59,7 @@ const addBeacon2 = async (req, res) => {
                 
                 if (existingBeacon && existingBeacon.deletedAt) {
                     // Revoke soft delete
-                    existingBeacon.shop_id = shop_id;
+                    existingBeacon.div_id = div_id;
                     existingBeacon.beacon_org = beacon_org;
                     existingBeacon.beacon_name = beacon_name;
                     existingBeacon.deletedAt = null; // Restore the record
@@ -94,19 +94,19 @@ const addBeacon2 = async (req, res) => {
 // Function to add a new beacon
 const addBeacon = async (req, res) => {
     try {
-        // Retrieve the shop by its primary key (shop_id) from the request body
-        const shop = await Shop.findByPk(req.body.shop_id);
+        // Retrieve the div by its primary key (div_id) from the request body
+        const div = await Division.findByPk(req.body.div_id);
         if(req.body.beacon_org == undefined )
         { req.body.beacon_org = null  }
-        // If the shop is not found, return a 404 error response
-        if (!shop) {
-            return res.status(404).json({ status: "failure", message: "Shop not found" });
+        // If the div is not found, return a 404 error response
+        if (!div) {
+            return res.status(404).json({ status: "failure", message: "div not found" });
         }
         // Create a new beacon entry using the data from the request body
         const data = await Beacon.create({
             beacon_name: req.body.beacon_name,
             mac: req.body.mac,
-            shop_id: req.body.shop_id,
+            div_id: req.body.div_id,
             beacon_org : req.body.beacon_org
 
         });
@@ -139,12 +139,12 @@ const addBeacon = async (req, res) => {
                 };
                 const revokeData = await db.sequelize.query(`
                     UPDATE beaconDB.Beacons 
-                    SET shop_id = ?, template_id = null ,
+                    SET div_id = ?, template_id = null ,
                     createdAt = CURRENT_TIMESTAMP(), deletedAt = null,
                     beacon_org = ?, beacon_name = ? WHERE (mac = ?);
                     `, { 
                     type: Sequelize.QueryTypes.UPDATE,
-                    replacements : [req.body.shop_id,req.body.beacon_org,req.body.beacon_name,req.body.mac,]
+                    replacements : [req.body.div_id,req.body.beacon_org,req.body.beacon_name,req.body.mac,]
                 });
                 console.log("revoke data" ,revokeData[0]);
                 if(revokeData[1] > 0){
@@ -173,8 +173,8 @@ const getAllBeacons = async (req, res) => {
                 Beacons.mac,
                 Beacons.beacon_org,
                 COUNT(BeaconVisited.beacon_mac) as connectedUsers,
-                Beacons.shop_id AS div_Id,
-                ShopDetails.shop_name as div_name,
+                Beacons.div_id AS div_Id,
+                divisionDetails.div_name as div_name,
                 COALESCE(OrganizationDetails.org_id, 'NOT LINKED' ) as org_id,
                 COALESCE(OrganizationDetails.org_name, 'NOT LINKED') as org_name,
                 Beacons.template_id,
@@ -182,9 +182,9 @@ const getAllBeacons = async (req, res) => {
             FROM 
                 beaconDB.Beacons
             LEFT JOIN 
-                beaconDB.ShopDetails ON Beacons.shop_id = ShopDetails.shop_id
+                beaconDB.divisionDetails ON Beacons.div_id = divisionDetails.div_id
             LEFT JOIN 
-                beaconDB.OrganizationDetails ON ShopDetails.org_id = OrganizationDetails.org_id
+                beaconDB.OrganizationDetails ON divisionDetails.org_id = OrganizationDetails.org_id
             LEFT JOIN 
                 tbl_templates ON Beacons.template_id = tbl_templates.temp_id
             LEFT JOIN 
@@ -192,7 +192,7 @@ const getAllBeacons = async (req, res) => {
             WHERE beaconDB.Beacons.deletedAt IS NULL
             GROUP BY 
                 Beacons.beacon_id,
-                Beacons.shop_id,
+                Beacons.div_id,
                 OrganizationDetails.org_id;
             `, {
                 type: Sequelize.QueryTypes.SELECT
@@ -256,11 +256,11 @@ const getBeaconsList = async (req, res) => {
 //             attributes: ["template_id"],
 //             where: { mac: macAddress },
 //             include: {
-//                 model: Shop,
+//                 model: div,
 //                 attributes: ["org_id"]
 //             }
 //         });
-//         console.log(beaconData.ShopDetail.dataValues.org_id);
+//         console.log(beaconData.divDetail.dataValues.org_id);
 
 //         // If beacon data is found, proceed to find the associated template
 //         if (beaconData) {
@@ -289,7 +289,7 @@ const getBeaconsList = async (req, res) => {
 //                         where: { templateType_id: templateData.templateType_id }
 //                     });
 //                     var launchUrl = "";
-//                     const staticPath = templateTypeData.template_path + "?orgId=" + beaconData.ShopDetail.dataValues.org_id
+//                     const staticPath = templateTypeData.template_path + "?orgId=" + beaconData.divDetail.dataValues.org_id
 //                     // if(staticPath[staticPath.length -1]!='/')
 //                     // {
 //                     //     staticPath = staticPath + '/';
@@ -315,7 +315,7 @@ const getBeaconsList = async (req, res) => {
 //                     }
 //                     launchUrlOrg = {
 //                         url: launchUrl,
-//                         org_id: beaconData.ShopDetail.dataValues.org_id
+//                         org_id: beaconData.divDetail.dataValues.org_id
 //                     }
 //                     return launchUrlOrg;
 //                 } else {
@@ -412,20 +412,20 @@ const updateBeacon = async (req, res) => {
         // Retrieve the beacon by its primary key (beacon_id) from the request body
         const beaconData = await Beacon.findByPk(req.body.beacon_id);
 
-        // If the shop is not found, return a 404 error response
+        // If the div is not found, return a 404 error response
         if (!beaconData) {
             return res.status(404).json({ status: "failure", message: "Beacon not found" });
         }
-        // Retrieve the shop by its primary key (shop_id) from the request body
-        const shopData = await Shop.findByPk(req.body.shop_id);
-        if (!shopData) {
-            return res.status(404).json({ status: "failure", message: "Shop not found" });
+        // Retrieve the div by its primary key (div_id) from the request body
+        const divData = await Division.findByPk(req.body.div_id);
+        if (!divData) {
+            return res.status(404).json({ status: "failure", message: "div not found" });
         }
 
         // Create a new beacon entry using the data from the request body
         const data = await Beacon.update({
             beacon_name: req.body.beacon_name,
-            shop_id: req.body.shop_id,
+            div_id: req.body.div_id,
             beacon_org : req.body.beacon_org,
         }, {
             where: {
@@ -460,7 +460,7 @@ const deleteBeacon = async (req, res) => {
         // Retrieve the beacon by its primary key (beacon_id) from the request body
         const beaconData = await Beacon.findByPk(req.params.id);
 
-        // If the shop is not found, return a 404 error response
+        // If the div is not found, return a 404 error response
         if (!beaconData) {
             return res.status(404).json({ status: "failure", message: "Beacon not found" });
         }
@@ -493,8 +493,8 @@ const getSingleBeacon = async (req, res) => {
             Beacons.mac,
             Beacons.beacon_org,
             COUNT(BeaconVisited.beacon_mac) as connectedUsers,
-            Beacons.shop_id AS div_Id,
-            ShopDetails.shop_name as div_name,
+            Beacons.div_id AS div_Id,
+            divisionDetails.div_name as div_name,
             COALESCE(OrganizationDetails.org_id, NULL) as org_id,
             COALESCE(OrganizationDetails.org_name, NULL) as org_name,
             Beacons.template_id,
@@ -502,9 +502,9 @@ const getSingleBeacon = async (req, res) => {
         FROM 
             beaconDB.Beacons
         LEFT JOIN 
-            beaconDB.ShopDetails ON Beacons.shop_id = ShopDetails.shop_id
+            beaconDB.divisionDetails ON Beacons.div_id = divisionDetails.div_id
         LEFT JOIN 
-            beaconDB.OrganizationDetails ON ShopDetails.org_id = OrganizationDetails.org_id
+            beaconDB.OrganizationDetails ON divisionDetails.org_id = OrganizationDetails.org_id
         LEFT JOIN 
             tbl_templates ON Beacons.template_id = tbl_templates.temp_id
         LEFT JOIN 
@@ -513,7 +513,7 @@ const getSingleBeacon = async (req, res) => {
             Beacons.beacon_id = ? and Beacons.deletedAt is null
         GROUP BY 
             Beacons.beacon_id,
-            Beacons.shop_id,
+            Beacons.div_id,
             OrganizationDetails.org_id;
         `, {
             type: Sequelize.QueryTypes.SELECT,

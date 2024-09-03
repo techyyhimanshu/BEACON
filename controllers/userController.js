@@ -12,16 +12,16 @@ const trackUser = async (req, res) => {
     try {
         const userBeaconData = await db.sequelize.query(`
         SELECT Beacons.beacon_name,
-        ShopDetails.shop_name,
+        divisionDetails.div_name,
         OrganizationDetails.org_name,
         OrganizationDetails.address,
         BeaconVisited.location,
         BeaconVisited.createdAt
-        FROM BeaconVisited ,OrganizationDetails,Beacons,ShopDetails
+        FROM BeaconVisited ,OrganizationDetails,Beacons,divisionDetails
         WHERE  BeaconVisited.user_mac= ?
         AND Beacons.mac = BeaconVisited.beacon_mac
-        AND  Beacons.shop_id = ShopDetails.shop_id
-        AND  OrganizationDetails.org_id=ShopDetails.org_id
+        AND  Beacons.div_id = divisionDetails.div_id
+        AND  OrganizationDetails.org_id=divisionDetails.org_id
         ORDER BY BeaconVisited.createdAt DESC;`,
             {
                 type: Sequelize.QueryTypes.SELECT,
@@ -119,9 +119,9 @@ const orgWeeklyUsers = async (req, res) => {
                 select o.org_name,o.org_id,count(distinct bv.user_mac) as total_user_count
                 from OrganizationDetails o
                 join 
-                    ShopDetails s on s.org_id=o.org_id
+                    divisionDetails s on s.org_id=o.org_id
                 join 
-                    Beacons b on b.shop_id=s.shop_id
+                    Beacons b on b.div_id=s.div_id
                 join
                     BeaconVisited bv on bv.beacon_mac=b.mac
                 where o.org_id=?
@@ -137,12 +137,12 @@ const orgWeeklyUsers = async (req, res) => {
             return res.status(404).json({ status: "failure", message: "Not found" })
         }
         const weeklyBeacons = await db.sequelize.query(`
-            select b.beacon_name,s.shop_name as division_name,b.beacon_id,count(distinct bv.user_mac) as user_count
+            select b.beacon_name,s.div_name as division_name,b.beacon_id,count(distinct bv.user_mac) as user_count
                 from OrganizationDetails o
                 join 
-                    ShopDetails s on s.org_id=o.org_id
+                    divisionDetails s on s.org_id=o.org_id
                 join 
-                    Beacons b on b.shop_id=s.shop_id
+                    Beacons b on b.div_id=s.div_id
                 join
                     BeaconVisited bv on bv.beacon_mac=b.mac
                 where o.org_id=?
@@ -175,9 +175,9 @@ const orgMonthlyUsers = async (req, res) => {
                 FROM 
                     beaconDB.OrganizationDetails o
                 JOIN 
-                    beaconDB.ShopDetails s ON o.org_id = s.org_id
+                    beaconDB.divisionDetails s ON o.org_id = s.org_id
                 JOIN 
-                    beaconDB.Beacons b ON s.shop_id = b.shop_id
+                    beaconDB.Beacons b ON s.div_id = b.div_id
                 JOIN 
                     beaconDB.BeaconVisited bv ON b.mac = bv.beacon_mac
                 WHERE 
@@ -195,14 +195,14 @@ const orgMonthlyUsers = async (req, res) => {
         const beaconData = await db.sequelize.query(`SELECT 
             b.beacon_id,
             b.beacon_name,
-            s.shop_name as division_name,
+            s.div_name as division_name,
             COUNT(distinct bv.user_mac) AS user_visited
             FROM 
             beaconDB.OrganizationDetails o
             JOIN 
-                beaconDB.ShopDetails s ON o.org_id = s.org_id
+                beaconDB.divisionDetails s ON o.org_id = s.org_id
             JOIN 
-                beaconDB.Beacons b ON s.shop_id = b.shop_id
+                beaconDB.Beacons b ON s.div_id = b.div_id
             JOIN 
                 beaconDB.BeaconVisited bv ON b.mac = bv.beacon_mac
             WHERE 
@@ -224,9 +224,11 @@ const getAllUsers = async (req, res) => {
 
     try {
         if (req.username === 'cit_superadmin') {
-            const users = await User.findAll({})
-            if (users) {
-                return res.status(200).json({ status: "success", data: users })
+            const {count,rows} = await User.findAndCountAll({
+                attributes : [`user_id`, `device_id`, `last_location`, `full_name`, `gender`, `dob`, `phone`, `email`]
+            });
+            if (rows) {
+                return res.status(200).json({ status: "success",count:count, data: rows })
             } else {
                 return res.status(404).json({ status: "failure", message: "Not found" })
             }

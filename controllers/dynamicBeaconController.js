@@ -84,13 +84,13 @@ const beaconVisited = async (data) => {
         const [data2, user] = await Promise.all([
             BeaconVisited.create({
                 beacon_mac: data.mac,
-                device_id: uniqueId,
+                user_mac: uniqueId,
                 location: data.location,
                 temp_id: data.temp_id
             }),
             User.findOne({
-                attributes: ['device_id', 'last_location'],
-                where: { device_id: uniqueId }
+                attributes: ['beacon_mac', 'last_location'],
+                where: { beacon_mac: uniqueId }
             })
         ]);
 

@@ -17,86 +17,105 @@ module.exports = (sequelize, DataTypes) => {
   }
   DivisionDetails.init({
     div_id: {
-      type:DataTypes.INTEGER,
-      primaryKey:true,
-      autoIncrement:true
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true
     },
-    org_id:{
+    org_id: {
       allowNull: false,
       type: DataTypes.INTEGER,
       // references: {
       //   model:organizationdetail,
       //   key: 'org_id'
       // },
-      validate:{
-        notNull:{
-          msg:"Organization cannot be empty"
+      validate: {
+        notNull: {
+          msg: "Organization id cannot be null"
+        },
+        notEmpty: {
+          msg: "Organization id cannot be empty"
         }
       }
     },
     div_name: {
-      type:DataTypes.STRING,
-      allowNull:false,
-      validate:{
-        notNull:{
-          msg:"div name cannot be empty"
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        notNull: {
+          msg:"Division name cannot be null"
+        },
+        notEmpty: {
+          msg: "Division name cannot be empty"
         }
       }
     },
-    div_no:{
-      type:DataTypes.STRING,
-      allowNull:false,
-      validate:{
-        notNull:{
-          msg:"div number cannot be empty"
+    div_no: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique:true,
+      validate: {
+        notNull: {
+          msg: "Division number cannot be null"
+                },
+        notEmpty: {
+          msg: "Division number cannot be empty"
         }
       }
     },
     category: {
-      type:DataTypes.STRING,
-      allowNull:false,
+      type: DataTypes.STRING,
+      allowNull: false,
       // references: {
       //   model:Category,
       //   key: 'category_id'
       // },
-      validate:{
-        notNull:{
-          msg:"Category cannot be empty"
+      validate: {
+        notNull: {
+          msg: "Category cannot be empty"
+        },
+        notEmpty:{
+          msg: "Category cannot be empty"
         }
       }
     },
-    contact_number:{
-      type:DataTypes.STRING,
-      allowNull:false,
-      validate:{
-        notNull:{
-          msg:"Contact number cannot be empty"
+    contact_number: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        notNull: {
+          msg: "Contact number cannot be empty"
         },
-        isNumeric:{
-          msg:"Contact number is invalid"
+        notEmpty:{
+          msg: "Contact number cannot be empty"
         },
-        len:{
-          args:[10,10],
-          msg:"Contact number must be 10 digits long"
+        isNumeric: {
+          msg: "Contact number is invalid"
+        },
+        len: {
+          args: [10, 10],
+          msg: "Contact number must be 10 digits long"
         }
 
       }
     },
     email: {
-      type:DataTypes.STRING,
-      allowNull:false,
-      validate:{
-        notNull:{
-          msg:"Email cannot be empty"
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        notNull: {
+          msg: "Email cannot be empty"
         },
-        isEmail:{
-          msg:"Email address is invalid"
+        notEmpty:{
+          msg: "Email cannot be empty"
+        },
+        isEmail: {
+          msg: "Email address is invalid"
         }
       }
     }
   }, {
     sequelize,
-    paranoid:true,
+    paranoid: true,
     modelName: 'divisionDetails',
   });
   return DivisionDetails;

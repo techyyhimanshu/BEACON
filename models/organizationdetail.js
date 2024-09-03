@@ -15,56 +15,79 @@ module.exports = (sequelize, DataTypes) => {
   }
   OrganizationDetail.init({
     org_id: {
-      type:DataTypes.INTEGER,
-      primaryKey:true,
-      autoIncrement:true,
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
     },
     org_name: {
-      type:DataTypes.STRING,
-      allowNull:false,
-      validate:{
-        notNull:{
-          msg:"Organization name cannot be empty"
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        notNull: {
+          msg: "Organization name cannot be null"
+        },
+        notEmpty: {
+          msg: "Organization name cannot be empty"
         }
       }
     },
-    address:{
-      type:DataTypes.STRING,
-      allowNull:false,
-      validate:{
-        notNull:{
-          msg:"Address cannot be empty"
+    address: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        notNull: {
+          msg: "Address cannot be null"
+        },
+        notEmpty: {
+          msg: "Address cannot be empty"
         }
       }
     },
-    contact_number:{
-      type:DataTypes.STRING,
-      allowNull:false,
-      validate:{
-        notNull:{
-          msg:"Contact number cannot be empty"
+    contact_number: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: {
+        name: "contact_number_UNIQUE",
+        msg: "Contact number already exist"
+      },
+      validate: {
+        notNull: {
+          msg: "Contact number cannot be null"
         },
-        isNumeric:{
-          msg:"Contact number is not correct"
+        notEmpty: {
+          msg: "Contact number cannot be empty"
         },
-        len:{
-          args:[10,10],
-          msg:"Contact number must be 10 digits only"
+        isNumeric: {
+          msg: "Contact number is not correct"
+        },
+        len: {
+          args: [10, 10],
+          msg: "Contact number must be 10 digits only"
         }
       }
     },
     email: {
-      type:DataTypes.STRING,
-      unique :true,
-      validate:{
-        isEmail:{
-          msg:"Email address is invalid"
-        }
+      type: DataTypes.STRING,
+      unique: true,
+      allowNull: false,
+      validate: {
+          customValidator(value) {
+              if (value === null) {
+                  throw new Error("Email cannot be null");
+              }
+              if (value === '') {
+                  throw new Error("Email cannot be empty");
+              }
+              if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+                  throw new Error("Email address is invalid");
+              }
+          }
       }
-    },
+  }
+  
   }, {
     sequelize,
-    paranoid:true,
+    paranoid: true,
     modelName: 'OrganizationDetail',
   });
   return OrganizationDetail;

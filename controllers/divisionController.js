@@ -11,6 +11,12 @@ const createDivision = async (req, res) => {
         const username = req.username
         if (username === "cit_superadmin") {
             const { div_name, div_no, category, contact_number, email, org_id } = req.body
+            if(!category){
+                return res.status(400).json({status:"failure", message: "Category id cannot be empty" })
+            }
+            if(!org_id){
+                return res.status(400).json({status:"failure", message: "Organization id cannot be empty" })
+            }
             const categoryID = await db.Category.findOne({
                 where: { category_id: category }
             })
@@ -45,8 +51,8 @@ const createDivision = async (req, res) => {
                 if (errorMessages.includes('email must be unique'))
                     {
                         const Data = await db.sequelize.query(`
-                            SELECT deletedAt FROM OrganizationDetails
-                            WHERE OrganizationDetails.email = ? ;
+                            SELECT deletedAt FROM divisionDetails
+                            WHERE divisionDetails.email = ? ;
                             `, { 
                             type: Sequelize.QueryTypes.SELECT,
                             replacements : [req.body.email]
@@ -58,17 +64,17 @@ const createDivision = async (req, res) => {
                             return res.status(400).json({ status: "failure", message: "Email address already in use" });
                         };
                         const revokeData = await db.sequelize.query(`
-                            UPDATE beaconDB.OrganizationDetails 
-                            SET org_name = ?, address = ? ,
-                            createdAt = CURRENT_TIMESTAMP(), deletedAt = null,
-                            contact_number = ? WHERE (email = ?);
+                            UPDATE beaconDB.divisionDetails 
+                            SET div_name = ?,div_no=?,category=?,contact_number=?,org_id=?,
+                            createdAt = CURRENT_TIMESTAMP(), deletedAt = null
+                             WHERE email = ?;
                             `, { 
                             type: Sequelize.QueryTypes.UPDATE,
-                            replacements : [req.body.org_name,req.body.address,req.body.contact_number,req.body.email,]
+                            replacements : [req.body.div_name,req.body.div_no,req.body.category,req.body.contact_number,req.body.org_id,req.body.email,]
                         });
                         console.log("revoke data" ,revokeData[0]);
                         if(revokeData[1] > 0){
-                            return res.status(200).json({ status: "success", message: "Org Created successfully" });
+                            return res.status(200).json({ status: "success", message: "Division Created successfully" });
                         }
                     };
                 return res.status(400).json({ status: "failure", message: errorMessages });
@@ -77,6 +83,8 @@ const createDivision = async (req, res) => {
                 return res.status(400).json({ status: "failure", message: "something went wrong" });
             }
         }
+        console.log(error);
+        
         return res.status(500).json({ status: "failure", message: "Internal Server Error"})
     }
 
@@ -114,7 +122,7 @@ const getSingleDivision = async (req, res) => {
             res.status(200).json({ status: "success", data: division })
         }
         else {
-            res.status(404).json({ status: "failure", message: "Not found" })
+            res.status(200).json({ status: "failure", message: "Not found" })
         }
     } catch (error) {
         res.status(500).json({ status: "failure", message: "Internal Server Error" });
@@ -189,8 +197,11 @@ const updateDivision = async (req, res) => {
             res.status(403).json({ status: "failure", message: "Unauthorized" })
         }
     } catch (error) {
-        console.log(error.message);
-        res.status(500).json({ status: "failure" });
+        if (error instanceof Sequelize.ValidationError) {
+            const errorMessages = error.errors.map(err => err.message);
+            return res.status(400).json({ status: "failure", message: errorMessages})
+        }
+        return  res.status(500).json({ status: "failure", message: "Internal Server Error" });
     }
 
 }
@@ -264,7 +275,7 @@ const getDivBeacon = async (req, res) => {
         if (divBeacons.length !== 0) {
             res.status(200).json({ status: "success", data: divBeacons })
         } else {
-            res.status(404).json({ status: "Not found", message: "no beacon added to this div" })
+            res.status(200).json({ status: "failure", data:divBeacons })
         }
     } catch (e) { res.status(500).json({ status: "failure", message: "Internal Server Error" }); }
 }

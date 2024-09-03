@@ -18,8 +18,9 @@ const createOrganization = async (req, res) => {
             const { org_name, address, contact_number, email } = req.body
             const data = await Organization.create(req.body)
             if (data) {
-                res.status(200).json({ status: "success", message: "Created successfully" })
+                return res.status(200).json({ status: "success", message: "Created successfully" })
             }
+            return res.status(200).json({ status: "failure", message: "Error occured" })
         } else {
             res.status(401).json({ status: "failure", message: "Unauthorized" })
         }
@@ -63,7 +64,7 @@ const createOrganization = async (req, res) => {
                 }
             } else{
             console.log(error.name, error.message); 
-            return res.status(400).json({ status: "failure", message: error.message });
+            return res.status(500).json({ status: "failure", message: "Internal server error" });
         }
     
     }
@@ -167,7 +168,7 @@ const getDivisionByOrganization = async (req, res) => {
         if (data.length === 0) {
             // if(data.length==0)
             // {
-            res.status(200).json({ status: "failure", data: "organization not found" })
+            res.status(200).json({ status: "success", data: data })
             // }
         }
         else {

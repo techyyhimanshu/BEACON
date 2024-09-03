@@ -227,7 +227,7 @@ const getAllUsers = async (req, res) => {
     try {
         if (req.username === 'cit_superadmin') {
             const {count,rows} = await User.findAndCountAll({
-                attributes : [`user_id`, `device_id`, `last_location`, `full_name`, `gender`, `dob`, `phone`, `email`]
+                attributes : [`user_id`, `device_id`, `last_location`, `full_name`, `gender`, [db.sequelize.fn('date', db.sequelize.col('dob')), 'dob'], `phone`, `email`]
             });
             if (rows) {
                 return res.status(200).json({ status: "success",count:count, data: rows })

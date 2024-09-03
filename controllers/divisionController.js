@@ -76,7 +76,35 @@ const createDivision = async (req, res) => {
                         if(revokeData[1] > 0){
                             return res.status(200).json({ status: "success", message: "Division Created successfully" });
                         }
-                    };
+                } else if (errorMessages.includes('contact_number must be unique'))
+                    {
+                        const Data = await db.sequelize.query(`
+                            SELECT deletedAt FROM divisionDetails
+                            WHERE divisionDetails.contact_number = ? ;
+                            `, { 
+                            type: Sequelize.QueryTypes.SELECT,
+                            replacements : [req.body.email]
+                        });
+                        console.log("deleted data",Data[0].deletedAt);
+                        
+                        if(Data[0].deletedAt == null){
+                            // beacon is already in table
+                            return res.status(400).json({ status: "failure", message: "contact_number already in use" });
+                        };
+                        const revokeData = await db.sequelize.query(`
+                            UPDATE beaconDB.divisionDetails 
+                            SET div_name = ?,div_no=?,category=?,email=?,org_id=?,
+                            createdAt = CURRENT_TIMESTAMP(), deletedAt = null
+                             WHERE contact_number = ?;
+                            `, { 
+                            type: Sequelize.QueryTypes.UPDATE,
+                            replacements : [req.body.div_name,req.body.div_no,req.body.category,req.body.email,req.body.org_id,req.body.contact_number]
+                        });
+                        console.log("revoke data" ,revokeData[0]);
+                        if(revokeData[1] > 0){
+                            return res.status(200).json({ status: "success", message: "Division Created successfully" });
+                        }
+                    }; 
                 return res.status(400).json({ status: "failure", message: errorMessages });
             } catch(e) {
                 console.log(e.message);

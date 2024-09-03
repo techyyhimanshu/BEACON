@@ -37,7 +37,7 @@ Object.keys(db).forEach(modelName => {
   }
 });
 // Load and attach models
-db.Shop = require('./shopdetails')(sequelize, DataTypes);
+db.Division = require('./divisionDetails')(sequelize, DataTypes);
 db.Organization = require('./organizationdetail')(sequelize, DataTypes);
 db.Category = require('./category')(sequelize, DataTypes);
 db.Beacon = require('./beacon')(sequelize, DataTypes);
@@ -86,14 +86,14 @@ db.Beacon.belongsTo(db.template,{foreignKey:'template_id'})
 db.Category.hasMany(db.temptype,{foreignKey:'category_id'})
 db.temptype.belongsTo(db.Category,{foreignKey:'category_id'})
 
-db.Organization.hasMany(db.Shop,{foreignKey:"org_id"})
-db.Shop.belongsTo(db.Organization,{foreignKey:"org_id"})
+db.Organization.hasMany(db.Division,{foreignKey:"org_id"})
+db.Division.belongsTo(db.Organization,{foreignKey:"org_id"})
 
-db.Category.hasMany(db.Shop,{foreignKey:'category'})
-db.Shop.belongsTo(db.Category,{foreignKey:'category'})
+db.Category.hasMany(db.Division,{foreignKey:'category'})
+db.Division.belongsTo(db.Category,{foreignKey:'category'})
 
-db.Shop.hasOne(db.Beacon,{foreignKey:'shop_id'})
-db.Beacon.belongsTo(db.Shop,{foreignKey:'shop_id'})
+db.Division.hasOne(db.Beacon,{foreignKey:'div_id'})
+db.Beacon.belongsTo(db.Division,{foreignKey:'div_id'})
 
 db.BeaconTemplate.hasMany(db.template,{foreignKey:'template_id'})
 db.template.belongsTo(db.BeaconTemplate,{foreignKey:'template_id'})

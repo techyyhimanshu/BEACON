@@ -2,7 +2,7 @@ const db = require("../models")
 const argon2 = require("argon2")
 const jwt = require("jsonwebtoken")
 const Organization = db.Organization
-const Shop = db.Shop
+const Division = db.Division
 const Beacon = db.Beacon
 const Template = db.template
 const TemplateType = db.temptype
@@ -26,11 +26,50 @@ const createOrganization = async (req, res) => {
     } catch (error) {
         if (error instanceof Sequelize.ValidationError) {
             const errorMessages = error.errors.map(err => err.message);
-            res.status(400).json({ status: "failure", message: errorMessages });
+            try{
+                if (errorMessages.includes('email must be unique'))
+                    {
+                        const Data = await db.sequelize.query(`
+                            SELECT deletedAt FROM OrganizationDetails
+                            WHERE OrganizationDetails.email = ? ;
+                            `, { 
+                            type: Sequelize.QueryTypes.SELECT,
+                            replacements : [req.body.email]
+                        });
+                        console.log("deleted data",Data[0].deletedAt);
+                        
+                        if(Data[0].deletedAt == null){
+                            // beacon is already in table
+                            return res.status(400).json({ status: "failure", message: "Email address already in use" });
+                        };
+                        const revokeData = await db.sequelize.query(`
+                            UPDATE beaconDB.OrganizationDetails 
+                            SET org_name = ?, address = ? ,
+                            createdAt = CURRENT_TIMESTAMP(), deletedAt = null,
+                            contact_number = ? WHERE (email = ?);
+                            `, { 
+                            type: Sequelize.QueryTypes.UPDATE,
+                            replacements : [req.body.org_name,req.body.address,req.body.contact_number,req.body.email,]
+                        });
+                        console.log("revoke data" ,revokeData[0]);
+                        if(revokeData[1] > 0){
+                            return res.status(200).json({ status: "success", message: "Org Created successfully" });
+                        }
+                    };
+                    return res.status(400).json({ status: "failure", message: errorMessages });
+                } catch(e) {
+                    console.log(e.message);
+                    return res.status(400).json({ status: "failure", message: "something went wrong" });
+                }
+            } else{
+            console.log(error.name, error.message); 
+            return res.status(400).json({ status: "failure", message: error.message });
         }
+    
     }
-
 }
+
+
 const getAllOrganization = async (req, res) => {
     try {
         const data = await Organization.findAll({
@@ -105,10 +144,10 @@ const deleteOrganization = async (req, res) => {
 
 }
 
-const getShopsByOrganization = async (req, res) => {
+const getDivisionByOrganization = async (req, res) => {
     try {
-        const data = await Shop.findAll({
-            attributes: ['shop_id', 'shop_name', 'shop_no'],
+        const data = await Division.findAll({
+            attributes: ['div_id', 'div_name', 'div_no'],
             where: {
                 org_id: req.body.org_id
             },
@@ -118,9 +157,9 @@ const getShopsByOrganization = async (req, res) => {
             }]
         })
         //const catName = data[0].dataValues.Category.category_name
-        // const shops = data.map(shop => ({
-        //     shop_name: shop.dataValues.shop_name,
-        //     shop_no: shop.dataValues.shop_no,
+        // const divs = data.map(div => ({
+        //     div_name: div.dataValues.div_name,
+        //     div_no: div.dataValues.div_no,
         //     category: catName
         // }));
         console.log(data);
@@ -140,8 +179,6 @@ const getShopsByOrganization = async (req, res) => {
     }
 
 }
-
-
 // get beacon url
 function getDifference(date_1, date_2) {
     let date1 = new Date(date_1);
@@ -170,7 +207,7 @@ async function findUrl(macAddress) {
             attributes: ["template_id"],
             where: { mac: macAddress },
             include: {
-                model: Shop,
+                model: div,
                 attributes: ["org_id"]
             }
         });
@@ -205,7 +242,7 @@ async function findUrl(macAddress) {
                         where: { templateType_id: templateData.templateType_id }
                     });
                     var launchUrl = "";
-                    const staticPath = templateTypeData.template_path + "?orgId=" + beaconData.ShopDetail.dataValues.org_id
+                    const staticPath = templateTypeData.template_path + "?orgId=" + beaconData.divDetail.dataValues.org_id
                     // if(staticPath[staticPath.length -1]!='/')
                     // {
                     //     staticPath = staticPath + '/';
@@ -231,7 +268,7 @@ async function findUrl(macAddress) {
                     }
                     launchUrlOrg = {
                         url: launchUrl,
-                        org_id: beaconData.ShopDetail.dataValues.org_id
+                        org_id: beaconData.divDetail.dataValues.org_id
                     }
                     //console.log(launchUrlOrg);
 
@@ -296,9 +333,9 @@ const getOrganizationBeacons2 = async (req, res) => {
         const orgBeacons = await db.sequelize.query(`
             select beacon_id,beacon_name,mac 
             from beaconDB.Beacons 
-            where shop_id in
-            (select shop_id 
-            from beaconDB.ShopDetails 
+            where div_id in
+            (select div_id 
+            from beaconDB.divisionDetails 
             where org_id=?)`,
             {
                 type: Sequelize.QueryTypes.SELECT,
@@ -344,9 +381,9 @@ const getOrganizationBeacons = async (req, res) => {
         FROM 
             beaconDB.OrganizationDetails o
         JOIN 
-            beaconDB.ShopDetails s ON o.org_id = s.org_id
+            beaconDB.divisionDetails s ON o.org_id = s.org_id
         JOIN 
-            beaconDB.Beacons b ON s.shop_id = b.shop_id
+            beaconDB.Beacons b ON s.div_id = b.div_id
         WHERE 
             o.org_id = ?
         GROUP BY 
@@ -368,18 +405,18 @@ const getOrganizationBeacons = async (req, res) => {
                     THEN
                         CASE
                             WHEN ((templates.offer_data_1!= "" OR templates.offer_data_1 != NULL) AND (templates.offer_data_2!= "" OR templates.offer_data_2 != NULL)) 
-                            THEN CONCAT(tempTypes.template_path,"?orgId=",ShopDetails.org_id,"&&offertext=" ,templates.offer_data_1,"&&offerdata=",templates.offer_data_2)
+                            THEN CONCAT(tempTypes.template_path,"?orgId=",divisionDetails.org_id,"&&offertext=" ,templates.offer_data_1,"&&offerdata=",templates.offer_data_2)
                             WHEN (templates.offer_data_1!= "" OR templates.offer_data_1 != NULL) 
-                            THEN CONCAT(tempTypes.template_path,"?orgId=",ShopDetails.org_id,"&&offertext=",templates.offer_data_1)
+                            THEN CONCAT(tempTypes.template_path,"?orgId=",divisionDetails.org_id,"&&offertext=",templates.offer_data_1)
                             WHEN (templates.offer_data_2!= "" OR templates.offer_data_2 != NULL) 
-                            THEN CONCAT(tempTypes.template_path,"?orgId=",ShopDetails.org_id,"&&offerdata=",templates.offer_data_2)
-                        ELSE CONCAT(tempTypes.template_path,"?orgId=",ShopDetails.org_id)
+                            THEN CONCAT(tempTypes.template_path,"?orgId=",divisionDetails.org_id,"&&offerdata=",templates.offer_data_2)
+                        ELSE CONCAT(tempTypes.template_path,"?orgId=",divisionDetails.org_id)
                         END 
                     ELSE 'OFFER NOT VALID'
                 END as URL
-            FROM beaconDB.ShopDetails,beaconDB.Beacons,beaconDB.templates,beaconDB.tempTypes
-            WHERE ShopDetails.org_id= ?
-            AND Beacons.shop_id = ShopDetails.shop_id
+            FROM beaconDB.divisionDetails,beaconDB.Beacons,beaconDB.templates,beaconDB.tempTypes
+            WHERE divisionDetails.org_id= ?
+            AND Beacons.div_id = divisionDetails.div_id
             AND Beacons.template_id = templates.template_id
             AND tempTypes.templateType_id = templates.templateType_id;`,
             {
@@ -412,18 +449,18 @@ const getOrganizationMenu = async (req, res) => {
                     THEN
                         CASE
                             WHEN ((templates.offer_data_1!= "" OR templates.offer_data_1 != NULL) AND (templates.offer_data_2!= "" OR templates.offer_data_2 != NULL)) 
-                            THEN CONCAT(tempTypes.template_path,"?orgId=",ShopDetails.org_id,"&&offertext=" ,templates.offer_data_1,"&&offerdata=",templates.offer_data_2)
+                            THEN CONCAT(tempTypes.template_path,"?orgId=",divisionDetails.org_id,"&&offertext=" ,templates.offer_data_1,"&&offerdata=",templates.offer_data_2)
                             WHEN (templates.offer_data_1!= "" OR templates.offer_data_1 != NULL) 
-                            THEN CONCAT(tempTypes.template_path,"?orgId=",ShopDetails.org_id,"&&offertext=",templates.offer_data_1)
+                            THEN CONCAT(tempTypes.template_path,"?orgId=",divisionDetails.org_id,"&&offertext=",templates.offer_data_1)
                             WHEN (templates.offer_data_2!= "" OR templates.offer_data_2 != NULL) 
-                            THEN CONCAT(tempTypes.template_path,"?orgId=",ShopDetails.org_id,"&&offerdata=",templates.offer_data_2)
-                        ELSE CONCAT(tempTypes.template_path,"?orgId=",ShopDetails.org_id)
+                            THEN CONCAT(tempTypes.template_path,"?orgId=",divisionDetails.org_id,"&&offerdata=",templates.offer_data_2)
+                        ELSE CONCAT(tempTypes.template_path,"?orgId=",divisionDetails.org_id)
                         END 
                     ELSE 'www.google.com'
                 END as URL
-            FROM beaconDB.ShopDetails,beaconDB.Beacons,beaconDB.templates,beaconDB.tempTypes,beaconDB.BeaconTemplates
-            WHERE ShopDetails.org_id= ?
-            AND Beacons.shop_id = ShopDetails.shop_id
+            FROM beaconDB.divisionDetails,beaconDB.Beacons,beaconDB.templates,beaconDB.tempTypes,beaconDB.BeaconTemplates
+            WHERE divisionDetails.org_id= ?
+            AND Beacons.div_id = divisionDetails.div_id
             AND BeaconTemplates.beacon_id = Beacons.beacon_id
             AND templates.template_id = BeaconTemplates.template_id
             AND tempTypes.templateType_id = templates.templateType_id
@@ -451,19 +488,19 @@ const getAllBeaconOrgWise = async (req, res) => {
         SELECT 
             OrganizationDetails.org_id,
             OrganizationDetails.org_name,
-            ShopDetails.shop_name as division,
+            divisionDetails.div_name as division,
             (SELECT COUNT(*) FROM Beacons
-            JOIN ShopDetails ON Beacons.shop_id = ShopDetails.shop_id
-            WHERE ShopDetails.org_id = OrganizationDetails.org_id
+            JOIN divisionDetails ON Beacons.div_id = divisionDetails.div_id
+            WHERE divisionDetails.org_id = OrganizationDetails.org_id
             AND Beacons.deletedAt IS NULL) AS beacons_of_org,
             Beacons.beacon_id,
             Beacons.beacon_name
         FROM 
             OrganizationDetails
         JOIN 
-            ShopDetails ON ShopDetails.org_id = OrganizationDetails.org_id
+            divisionDetails ON divisionDetails.org_id = OrganizationDetails.org_id
         JOIN 
-            Beacons ON Beacons.shop_id = ShopDetails.shop_id
+            Beacons ON Beacons.div_id = divisionDetails.div_id
         WHERE 
             Beacons.deletedAt IS NULL
         GROUP BY 
@@ -492,7 +529,7 @@ module.exports = {
     getSingleOrganization,
     updateOrganization,
     deleteOrganization,
-    getShopsByOrganization,
+    getDivisionByOrganization,
     getOrganizationBeacons,
     getOrganizationMenu,
     getAllBeaconOrgWise

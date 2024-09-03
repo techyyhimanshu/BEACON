@@ -17,7 +17,7 @@ module.exports = {
         unique:true,
         allowNull:false
       },
-      shop_id: {
+      div_id: {
         type: Sequelize.INTEGER,
         allowNull :false
       },

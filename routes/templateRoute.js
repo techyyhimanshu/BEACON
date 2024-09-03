@@ -7,9 +7,9 @@ const verifyToken = require('../middlewares/authMiddleware');
 
 router.post("/api/template",createTemplate)
 router.get("/api/templates",getAllTemplate)
-router.get("/api/shop/template/:id",getMyTemplate)
-router.patch("/api/shop/template/update",updateMyTemplate)
-router.post("/api/shop/template/delete",deleteMyTemplate)
+router.get("/api/template/:id",getMyTemplate)
+router.patch("/api/template/update",updateMyTemplate)
+router.post("/api/template/delete",deleteMyTemplate)
 router.post("/api/template/asign",asignTemplateToBeacon)
 router.post("/api/template/crateChild",createChildTemplate)
 

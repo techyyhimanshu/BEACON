@@ -2,7 +2,7 @@
 const {
   Model
 } = require('sequelize');
-const { Shop } = require('./shopdetails');
+const { Division } = require('./divisionDetails');
 const { template } = require('./template');
 module.exports = (sequelize, DataTypes) => {
   class Beacon extends Model {
@@ -37,17 +37,17 @@ module.exports = (sequelize, DataTypes) => {
         }
       }
     },
-    shop_id: {
+    div_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
       unique : false,
       references: {
-        model: Shop,
-        key: "shop_id"
+        model: Division,
+        key: "div_id"
       },
       validate: {
         notNull: {
-          msg: "Shop cannot be null"
+          msg: "Division ID cannot be null"
         }
       }
     },

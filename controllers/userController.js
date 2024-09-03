@@ -22,6 +22,8 @@ const trackUser = async (req, res) => {
         AND Beacons.mac = BeaconVisited.beacon_mac
         AND  Beacons.div_id = divisionDetails.div_id
         AND  OrganizationDetails.org_id=divisionDetails.org_id
+        AND  Beacons.div_id = divisionDetails.div_id
+        AND  OrganizationDetails.org_id=divisionDetails.org_id
         ORDER BY BeaconVisited.createdAt DESC;`,
             {
                 type: Sequelize.QueryTypes.SELECT,
@@ -141,7 +143,9 @@ const orgWeeklyUsers = async (req, res) => {
                 from OrganizationDetails o
                 join 
                     divisionDetails s on s.org_id=o.org_id
+                    divisionDetails s on s.org_id=o.org_id
                 join 
+                    Beacons b on b.div_id=s.div_id
                     Beacons b on b.div_id=s.div_id
                 join
                     BeaconVisited bv on bv.beacon_mac=b.mac
@@ -201,7 +205,9 @@ const orgMonthlyUsers = async (req, res) => {
             beaconDB.OrganizationDetails o
             JOIN 
                 beaconDB.divisionDetails s ON o.org_id = s.org_id
+                beaconDB.divisionDetails s ON o.org_id = s.org_id
             JOIN 
+                beaconDB.Beacons b ON s.div_id = b.div_id
                 beaconDB.Beacons b ON s.div_id = b.div_id
             JOIN 
                 beaconDB.BeaconVisited bv ON b.mac = bv.beacon_mac
@@ -224,11 +230,11 @@ const getAllUsers = async (req, res) => {
 
     try {
         if (req.username === 'cit_superadmin') {
-            const users = await User.findAll({
-                attributes:["user_id","full_name","gender","dob","phone","email","device_id"],
-            })
-            if (users) {
-                return res.status(200).json({ status: "success", data: users })
+            const {count,rows} = await User.findAndCountAll({
+                attributes : [`user_id`, `device_id`, `last_location`, `full_name`, `gender`, `dob`, `phone`, `email`]
+            });
+            if (rows) {
+                return res.status(200).json({ status: "success",count:count, data: rows })
             } else {
                 return res.status(404).json({ status: "failure", message: "Not found" })
             }

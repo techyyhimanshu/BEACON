@@ -2,7 +2,7 @@ const db = require("../models")
 const Category = db.Category
 const TemplateType = db.temptype
 const Template = db.template
-const Shop = db.Shop
+const Division = db.Division
 const Beacon = db.Beacon
 const BeaconTemplate = db.BeaconTemplate
 

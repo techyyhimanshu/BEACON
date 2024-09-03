@@ -13,7 +13,7 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull:false
       },
-      user_mac: {
+      device_id: {
         type: Sequelize.STRING
       },
       location:{

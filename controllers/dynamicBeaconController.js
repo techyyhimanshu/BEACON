@@ -1,14 +1,14 @@
 const db = require("../models");
 const Sequelize = require('sequelize');
 const tbl_template = require("../models/tbl_template");
-const TempButton =db.tbl_temp_button;
-const TempContent =db.tbl_temp_content;
-const TempSubMenu =db.tbl_temp_menu;
-const Template =db.tbl_template;
-const Beacon =db.Beacon;
-const BeaconVisited =db.BeaconVisited;
-const User =db.user;
-const TempLikes =db.tbl_temp_like;
+const TempButton = db.tbl_temp_button;
+const TempContent = db.tbl_temp_content;
+const TempSubMenu = db.tbl_temp_menu;
+const Template = db.tbl_template;
+const Beacon = db.Beacon;
+const BeaconVisited = db.BeaconVisited;
+const User = db.user;
+const TempLikes = db.tbl_temp_like;
 
 
 const beaconFire = async (req, res) => {
@@ -25,7 +25,7 @@ const beaconFire = async (req, res) => {
                 req.body.temp_id = beacon.template_id;
 
                 // Process beaconVisited in the background without waiting for it to complete
-                beaconVisited(req.body);
+                await beaconVisited(req.body);
 
                 // Fetch the user's like/dislike status for the template associated with the beacon
                 const tempLikeData = await TempLikes.findOne({
@@ -57,7 +57,7 @@ const beaconFire = async (req, res) => {
                 const url = `https://beacon-git-main-ac-ankurs-projects.vercel.app/template/${beacon.template_id}`;
 
                 // Respond with the success status, template URL, and like/dislike data
-                return res.status(200).json({ status: "success", url: url,templateId:beacon.template_id , like_Data: likeData });
+                return res.status(200).json({ status: "success", url: url, templateId: beacon.template_id, like_Data: likeData });
             } else {
                 // Handle the case where the beacon does not have an associated template
                 return res.status(200).json({ status: "failure", message: "No template is assigned to this beacon" });
@@ -77,38 +77,15 @@ const beaconFire = async (req, res) => {
 // USER IS SAVED TO BEACON VISITED
 const beaconVisited = async (data) => {
     const uniqueId = data.device_uniqueID;
-    const locationChanged = user => user && user.last_location !== data.location;
-
     try {
         // Create BeaconVisited record and fetch user data in parallel
-        const [data2, user] = await Promise.all([
-            BeaconVisited.create({
-                beacon_mac: data.mac,
-                device_id: uniqueId,
-                location: data.location,
-                temp_id: data.temp_id
-            }),
-            User.findOne({
-                attributes: ['device_id', 'last_location'],
-                where: { device_id: uniqueId }
-            })
-        ]);
-
-        // Handle user creation or update based on whether the location has changed
-        if (user) {
-            if (locationChanged(user)) {
-                await User.update(
-                    { last_location: data.location },
-                    { where: { device_id: uniqueId } }
-                );
-            }
-        } else {
-            await User.create({
-                device_id: uniqueId,
-                last_location: data.location
-            });
-        }
-
+        
+        const data2 = await BeaconVisited.create({
+            beacon_mac: data.mac,
+            device_id: uniqueId,
+            location: data.location,
+            temp_id: data.temp_id
+        })        
         return data2;
     } catch (error) {
         console.log(error);
@@ -117,53 +94,53 @@ const beaconVisited = async (data) => {
 };
 
 
-const templateAsignToBeacon = async(req,res)=>{
-    try{
+const templateAsignToBeacon = async (req, res) => {
+    try {
         // CHECK BEACON EXISTANCE
         const beacon = await Beacon.findOne({
-            attributes : ['template_id'],
-            where:{
+            attributes: ['template_id'],
+            where: {
                 beacon_id: req.body.beacon_id
             }
         })
-        if(!beacon)
-            {   return res.status(404).json({status:"failure",message:"beacon not found"})
+        if (!beacon) {
+            return res.status(404).json({ status: "failure", message: "beacon not found" })
         }
         // CHECK TEMPLATE EXISTANCEs
         const template = await Template.findOne({
-            attributes : ['temp_id'],
-            where:{
+            attributes: ['temp_id'],
+            where: {
                 temp_id: req.body.template_id
             }
         });
         console.log(template);
-        
-        if(!template)
-            {   return res.status(404).json({status:"failure",message:"template not found"})
+
+        if (!template) {
+            return res.status(404).json({ status: "failure", message: "template not found" })
         }
         // set TEMPLATE TO BEACON
-        var beaconUpdate =  await Beacon.update({
-            template_id : req.body.template_id                
-            },{
-                where : {                        
-                    beacon_id: req.body.beacon_id
-                }
-            })
-            // console.log(beaconUpdate);
-            
-        if(beaconUpdate > 0){
-            return res.status(200).json({status:"success",message:"template " + req.body.template_id + " is asign to beacon "+ req.body.beacon_id})
+        var beaconUpdate = await Beacon.update({
+            template_id: req.body.template_id
+        }, {
+            where: {
+                beacon_id: req.body.beacon_id
+            }
+        })
+        // console.log(beaconUpdate);
+
+        if (beaconUpdate > 0) {
+            return res.status(200).json({ status: "success", message: "template " + req.body.template_id + " is asign to beacon " + req.body.beacon_id })
         } else {
-            return res.status(404).json({status:"failue",message:"template " + req.body.template_id + " is Not asign to beacon "+ req.body.beacon_id})
+            return res.status(404).json({ status: "failue", message: "template " + req.body.template_id + " is Not asign to beacon " + req.body.beacon_id })
         }
-    }catch(error){
-        console.log(error.name,error.message);
-        return res.status(500).json({status:"failure",message:"Internal server error"})
-        
+    } catch (error) {
+        console.log(error.name, error.message);
+        return res.status(500).json({ status: "failure", message: "Internal server error" })
+
     }
 }
 
-module.exports= {
+module.exports = {
     beaconFire,
     templateAsignToBeacon
 }

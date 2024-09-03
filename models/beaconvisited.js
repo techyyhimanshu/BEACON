@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false
     },
-    user_mac: DataTypes.STRING,
+    device_id: DataTypes.STRING,
     location: {
       type: DataTypes.STRING
     },

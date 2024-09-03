@@ -17,15 +17,15 @@ const trackUser = async (req, res) => {
         OrganizationDetails.address,
         BeaconVisited.location,
         BeaconVisited.createdAt
-        FROM BeaconVisited ,OrganizationDetails,Beacons,ShopDetails
-        WHERE  BeaconVisited.user_mac= ?
+        FROM BeaconVisited ,OrganizationDetails,Beacons,divisionDetails
+        WHERE  BeaconVisited.device_id= ?
         AND Beacons.mac = BeaconVisited.beacon_mac
-        AND  Beacons.shop_id = ShopDetails.shop_id
-        AND  OrganizationDetails.org_id=ShopDetails.org_id
+        AND  Beacons.div_id = divisionDetails.div_id
+        AND  OrganizationDetails.org_id=divisionDetails.org_id
         ORDER BY BeaconVisited.createdAt DESC;`,
             {
                 type: Sequelize.QueryTypes.SELECT,
-                replacements: [req.body.user_mac]
+                replacements: [req.body.device_id]
             })
         if (userBeaconData) {
             return res.status(200).json({ status: "success", data: userBeaconData })
@@ -43,7 +43,7 @@ const beaconTotalUser = async (req, res) => {
             b.beacon_id,
             b.beacon_name,
             bv.beacon_mac AS beacon_mac,
-            COUNT(distinct bv.user_mac) AS connectedUsers
+            COUNT(distinct bv.device_id) AS connectedUsers
             FROM 
              beaconDB.Beacons b
             JOIN 
@@ -58,7 +58,7 @@ const beaconTotalUser = async (req, res) => {
             type: Sequelize.QueryTypes.SELECT
         })
         // const beaconTotalUser = await db.sequelize.query(`
-        //     SELECT COUNT(DISTINCT BeaconVisited.user_mac) as count
+        //     SELECT COUNT(DISTINCT BeaconVisited.device_id) as count
         //     FROM BeaconVisited 
         //     WHERE BeaconVisited.beacon_mac = ?; `,
         //     {
@@ -66,7 +66,7 @@ const beaconTotalUser = async (req, res) => {
         //         replacements: [req.body.mac]
         //     });
         // const beaconTotalUserData = await db.sequelize.query(`
-        //     SELECT DISTINCT BeaconVisited.user_mac
+        //     SELECT DISTINCT BeaconVisited.device_id
         //     FROM BeaconVisited 
         //     WHERE BeaconVisited.beacon_mac = ?; `,
         //     {
@@ -86,7 +86,7 @@ const beaconTotalUser = async (req, res) => {
 const beaconTodayUser = async (req, res) => {
     try {
         const beaconTodayUser = await db.sequelize.query(`
-                SELECT COUNT(distinct BeaconVisited.user_mac) as count
+                SELECT COUNT(distinct BeaconVisited.device_id) as count
                 FROM BeaconVisited
                 WHERE BeaconVisited.beacon_mac = ?
                 AND DATE(BeaconVisited.createdAt) = CURDATE(); `,
@@ -116,12 +116,12 @@ const orgWeeklyUsers = async (req, res) => {
             return res.status(200).json({ status: "success", message: "Invalid date range" })
         }
         const beaconWeekUserCount = await db.sequelize.query(`
-                select o.org_name,o.org_id,count(distinct bv.user_mac) as total_user_count
+                select o.org_name,o.org_id,count(distinct bv.device_id) as total_user_count
                 from OrganizationDetails o
                 join 
-                    ShopDetails s on s.org_id=o.org_id
+                    divisionDetails s on s.org_id=o.org_id
                 join 
-                    Beacons b on b.shop_id=s.shop_id
+                    Beacons b on b.div_id=s.div_id
                 join
                     BeaconVisited bv on bv.beacon_mac=b.mac
                 where o.org_id=?
@@ -130,19 +130,19 @@ const orgWeeklyUsers = async (req, res) => {
                     o.org_id,o.org_name `,
             {
                 type: Sequelize.QueryTypes.SELECT,
-                replacements: [req.body.org_id, req.body.start_date, req.body.end_date]
+                replacements: [req.body.org_id, req.body.start_date, req.body.end_date+" 23:59:59"]
             })
 
         if (!beaconWeekUserCount || beaconWeekUserCount.length === 0) {
             return res.status(404).json({ status: "failure", message: "Not found" })
         }
         const weeklyBeacons = await db.sequelize.query(`
-            select b.beacon_name,s.shop_name as division_name,b.beacon_id,count(distinct bv.user_mac) as user_count
+            select b.beacon_name,s.div_name as division_name,b.beacon_id,count(distinct bv.device_id) as user_count
                 from OrganizationDetails o
                 join 
-                    ShopDetails s on s.org_id=o.org_id
+                    divisionDetails s on s.org_id=o.org_id
                 join 
-                    Beacons b on b.shop_id=s.shop_id
+                    Beacons b on b.div_id=s.div_id
                 join
                     BeaconVisited bv on bv.beacon_mac=b.mac
                 where o.org_id=?
@@ -151,13 +151,13 @@ const orgWeeklyUsers = async (req, res) => {
                     o.org_id,b.mac `,
             {
                 type: Sequelize.QueryTypes.SELECT,
-                replacements: [req.body.org_id, req.body.start_date, req.body.end_date]
+                replacements: [req.body.org_id, req.body.start_date, req.body.end_date+" 23:59:59"]
             })
         beaconWeekUserCount[0].beacons = weeklyBeacons
         return res.status(200).json({ status: "success", data: beaconWeekUserCount })
     } catch (error) {
-        return res.status(500).json({ status: "failure", message: "Internal server error" })
         console.log(error);
+        return res.status(500).json({ status: "failure", message: "Internal server error" })
 
     }
 }
@@ -171,13 +171,13 @@ const orgMonthlyUsers = async (req, res) => {
                 SELECT 
                 o.org_name,
                 o.org_id,
-                COUNT(distinct bv.user_mac) AS total_user_visited
+                COUNT(distinct bv.device_id) AS total_user_visited
                 FROM 
                     beaconDB.OrganizationDetails o
                 JOIN 
-                    beaconDB.ShopDetails s ON o.org_id = s.org_id
+                    beaconDB.divisionDetails s ON o.org_id = s.org_id
                 JOIN 
-                    beaconDB.Beacons b ON s.shop_id = b.shop_id
+                    beaconDB.Beacons b ON s.div_id = b.div_id
                 JOIN 
                     beaconDB.BeaconVisited bv ON b.mac = bv.beacon_mac
                 WHERE 
@@ -195,14 +195,14 @@ const orgMonthlyUsers = async (req, res) => {
         const beaconData = await db.sequelize.query(`SELECT 
             b.beacon_id,
             b.beacon_name,
-            s.shop_name as division_name,
-            COUNT(distinct bv.user_mac) AS user_visited
+            s.div_name,
+            COUNT(distinct bv.device_id) AS user_visited
             FROM 
             beaconDB.OrganizationDetails o
             JOIN 
-                beaconDB.ShopDetails s ON o.org_id = s.org_id
+                beaconDB.divisionDetails s ON o.org_id = s.org_id
             JOIN 
-                beaconDB.Beacons b ON s.shop_id = b.shop_id
+                beaconDB.Beacons b ON s.div_id = b.div_id
             JOIN 
                 beaconDB.BeaconVisited bv ON b.mac = bv.beacon_mac
             WHERE 
@@ -393,8 +393,8 @@ const userHistory = async (req, res) => {
         const userdata = await db.sequelize.query(`
             SELECT bv.temp_id,SEC_TO_TIME( timestampdiff(second, bv.createdAt, current_timestamp()) ) as Time_Ago 
             FROM beaconDB.BeaconVisited bv INNER JOIN 
-            ( SELECT temp_id,MAX(createdAt) as latestCreatedAt FROM beaconDB.BeaconVisited WHERE user_mac = ? GROUP BY temp_id )
-            latest ON bv.temp_id = latest.temp_id AND bv.createdAt = latest.latestCreatedAt WHERE bv.user_mac = ? 
+            ( SELECT temp_id,MAX(createdAt) as latestCreatedAt FROM beaconDB.BeaconVisited WHERE device_id = ? GROUP BY temp_id )
+            latest ON bv.temp_id = latest.temp_id AND bv.createdAt = latest.latestCreatedAt WHERE bv.device_id = ? 
             order by Time_Ago;
             `,
             { replacements: [bodyData.user_uniqueID, bodyData.user_uniqueID] }

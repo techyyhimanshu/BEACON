@@ -514,7 +514,7 @@ const templateView = async (req, res) => {
             return res.status(404).json({ status: "failure", message: `Template ID ${req.params.id} is not exists` })
         }
         const { count, rows } = await BeaconVisited.findAndCountAll({
-            attributes: ["user_mac"],
+            attributes: ["device_id"],
             where: {
                 temp_id: req.params.id
             }
@@ -534,7 +534,7 @@ const templateView = async (req, res) => {
 const TempHistory = async (req, res) => {
     try {
         const historydata = await db.sequelize.query(`
-            select user_mac as device_uniqueID, SEC_TO_TIME(timestampdiff(second,createdAt,current_timestamp())) as Time_Ago 
+            select device_id as device_uniqueID, SEC_TO_TIME(timestampdiff(second,createdAt,current_timestamp())) as Time_Ago 
             from beaconDB.BeaconVisited where temp_id = ? order by Time_Ago ASC;
             `,
             { replacements : [req.params.id]}

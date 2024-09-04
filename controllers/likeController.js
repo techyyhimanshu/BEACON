@@ -47,15 +47,15 @@ const likeTemplate = async (req, res) => {
 
 const templateLikes = async (req, res) => {
     try {
-        const data = await TemplatesLike.findAll({
+        const {count,rows} = await TemplatesLike.findAndCountAll({
             attributes: ['user_uniqueID',['createdAt','liked_At']],
             where:{
                 temp_id : req.params.id,
                 status : 1
             }
         });
-        if (data.length > 0) {
-            res.status(200).json({ status: "success", data: data })
+        if (rows.length > 0) {
+            res.status(200).json({ status: "success",count:count, data: rows })
         }
         else {
             res.status(200).json({ status: "success", data: '0 View'  })

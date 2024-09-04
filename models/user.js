@@ -30,28 +30,84 @@ module.exports = (sequelize, DataTypes) => {
     },
     full_name:{
       type: DataTypes.STRING,
-      allowNull:false
+      allowNull:false,
+      validate:{
+        notNull:{
+          msg:"Full name is required"
+        },
+        notEmpty:{
+          msg:"Full name is required"
+        }
+      }
     },
     gender:{
       type: DataTypes.STRING,
-      allowNull:false
+      allowNull:false,
+      validate:{
+        notNull:{
+          msg:"Gender is required"
+        },
+        notEmpty:{
+          msg:"Gender is required"
+        },
+        isAlpha:{
+          msg:"Invalid  gender"
+        }
+      }
     },
     dob:{
       type: DataTypes.DATE,
-      allowNull:false
+      allowNull:false,
+      validate:{
+        notNull:{
+          msg:"DOB is required"
+        },
+        notEmpty:{
+          msg:"DOB is required"
+        },
+        isDate:{
+          msg:"Invalid Date"
+        }
+      }
     },
     phone:{
       type: DataTypes.STRING,
-      unique:true
+      unique:true,
+      isNumeric: {
+        msg: "Contact number is invalid"
+      },
+      len: {
+        args: [10, 10],
+        msg: "Contact number must be 10 digits long"
+      }
     },
     email: {
       type: DataTypes.STRING,
       unique : true,
-      allowNull:false
+      allowNull:false,
+      validate:{
+        notNull:{
+          msg:"Email is required"
+        },
+        notEmpty:{
+          msg:"Email is required"
+        },
+        isEmail:{
+          msg:"Invalid email"
+        }
+      }
     },
     password: {
       type: DataTypes.STRING,
-      allowNull:false
+      allowNull:false,
+      validate:{
+        notNull:{
+          msg:"Password is required"
+        },
+        notEmpty:{
+          msg:"Password is required"
+        }
+      }
     }
   }, {
     sequelize,

@@ -77,8 +77,8 @@ db.tbl_template.hasMany(db.tbl_temp_content,{foreignKey:'temp_id'})
 db.temptype.hasMany(db.template,{foreignKey:'templateType_id'})
 db.template.belongsTo(db.temptype,{foreignKey:'templateType_id'})
 
-db.BeaconVisited.hasMany(db.user,{foreignKey:'user_mac'})
-db.user.belongsTo(db.BeaconVisited,{foreignKey:'user_mac'})
+db.BeaconVisited.hasMany(db.user,{foreignKey:'device_id'})
+db.user.belongsTo(db.BeaconVisited,{foreignKey:'device_id'})
 
 db.template.hasMany(db.Beacon,{foreignKey:'template_id'})
 db.Beacon.belongsTo(db.template,{foreignKey:'template_id'})

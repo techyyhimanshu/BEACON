@@ -248,8 +248,13 @@ const getAllUsers = async (req, res) => {
 const registerUser = async (req, res) => {
     try {
         const { password } = req.body
-        const hashedPassword = await argon2.hash(password)
-        console.log(hashedPassword);
+        let hashedPassword
+        if(password!=undefined){
+             hashedPassword = await argon2.hash(password)
+        }
+        if(!password){            
+            hashedPassword=""
+        }
 
         const userRegistered = await User.create({
             ...req.body,
@@ -264,7 +269,8 @@ const registerUser = async (req, res) => {
             const messages = error.errors.map(err => err.message)
             return res.status(400).send({ status: "failure", message: messages })
         }
-
+        console.log(error);
+        
         return res.status(500).send({ status: "failure", message: "Internal server error" })
 
     }

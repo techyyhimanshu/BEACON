@@ -379,9 +379,6 @@ const getBeaconsList = async (req, res) => {
 //             const visitedData = await beaconVisited(req.body)
 //             const userFcm=await DeviceFcmToken.findOne({
 //                 attributes:["fcm_token"],
-//                 where:{
-//                     device_id:req.body.user_mac
-//                 }
 //             })            
 //             if (visitedData) {
 //                 await sendMessageToUser(userFcm.fcm_token, 'Welcome to Our Beacon Zone!"', "Hi there! You've entered our beacon zone. Tap here to unlock your exclusive offer before it’s gone!");
@@ -541,7 +538,7 @@ const beaconVisited = async (data) => {
     try {
         const data2 = await BeaconVisited.create({
             beacon_mac: data.mac,
-            user_mac: data.user_mac,
+            device_id: data.device_id,
             location: data.location
         })
         return data2;
@@ -551,18 +548,18 @@ const beaconVisited = async (data) => {
     }
 }
 
-// const createFcmTokenEntry = async (user_mac, fcm_token) => {
+// const createFcmTokenEntry = async (device_id, fcm_token) => {
 //     try {
 //         const userFcm=await DeviceFcmToken.findOne({
 //             attributes:["fcm_token"],
 //             where:{
-//                 device_id:user_mac
+//                 device_id:device_id
 //             }
 //         })
         
 //         if(userFcm===null||!userFcm || userFcm.fcm_token.length===0){
 //             const data = await DeviceFcmToken.create({
-//                 device_id: user_mac,
+//                 device_id: device_id,
 //                 fcm_token: fcm_token
 //             })
     
@@ -578,7 +575,7 @@ const beaconVisited = async (data) => {
 //             fcm_token:fcm_token
 //         },{
 //             where:{
-//                 device_id:user_mac
+//                 device_id:device_id
 //             }
 //         })
 //         if(!fcmUpdate){

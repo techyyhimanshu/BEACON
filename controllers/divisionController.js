@@ -83,13 +83,13 @@ const createDivision = async (req, res) => {
                             WHERE divisionDetails.contact_number = ? ;
                             `, { 
                             type: Sequelize.QueryTypes.SELECT,
-                            replacements : [req.body.email]
+                            replacements : [req.body.contact_number]
                         });
                         console.log("deleted data",Data[0].deletedAt);
                         
                         if(Data[0].deletedAt == null){
                             // beacon is already in table
-                            return res.status(400).json({ status: "failure", message: "contact_number already in use" });
+                            return res.status(400).json({ status: "failure", message: "Contact Number already in use" });
                         };
                         const revokeData = await db.sequelize.query(`
                             UPDATE beaconDB.divisionDetails 

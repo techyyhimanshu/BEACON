@@ -292,6 +292,9 @@ function isStrongPassword(password) {
 const loginUser = async (req, res) => {
     try {
         const { password, email } = req.body
+        if(!email|| !password){
+            return res.status(400).send({ status: "failure", message: "Email and password are required"})
+        }
         const userFound = await User.findOne({
             attributes: ["email", "password"],
             where: {
@@ -302,10 +305,8 @@ const loginUser = async (req, res) => {
             return res.status(200).send({ status: "failure", message: "User not found with this email" })
         }
         const verifiedPassword = await argon2.verify(userFound.password, password)
-        console.log(verifiedPassword);
-
         if (!verifiedPassword) {
-            return res.status(200).send({ status: "failure", message: "Invalid password" })
+            return res.status(200).send({ status: "failure", message: "Login failed" })
         }
         return res.status(200).send({ status: "success", message: "Login successfully" })
     } catch (error) {

@@ -52,7 +52,6 @@ module.exports = (sequelize, DataTypes) => {
     div_no: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique:true,
       validate: {
         notNull: {
           msg: "Division number cannot be null"

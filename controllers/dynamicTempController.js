@@ -269,7 +269,7 @@ const deleteTemplate = async (req, res) => {
             res.status(200).json({ status: "success", message: "data deleted" })
         }
         else {
-            res.status(404).json({ status: "failure", message: "data not found" })
+            res.status(200).json({ status: "failure", message: "data not found" })
         }
     } catch (error) {
         res.status(500).json({ status: "failure", message: "Internal server error" })
@@ -325,7 +325,7 @@ const getSubMenuByID = async (req, res) => {
             res.status(200).json({ status: "success", data: templateSubMenu })
         }
         else {
-            res.status(404).json({ status: "failure", message: "data not found" })
+            res.status(200).json({ status: "failure", message: "data not found" })
         }
     } catch (e) {
         res.status(500).json({ status: "failure", message: "Internal server error" })
@@ -351,10 +351,10 @@ const getSubMenuByTempId = async (req, res) => {
             res.status(200).json({ status: "success", data: templateSubMenu })
         }
         else {
-            res.status(404).json({ status: "failure", message: "data not found" })
+            res.status(200).json({ status: "failure", message: "data not found" })
         }
     } catch (e) {
-        res.status(404).json({ status: "failure", message: "Internal server error" })
+        res.status(200).json({ status: "failure", message: "Internal server error" })
         console.log(error.message);
     }
 }
@@ -373,10 +373,10 @@ const getAllSubMenu = async (req, res) => {
             res.status(200).json({ status: "success", data: templateSubMenu })
         }
         else {
-            res.status(404).json({ status: "failure", message: "data not found" })
+            res.status(200).json({ status: "failure", message: "data not found" })
         }
     } catch (e) {
-        res.status(404).json({ status: "failure", message: "Internal server error" })
+        res.status(200).json({ status: "failure", message: "Internal server error" })
         console.log(error.message);
     }
 }
@@ -420,7 +420,7 @@ const deleteSubMenu = async (req, res) => {
             res.status(200).json({ status: "failure", message: "data not found" })
         }
     } catch (e) {
-        res.status(404).json({ status: "failure", message: "Internal server error" })
+        res.status(200).json({ status: "failure", message: "Internal server error" })
         console.log(error.message);
     }
 }
@@ -511,7 +511,7 @@ const templateView = async (req, res) => {
     try {
         const tempExist = await Template.findByPk(req.params.id);
         if (!tempExist) {
-            return res.status(404).json({ status: "failure", message: `Template ID ${req.params.id} is not exists` })
+            return res.status(200).json({ status: "failure", message: `Template ID ${req.params.id} is not exists` })
         }
         const { count, rows } = await BeaconVisited.findAndCountAll({
             attributes: ["device_id"],
@@ -543,7 +543,7 @@ const TempHistory = async (req, res) => {
             return res.status(200).json({ status: "success" ,data:historydata[0]})
         }
         else{
-            return res.status(404).json({ status: "fail", message: "data is not found"  })
+            return res.status(200).json({ status: "fail", message: "data is not found"  })
         }
     } catch (error) {
         return res.status(500).json({ status: "failure", message: error.message });

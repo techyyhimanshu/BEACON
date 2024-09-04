@@ -37,7 +37,7 @@ const likeTemplate = async (req, res) => {
         if (rows.length > 0 ) {
             res.status(200).json({ status: "success", data: rows })
         } else {
-            res.status(404).json({ status: "failure", message: "Not found" })
+            res.status(200).json({ status: "failure", message: "Not found" })
         }
     } catch (error) {
         console.log(error.message);

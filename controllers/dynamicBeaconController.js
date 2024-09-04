@@ -104,7 +104,7 @@ const templateAsignToBeacon = async (req, res) => {
             }
         })
         if (!beacon) {
-            return res.status(404).json({ status: "failure", message: "beacon not found" })
+            return res.status(200).json({ status: "failure", message: "beacon not found" })
         }
         // CHECK TEMPLATE EXISTANCEs
         const template = await Template.findOne({
@@ -116,7 +116,7 @@ const templateAsignToBeacon = async (req, res) => {
         console.log(template);
 
         if (!template) {
-            return res.status(404).json({ status: "failure", message: "template not found" })
+            return res.status(200).json({ status: "failure", message: "template not found" })
         }
         // set TEMPLATE TO BEACON
         var beaconUpdate = await Beacon.update({
@@ -131,7 +131,7 @@ const templateAsignToBeacon = async (req, res) => {
         if (beaconUpdate > 0) {
             return res.status(200).json({ status: "success", message: "template " + req.body.template_id + " is asign to beacon " + req.body.beacon_id })
         } else {
-            return res.status(404).json({ status: "failue", message: "template " + req.body.template_id + " is Not asign to beacon " + req.body.beacon_id })
+            return res.status(200).json({ status: "failue", message: "template " + req.body.template_id + " is Not asign to beacon " + req.body.beacon_id })
         }
     } catch (error) {
         console.log(error.name, error.message);

@@ -25,10 +25,10 @@ const createOrgMenuItem = async (req, res) => {
                     res.status(200).json({ status: "failure", message: "Error occured" });
                 }
             } else {
-                res.status(404).json({ status: "failure", message: "Menu not found" });
+                res.status(200).json({ status: "failure", message: "Menu not found" });
             }
         } else {
-            res.status(404).json({ status: "failure", message: "Organization not found" });
+            res.status(200).json({ status: "failure", message: "Organization not found" });
         }
     } catch (error) {
         if (error instanceof Sequelize.ValidationError) {
@@ -51,7 +51,7 @@ const getOrgMenuItems= async (req, res) => {
         if(menuData){
             res.status(200).json({ status: "success", data:menuData });
         }else{
-            res.status(404).json({ status: "failure", message:"Not found" });
+            res.status(200).json({ status: "failure", message:"Not found" });
         }
     } catch (error) {
         if (error instanceof Sequelize.ValidationError) {

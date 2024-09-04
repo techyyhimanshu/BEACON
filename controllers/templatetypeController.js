@@ -46,7 +46,7 @@ const getAllTemplateType = async (req, res) => {
             res.status(200).json({ status: "success", data: data })
         }
         else{
-            res.status(404).json({ status: "failure", message: "Not found" })
+            res.status(200).json({ status: "failure", message: "Not found" })
         }
     } catch (error) {
         console.log(error.message);
@@ -66,7 +66,7 @@ const categoryTemplate = async (req, res) => {
             res.status(200).json({ status: "success", data: catTempData})
         }
         else{
-            res.status(404).json({ status: "failure", message: "Record not found" })
+            res.status(200).json({ status: "failure", message: "Record not found" })
         }
     } catch (error) {
         console.log(error.message);
@@ -88,7 +88,7 @@ const updateTemplate = async (req, res) => {
             res.status(200).json({ status: "success", message: "Updated successfully" })
         }
         else{
-            res.status(404).json({ status: "failure", message: "Record not found" })
+            res.status(200).json({ status: "failure", message: "Record not found" })
         }
     } catch (error) {
         console.log(error.message);
@@ -107,7 +107,7 @@ const deleteTemplate = async (req, res) => {
             res.status(200).json({ status: "success", message: "Deleted successfully" })
         }
         else{
-            res.status(404).json({ status: "failure", message: "Record not found" })
+            res.status(200).json({ status: "failure", message: "Record not found" })
         }
     } catch (error) {
         console.log(error.message);

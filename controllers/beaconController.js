@@ -32,7 +32,7 @@ const addBeacon2 = async (req, res) => {
 
         if (!div) {
             await transaction.rollback();
-            return res.status(404).json({ status: "failure", message: "div not found" });
+            return res.status(200).json({ status: "failure", message: "div not found" });
         }
 
         // Attempt to create a new beacon entry
@@ -98,9 +98,9 @@ const addBeacon = async (req, res) => {
         const div = await Division.findByPk(req.body.div_id);
         if(req.body.beacon_org == undefined )
         { req.body.beacon_org = null  }
-        // If the div is not found, return a 404 error response
+        // If the div is not found, return a 200 error response
         if (!div) {
-            return res.status(404).json({ status: "failure", message: "div not found" });
+            return res.status(200).json({ status: "failure", message: "div not found" });
         }
         // Create a new beacon entry using the data from the request body
         const data = await Beacon.create({
@@ -115,7 +115,7 @@ const addBeacon = async (req, res) => {
             return res.status(200).json({ status: "success", message: "Created successfully" });
         }
         else {
-            return res.status(404).json({ status: "failure", message: "Not Created successfully" });
+            return res.status(200).json({ status: "failure", message: "Not Created successfully" });
         }
     } catch (error) {
         // Handle Sequelize validation errors
@@ -204,7 +204,7 @@ const getAllBeacons = async (req, res) => {
             if (rows) {
                 res.status(200).json({ status: "success", count: count[0].COUNT, data: rows })
             } else {
-                res.status(404).json({ status: "failure", message: "Not found" })
+                res.status(200).json({ status: "failure", message: "Not found" })
             }
     } catch (error) {
         res.status(500).json({ status: "failure", message: "Internal server error" })
@@ -226,7 +226,7 @@ const getBeaconsList = async (req, res) => {
             }
             res.status(200).json({ status: "success", data: countRows })
         } else {
-            res.status(404).json({ status: "failure", message: "Not found" })
+            res.status(200).json({ status: "failure", message: "Not found" })
         }
     } catch (error) {
         res.status(500).json({ status: "failure", message: "Internal server error" })
@@ -362,7 +362,7 @@ const getBeaconsList = async (req, res) => {
 //     //         })            
 //     //         res.status(200).json({ status: "success", data:beaconTemplateData })
 //     //     } else {
-//     //         res.status(404).json({ status: "failure", message: "Beacon not found" })
+//     //         res.status(200).json({ status: "failure", message: "Beacon not found" })
 //     //     }
 //     // } catch (error) {
 //     //     console.log(error.message);
@@ -409,14 +409,14 @@ const updateBeacon = async (req, res) => {
         // Retrieve the beacon by its primary key (beacon_id) from the request body
         const beaconData = await Beacon.findByPk(req.body.beacon_id);
 
-        // If the div is not found, return a 404 error response
+        // If the div is not found, return a 200 error response
         if (!beaconData) {
-            return res.status(404).json({ status: "failure", message: "Beacon not found" });
+            return res.status(200).json({ status: "failure", message: "Beacon not found" });
         }
         // Retrieve the div by its primary key (div_id) from the request body
         const divData = await Division.findByPk(req.body.div_id);
         if (!divData) {
-            return res.status(404).json({ status: "failure", message: "div not found" });
+            return res.status(200).json({ status: "failure", message: "div not found" });
         }
 
         // Create a new beacon entry using the data from the request body
@@ -457,9 +457,9 @@ const deleteBeacon = async (req, res) => {
         // Retrieve the beacon by its primary key (beacon_id) from the request body
         const beaconData = await Beacon.findByPk(req.params.id);
 
-        // If the div is not found, return a 404 error response
+        // If the div is not found, return a 200 error response
         if (!beaconData) {
-            return res.status(404).json({ status: "failure", message: "Beacon not found" });
+            return res.status(200).json({ status: "failure", message: "Beacon not found" });
         }
         // DELETE BEACON
         const data = await Beacon.destroy({
@@ -519,7 +519,7 @@ const getSingleBeacon = async (req, res) => {
         if (rows.length > 0 ) {
             res.status(200).json({ status: "success", data: rows })
         } else {
-            res.status(404).json({ status: "failure", message: "Not found" })
+            res.status(200).json({ status: "failure", message: "Not found" })
         }
 } catch (error) {
         // Handle Sequelize validation errors

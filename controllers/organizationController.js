@@ -80,7 +80,7 @@ const getAllOrganization = async (req, res) => {
             res.status(200).json({ status: "success", data: data })
         }
         else {
-            res.status(404).json({ status: "failure", message: "Not found" })
+            res.status(200).json({ status: "failure", message: "Not found" })
         }
     } catch (error) {
         res.status(500).json({ status: "failure" });
@@ -99,7 +99,7 @@ const getSingleOrganization = async (req, res) => {
             res.status(200).json({ status: "success", data: data })
         }
         else {
-            res.status(404).json({ status: "failure", message: "Not found" })
+            res.status(200).json({ status: "failure", message: "Not found" })
         }
     } catch (error) {
         res.status(500).json({ status: "failure",message:"Internal  Server Error" });
@@ -117,7 +117,7 @@ const updateOrganization = async (req, res) => {
             res.status(200).json({ status: "success", message: "Updated successfully" })
         }
         else {
-            res.status(404).json({ status: "failure", message: "Record not found" })
+            res.status(200).json({ status: "failure", message: "Record not found" })
         }
     } catch (error) {
         console.log(error.message);
@@ -136,7 +136,7 @@ const deleteOrganization = async (req, res) => {
             res.status(200).json({ status: "success", message: "Deleted successfully" })
         }
         else {
-            res.status(404).json({ status: "failure", message: "Record not found" })
+            res.status(200).json({ status: "failure", message: "Record not found" })
         }
     } catch (error) {
         console.log(error.message);
@@ -364,7 +364,7 @@ const getOrganizationBeacons2 = async (req, res) => {
             if (data.length !== 0) {
                 res.status(200).json({ status: "success", data: data })
             } else {
-                res.status(404).json({ status: "Not found", message: "no beacon added to this org" })
+                res.status(200).json({ status: "Not found", message: "no beacon added to this org" })
             }
         });
     } catch (e) {
@@ -393,7 +393,7 @@ const getOrganizationBeacons = async (req, res) => {
         replacements: [req.params.id]
     })
         if (!orgDetails) {
-            return res.status(404).json({ status: "Not found", message: "Organization not found" })
+            return res.status(200).json({ status: "Not found", message: "Organization not found" })
         }
         
         const beacons = await db.sequelize.query(`
@@ -429,11 +429,11 @@ const getOrganizationBeacons = async (req, res) => {
             res.status(200).json({ status: "success",data:orgDetails })
         }
         else {
-            res.status(404).json({ status: "failure", message: "technical issue in url fetching" })
+            res.status(200).json({ status: "failure", message: "technical issue in url fetching" })
         }
     }
     catch (e) {
-        res.status(404).json({ status: "failure", message: e.message })
+        res.status(200).json({ status: "failure", message: e.message })
     }
 }
 
@@ -475,11 +475,11 @@ const getOrganizationMenu = async (req, res) => {
             res.status(200).json({ status: "success", data: buildUrl })
         }
         else {
-            res.status(404).json({ status: "failure", message: "technical issue in url fetching" })
+            res.status(200).json({ status: "failure", message: "technical issue in url fetching" })
         }
     }
     catch (e) {
-        res.status(404).json({ status: "failure", message: e.message })
+        res.status(200).json({ status: "failure", message: e.message })
     }
 }
 
@@ -517,10 +517,10 @@ const getAllBeaconOrgWise = async (req, res) => {
         if (orgBeaconData) {
             return res.status(200).json({ status: "success", data: orgBeaconData })
         } else {
-            return res.status(404).json({ status: "failure", message: "Not found" })
+            return res.status(200).json({ status: "failure", message: "Not found" })
         }
     } catch (error) {
-        return res.status(404).json({ status: "failure", message: "Internal server error"})
+        return res.status(200).json({ status: "failure", message: "Internal server error"})
     }
 }
 

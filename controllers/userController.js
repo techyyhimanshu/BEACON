@@ -32,10 +32,10 @@ const trackUser = async (req, res) => {
         if (userBeaconData) {
             return res.status(200).json({ status: "success", data: userBeaconData })
         } else {
-            return res.status(404).json({ status: "failure", message: "Not found" })
+            return res.status(200).json({ status: "failure", message: "Not found" })
         }
     } catch (error) {
-        return res.status(404).json({ status: "failure", message: "Internal server error", Error: error.message })
+        return res.status(200).json({ status: "failure", message: "Internal server error", Error: error.message })
     }
 }
 
@@ -78,10 +78,10 @@ const beaconTotalUser = async (req, res) => {
         if (totalBeaconsWithCount) {
             return res.status(200).json({ status: "success", data: totalBeaconsWithCount })
         } else {
-            return res.status(404).json({ status: "failure", message: "Not found" })
+            return res.status(200).json({ status: "failure", message: "Not found" })
         }
     } catch (error) {
-        return res.status(404).json({ status: "failure", message: "Internal server error", Error: error.message })
+        return res.status(200).json({ status: "failure", message: "Internal server error", Error: error.message })
     }
 }
 
@@ -99,10 +99,10 @@ const beaconTodayUser = async (req, res) => {
         if (beaconTodayUser) {
             return res.status(200).json({ status: "success", count: beaconTodayUser[0].count })
         } else {
-            return res.status(404).json({ status: "failure", message: "Not found" })
+            return res.status(200).json({ status: "failure", message: "Not found" })
         }
     } catch (error) {
-        return res.status(404).json({ status: "failure", message: "Internal server error", Error: error.message })
+        return res.status(200).json({ status: "failure", message: "Internal server error", Error: error.message })
     }
 }
 
@@ -136,7 +136,7 @@ const orgWeeklyUsers = async (req, res) => {
             })
 
         if (!beaconWeekUserCount || beaconWeekUserCount.length === 0) {
-            return res.status(404).json({ status: "failure", message: "Not found" })
+            return res.status(200).json({ status: "failure", message: "Not found" })
         }
         const weeklyBeacons = await db.sequelize.query(`
             select b.beacon_name,s.div_name as division_name,b.beacon_id,count(distinct bv.device_id) as user_count
@@ -167,7 +167,7 @@ const orgWeeklyUsers = async (req, res) => {
 const orgMonthlyUsers = async (req, res) => {
     try {
         if (!req.body.org_id || !req.body.month) {
-            return res.status(404).json({ status: "failure", message: "Please provide org_id and month" })
+            return res.status(200).json({ status: "failure", message: "Please provide org_id and month" })
         }
         const monthlyOrgData = await db.sequelize.query(`
                 SELECT 
@@ -192,7 +192,7 @@ const orgMonthlyUsers = async (req, res) => {
                 replacements: [req.body.org_id, req.body.month]
             })
         if (monthlyOrgData.length === 0 || !monthlyOrgData) {
-            return res.status(404).json({ status: "failure", message: "Not data found for selected month or beacon" })
+            return res.status(200).json({ status: "failure", message: "Not data found for selected month or beacon" })
         }
         const beaconData = await db.sequelize.query(`SELECT 
             b.beacon_id,
@@ -218,7 +218,7 @@ const orgMonthlyUsers = async (req, res) => {
         monthlyOrgData[0].beacons = beaconData
         return res.status(200).json({ status: "success", data: monthlyOrgData })
     } catch (error) {
-        return res.status(404).json({ status: "failure", message: "Internal server error", Error: error.message })
+        return res.status(200).json({ status: "failure", message: "Internal server error", Error: error.message })
     }
 }
 
@@ -232,7 +232,7 @@ const getAllUsers = async (req, res) => {
             if (rows) {
                 return res.status(200).json({ status: "success",count:count, data: rows })
             } else {
-                return res.status(404).json({ status: "failure", message: "Not found" })
+                return res.status(200).json({ status: "failure", message: "Not found" })
             }
         } else {
             return res.status(403).json({ status: "failure", message: "Unauthorized" })
@@ -427,7 +427,7 @@ const userHistory = async (req, res) => {
             return res.status(200).json({ status: "success", data: userdata[0] })
         }
         else {
-            return res.status(404).json({ status: "fail", message: "data is not found" })
+            return res.status(200).json({ status: "fail", message: "data is not found" })
         }
 
     } catch (error) {

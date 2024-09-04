@@ -9,10 +9,10 @@ try {
     if(categories){
         res.status(200).json({status:"success",data:categories})
     }else{
-        res.status(404).json({status:"failure",message:"Not found"})
+        res.status(200).json({status:"failure",message:"Not found"})
     }
 } catch (error) {
-    res.status(404).json({status:"failure",message:"Internal server error"})
+    res.status(500).json({status:"failure",message:"Internal server error"})
 }
 }
 const addCategory=async(req,res)=>{

@@ -23,7 +23,17 @@ module.exports = (sequelize, DataTypes) => {
     device_id: {
       type: DataTypes.STRING,
       allowNull : false,
-      unique : true
+      unique : true,
+      validate:{
+      notNull:{
+        msg : "Device ID is required"
+      },
+      customValidator(value){
+        if(!value){
+          throw new Error("Device ID is required")
+        }
+      }
+    }
     },
     last_location: {
       type: DataTypes.STRING
@@ -33,43 +43,69 @@ module.exports = (sequelize, DataTypes) => {
       allowNull:false,
       validate:{
         notNull:{
-          msg:"Full name is required"
+          msg:"Name is required"
         },
         notEmpty:{
-          msg:"Full name is required"
-        }
-      }
-    },
-    gender:{
-      type: DataTypes.STRING,
-      allowNull:false,
-      validate:{
-        notNull:{
-          msg:"Gender is required"
-        },
-        notEmpty:{
-          msg:"Gender is required"
+          msg:"Name is required"
         },
         isAlpha:{
-          msg:"Invalid  gender"
+          msg:"Name should only contain alphabets"
+        },
+        len: {
+          args: [2, 20],
+          msg: "Name should be atleast 2 characters long"
         }
       }
     },
-    dob:{
+    gender: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        notNull(value) {
+          if (value === null) {
+            throw new Error("Gender is required");
+          }
+        },
+        customValidator(value) {
+          if (!value) {
+            throw new Error("Gender is required");
+          }
+          if (!['male', 'female', 'other'].includes(value)) {
+            throw new Error("Invalid gender.");
+          }
+        }
+      }
+    },    
+    dob: {
       type: DataTypes.DATE,
-      allowNull:false,
-      validate:{
+      allowNull: false,
+      validate: {
         notNull:{
-          msg:"DOB is required"
+          msg:"Date of birth is required"
         },
-        notEmpty:{
-          msg:"DOB is required"
-        },
-        isDate:{
-          msg:"Invalid Date"
+       customValidator(value){
+          if (!value) {
+            throw new Error("Date of birth is required");
+          }
+          if(value.isDate){
+            throw new Error("Invalid date of birth");
+          }
+          // Check if the value is a valid date
+          const date = new Date(value);
+          if (isNaN(date.getTime())) {
+            throw new Error("Invalid Date");
+          }
+          // Optionally, add more date validation logic here
+          // For example, check if the date is in the past
+          const today = new Date();
+          if (date > today) {
+            throw new Error("Date of birth cannot be in the future");
+          }
         }
-      }
+       }
     },
+    
+    
     phone:{
       type: DataTypes.STRING,
       unique:true,
@@ -83,17 +119,20 @@ module.exports = (sequelize, DataTypes) => {
     },
     email: {
       type: DataTypes.STRING,
-      unique : true,
-      allowNull:false,
-      validate:{
+      unique: true,
+      allowNull: false,
+      validate: {
         notNull:{
           msg:"Email is required"
         },
-        notEmpty:{
-          msg:"Email is required"
-        },
-        isEmail:{
-          msg:"Invalid email"
+        customValidator(value) {
+          if (!value) {
+            throw new Error("Email is required");
+          }
+          // Check if the value is a valid email address
+          if (!/^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/.test(value)) {
+            throw new Error("Invalid email");
+          }
         }
       }
     },
@@ -104,8 +143,10 @@ module.exports = (sequelize, DataTypes) => {
         notNull:{
           msg:"Password is required"
         },
-        notEmpty:{
-          msg:"Password is required"
+        customValidator(value){
+          if(!value){
+            throw new Error("Password is required")
+          }
         }
       }
     }

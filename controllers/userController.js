@@ -248,13 +248,10 @@ const getAllUsers = async (req, res) => {
 const registerUser = async (req, res) => {
     try {
         const { password } = req.body
-        let hashedPassword
-        if(password!=undefined){
-             hashedPassword = await argon2.hash(password)
+        if (password && !isStrongPassword(password)) {
+            return res.status(400).send({ status: "failure", message: "Password must be strong enough" });
         }
-        if(!password){            
-            hashedPassword=""
-        }
+        const hashedPassword = password ? await argon2.hash(password) : "";
 
         const userRegistered = await User.create({
             ...req.body,
@@ -274,6 +271,22 @@ const registerUser = async (req, res) => {
         return res.status(500).send({ status: "failure", message: "Internal server error" })
 
     }
+}
+
+function isStrongPassword(password) {
+    const minLength = 8;
+    const maxLength = 20;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumbers = /[0-9]/.test(password);
+    const hasSpecialChars = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+    return password.length >= minLength && 
+           password.length <= maxLength &&
+           hasUpperCase &&
+           hasLowerCase &&
+           hasNumbers &&
+           hasSpecialChars;
 }
 
 const loginUser = async (req, res) => {

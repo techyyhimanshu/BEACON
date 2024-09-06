@@ -422,10 +422,10 @@ const unregisteredUser = async (req, res) => {
         // const distinctDeviceIds = result.map(r => r.device_id); // Extract device_id from each result row
         // const count = distinctDeviceIds.length; // Count the number of distinct device IDs
     
-        if (rows.lenth > 0) {
+        if (rows.length > 0) {
             return res.status(200).json({
                 status: "success",
-                count: rows.lenth, 
+                count: rows.length, 
                 data: rows
             });
         } else {

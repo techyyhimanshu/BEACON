@@ -415,10 +415,9 @@ const viewTime = async (req, res) => {
 const unregisteredUser = async (req, res) => {
     try {
         //const bodyData = req.body
-        const {count, rows} = await BeaconVisited.findAndCountAll({
-            attributes : ['device_id'],
-            distinct: true,
-            col: 'device_id'
+        const { count, rows } = await BeaconVisited.findAndCountAll({
+            attributes: ['device_id'],
+            group: ['device_id'], 
         });
         if (count > 0) {
             return res.status(200).json({ status: "success",count:count, data: rows })

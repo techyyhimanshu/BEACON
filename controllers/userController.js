@@ -414,7 +414,7 @@ const viewTime = async (req, res) => {
 
 const unregisteredUser = async (req, res) => {
     try {
-        const row = await BeaconVisited.findOne({
+        const rows = await BeaconVisited.findAll({
             attributes: [
               [Sequelize.fn('DISTINCT', Sequelize.col('device_id')), 'device_id'],
               'location',
@@ -422,15 +422,19 @@ const unregisteredUser = async (req, res) => {
               [Sequelize.fn('TIME', Sequelize.col('createdAt')), 'time']
             ],
             order: [
-              [Sequelize.fn('MAX', Sequelize.col('createdAt')), 'DESC']
+              [Sequelize.col('createdAt'), 'DESC']
             ],
             group: ['device_id', 'location']
           });
           
-          if (row) {
+          // Counting the distinct device IDs
+          const count = rows.length;
+          
+          if (count > 0) {
             return res.status(200).json({
               status: "success",
-              data: row
+              count: count,
+              data: rows
             });
           } else {
             return res.status(404).json({
@@ -438,6 +442,7 @@ const unregisteredUser = async (req, res) => {
               message: "Data not found"
             });
           }
+          
           
     } catch (error) {
         return res.status(400).json({

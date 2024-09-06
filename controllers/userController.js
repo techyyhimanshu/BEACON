@@ -414,7 +414,7 @@ const viewTime = async (req, res) => {
 
 const unregisteredUser = async (req, res) => {
     try {
-        const rows = await BeaconVisited.findOne({
+        const row = await BeaconVisited.findOne({
             attributes: [
               [Sequelize.fn('DISTINCT', Sequelize.col('device_id')), 'device_id'],
               'location',
@@ -426,19 +426,19 @@ const unregisteredUser = async (req, res) => {
             ],
             group: ['device_id', 'location']
           });
-    
-        if (rows.length > 0) {
+          
+          if (row) {
             return res.status(200).json({
-                status: "success",
-                count: rows.length, 
-                data: rows
+              status: "success",
+              data: row
             });
-        } else {
+          } else {
             return res.status(404).json({
-                status: "failure",
-                message: "Data not found"
+              status: "failure",
+              message: "Data not found"
             });
-        }
+          }
+          
     } catch (error) {
         return res.status(400).json({
             status: "failure",

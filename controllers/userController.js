@@ -414,7 +414,7 @@ const viewTime = async (req, res) => {
 
 const unregisteredUser = async (req, res) => {
     try {
-        const rows = await BeaconVisited.find({
+        const rows = await BeaconVisited.findAll({
             attributes: [[Sequelize.fn('DISTINCT', Sequelize.col('device_id')), 'device_id']]
             //  group: ['device_id'], // Group by device_id to get distinct values
         });

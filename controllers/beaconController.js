@@ -414,17 +414,13 @@ const updateBeacon = async (req, res) => {
             return res.status(200).json({ status: "failure", message: "Beacon not found" });
         }
         // Retrieve the div by its primary key (div_id) from the request body
-        const divData = await Division.findByPk(req.body.div_id);
-        if (!divData) {
-            return res.status(200).json({ status: "failure", message: "div not found" });
-        }
+        // const divData = await Division.findByPk(req.body.div_id);
+        // if (!divData) {
+        //     return res.status(200).json({ status: "failure", message: "div not found" });
+        // }
 
         // Create a new beacon entry using the data from the request body
-        const data = await Beacon.update({
-            beacon_name: req.body.beacon_name,
-            div_id: req.body.div_id,
-            beacon_org : req.body.beacon_org,
-        }, {
+        const data = await Beacon.update(req.body, {
             where: {
                 beacon_id: req.body.beacon_id
             }

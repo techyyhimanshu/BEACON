@@ -1,6 +1,6 @@
 const { Router } = require('express');
 const {trackUser,beaconTodayUser, beaconTotalUser,getAllUsers,viewTime, userHistory,
-    orgWeeklyUsers, orgMonthlyUsers,registerUser, registerFCM, countRegisteredUsers,
+    orgWeeklyUsers, orgMonthlyUsers,registerUser, registerFCM, countRegisteredUsers, unregisteredUser,
     loginUser} = require("../controllers/userController")
 const router = Router();
 const verifyToken = require('../middlewares/authMiddleware');
@@ -18,6 +18,7 @@ router.post("/api/fcm/register",registerFCM);
 router.post("/api/userViewTime",viewTime);
 router.get("/api/user/registered-count",countRegisteredUsers);
 router.post("/api/userHistory",userHistory);
+router.get("/api/unregisteredUsers",unregisteredUser);
 
 
 

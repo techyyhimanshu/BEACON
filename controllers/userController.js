@@ -2,10 +2,13 @@ const db = require("../models");
 const Sequelize = require('sequelize');
 const argon2 = require('argon2');
 const User = db.user
+const BeaconVisited = db.BeaconVisited
 const DeviceFcmToken = db.DeviceFcmToken
 const admin = require("../config/firebase");
 const { FirebaseAppError } = require("firebase-admin/app");
 const { FirebaseMessagingError } = require("firebase-admin/messaging");
+const sequelize = require("sequelize");
+const { beaconVisited } = require("./beaconController");
 
 
 const trackUser = async (req, res) => {
@@ -381,6 +384,7 @@ const registerFCM = async (req, res) => {
         return false
     }
 }
+
 const viewTime = async (req, res) => {
     try {
         const bodyData = req.body
@@ -406,7 +410,22 @@ const viewTime = async (req, res) => {
     } catch (error) {
         return res.status(400).json({ status: "failure", message: error.message });
     }
+}
 
+const unregisteredUser = async (req, res) => {
+    try {
+        const bodyData = req.body
+        const {count, rows} = await BeaconVisited.findAndCountAll({});
+        if (count > 0) {
+            return res.status(200).json({ status: "success",count:count, data: rows })
+        }
+        else {
+            return res.status(200).json({ status: "fail", message: "data is not found" })
+        }
+
+    } catch (error) {
+        return res.status(400).json({ status: "failure", message: error.message });
+    }
 }
 
 const userHistory = async (req, res) => {
@@ -450,6 +469,7 @@ const countRegisteredUsers = async (req, res) => {
         return res.status(500).json({ status: "failure", message: "Internal server error" });
     }
 }
+
 const sendMessageToUser = async (title, body,token) => {    
     try {
         const message = {
@@ -481,5 +501,6 @@ module.exports = {
     viewTime,
     userHistory,
     countRegisteredUsers,
-    loginUser
+    loginUser,
+    unregisteredUser
 }

@@ -414,22 +414,22 @@ const viewTime = async (req, res) => {
 
 const unregisteredUser = async (req, res) => {
     try {
-        const result = await BeaconVisited.findAndCountAll({
-            attributes: ['device_id'],
-            group: ['device_id'], // Group by device_id to get distinct values
+        const {count, rows} = await BeaconVisited.findAndCountAll({
+            attributes: [[Sequelize.fn('DISTINCT', Sequelize.col('device_id')), 'device_id']]
+            //  group: ['device_id'], // Group by device_id to get distinct values
         });
     
-        const distinctDeviceIds = result.map(r => r.device_id); // Extract device_id from each result row
-        const count = distinctDeviceIds.length; // Count the number of distinct device IDs
+        // const distinctDeviceIds = result.map(r => r.device_id); // Extract device_id from each result row
+        // const count = distinctDeviceIds.length; // Count the number of distinct device IDs
     
         if (count > 0) {
             return res.status(200).json({
                 status: "success",
                 count: count, 
-                data: distinctDeviceIds
+                data: rows
             });
         } else {
-            return res.status(200).json({
+            return res.status(404).json({
                 status: "failure",
                 message: "Data not found"
             });

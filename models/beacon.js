@@ -57,10 +57,6 @@ module.exports = (sequelize, DataTypes) => {
         model:template,
         key:'template_id'
       }
-    },
-    beacon_org:{
-      type : DataTypes.STRING,
-      // allowNull : false
     }
   }, {
     sequelize,

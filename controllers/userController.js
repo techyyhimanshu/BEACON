@@ -414,21 +414,33 @@ const viewTime = async (req, res) => {
 
 const unregisteredUser = async (req, res) => {
     try {
-        //const bodyData = req.body
-        const { count, rows } = await BeaconVisited.findAndCountAll({
+        const result = await BeaconVisited.findAndCountAll({
             attributes: ['device_id'],
-            group: ['device_id'], 
+            group: ['device_id'], // Group by device_id to get distinct values
         });
+    
+        const distinctDeviceIds = result.map(r => r.device_id); // Extract device_id from each result row
+        const count = distinctDeviceIds.length; // Count the number of distinct device IDs
+    
         if (count > 0) {
-            return res.status(200).json({ status: "success",count:count, data: rows })
+            return res.status(200).json({
+                status: "success",
+                count: count, 
+                data: distinctDeviceIds
+            });
+        } else {
+            return res.status(200).json({
+                status: "failure",
+                message: "Data not found"
+            });
         }
-        else {
-            return res.status(200).json({ status: "fail", message: "data is not found" })
-        }
-
     } catch (error) {
-        return res.status(400).json({ status: "failure", message: error.message });
+        return res.status(400).json({
+            status: "failure",
+            message: error.message
+        });
     }
+    
 }
 
 const userHistory = async (req, res) => {

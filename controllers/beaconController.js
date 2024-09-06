@@ -22,8 +22,8 @@ const addBeacon2 = async (req, res) => {
 
     try {
         // Input validation (Example: ensure required fields are present)
-        const { div_id, beacon_name, mac, beacon_org } = req.body;
-        if (!div_id || !beacon_name || !mac || !beacon_org) {
+        const { div_id, beacon_name, mac } = req.body;
+        if (!div_id || !beacon_name || !mac) {
             return res.status(400).json({ status: "failure", message: "Missing required fields" });
         }
 
@@ -40,8 +40,7 @@ const addBeacon2 = async (req, res) => {
             const data = await Beacon.create({
                 beacon_name,
                 mac,
-                div_id,
-                beacon_org
+                div_id
             }, { transaction });
 
             await transaction.commit();
@@ -60,7 +59,6 @@ const addBeacon2 = async (req, res) => {
                 if (existingBeacon && existingBeacon.deletedAt) {
                     // Revoke soft delete
                     existingBeacon.div_id = div_id;
-                    existingBeacon.beacon_org = beacon_org;
                     existingBeacon.beacon_name = beacon_name;
                     existingBeacon.deletedAt = null; // Restore the record
                     existingBeacon.createdAt = new Date(); // Update creation date
@@ -96,8 +94,6 @@ const addBeacon = async (req, res) => {
     try {
         // Retrieve the div by its primary key (div_id) from the request body
         const div = await Division.findByPk(req.body.div_id);
-        if(req.body.beacon_org == undefined )
-        { req.body.beacon_org = null  }
         // If the div is not found, return a 200 error response
         if (!div) {
             return res.status(200).json({ status: "failure", message: "div not found" });
@@ -106,9 +102,7 @@ const addBeacon = async (req, res) => {
         const data = await Beacon.create({
             beacon_name: req.body.beacon_name,
             mac: req.body.mac,
-            div_id: req.body.div_id,
-            beacon_org : req.body.beacon_org
-
+            div_id: req.body.div_id
         });
         // If the beacon is created successfully, return a success response
         if (data) {
@@ -141,10 +135,10 @@ const addBeacon = async (req, res) => {
                     UPDATE beaconDB.Beacons 
                     SET div_id = ?, template_id = null ,
                     createdAt = CURRENT_TIMESTAMP(), deletedAt = null,
-                    beacon_org = ?, beacon_name = ? WHERE (mac = ?);
+                    beacon_name = ? WHERE (mac = ?);
                     `, { 
                     type: Sequelize.QueryTypes.UPDATE,
-                    replacements : [req.body.div_id,req.body.beacon_org,req.body.beacon_name,req.body.mac,]
+                    replacements : [req.body.div_id,req.body.beacon_name,req.body.mac,]
                 });
                 console.log("revoke data" ,revokeData[0]);
                 if(revokeData[1] > 0){
@@ -171,7 +165,6 @@ const getAllBeacons = async (req, res) => {
                 Beacons.beacon_id,
                 Beacons.beacon_name,
                 Beacons.mac,
-                Beacons.beacon_org,
                 COUNT(BeaconVisited.beacon_mac) as connectedUsers,
                 Beacons.div_id AS div_Id,
                 divisionDetails.div_name as div_name,
@@ -215,7 +208,7 @@ const getAllBeacons = async (req, res) => {
 const getBeaconsList = async (req, res) => {
     try {
         const { count, rows } = await Beacon.findAndCountAll({
-            attributes: ['beacon_id', 'beacon_name', 'mac', 'beacon_org'],
+            attributes: ['beacon_id', 'beacon_name', 'mac'],
         })
         //console.log(rows,count);
 
@@ -484,7 +477,6 @@ const getSingleBeacon = async (req, res) => {
             Beacons.beacon_id,
             Beacons.beacon_name,
             Beacons.mac,
-            Beacons.beacon_org,
             COUNT(BeaconVisited.beacon_mac) as connectedUsers,
             Beacons.div_id AS div_Id,
             divisionDetails.div_name as div_name,

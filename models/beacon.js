@@ -52,11 +52,11 @@ module.exports = (sequelize, DataTypes) => {
       }
     },
     template_id:{
-      type:DataTypes.INTEGER,
-      references:{
-        model:template,
-        key:'template_id'
-      }
+      type:DataTypes.STRING,
+      // references:{
+      //   model:template,
+      //   key:'template_id'
+      // }
     }
   }, {
     sequelize,

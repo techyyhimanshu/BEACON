@@ -424,13 +424,9 @@ const unregisteredUser = async (req, res) => {
             {
                 type : sequelize.QueryTypes.SELECT
             })
-           //console.log(rows.date);
-          
-          
         // Convert the location string to an object for each row
         const parsedRows = rows.map(row => {
             let locationObject;
-        
             try {
             // If the location is stored as a string, you may need to parse it
             locationObject = eval(`(${row.location})`);

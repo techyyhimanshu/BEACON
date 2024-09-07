@@ -414,18 +414,18 @@ const viewTime = async (req, res) => {
 
 const unregisteredUser = async (req, res) => {
     try {
-        const rows = await BeaconVisited.findAll({
-            attributes: [
-              [Sequelize.fn('DISTINCT', Sequelize.col('device_id')), 'device_id'],
-              'location',
-              [Sequelize.fn('DATE', Sequelize.col('createdAt')), 'date'],
-              [Sequelize.fn('TIME', Sequelize.col('createdAt')), 'time']
-            ],
-            order: [
-              [Sequelize.col('createdAt'), 'DESC']
-            ],
-            group: ['device_id']
-          });
+        const rows = await db.sequelize.query(`SELECT 
+            DISTINCT(device_id) AS device_id, 
+            DATE(createdAt) AS date, 
+            TIME(createdAt) AS time, 
+            location FROM BeaconVisited AS BeaconVisited 
+            GROUP BY device_id 
+            ORDER BY createdAt DESC;`,
+            {
+                type : sequelize.QueryTypes.SELECT
+            })
+           //console.log(rows.date);
+          
           
         // Convert the location string to an object for each row
         const parsedRows = rows.map(row => {
@@ -435,17 +435,19 @@ const unregisteredUser = async (req, res) => {
             // If the location is stored as a string, you may need to parse it
             locationObject = eval(`(${row.location})`);
             } catch (error) {
-            console.error(`Failed to parse location for device_id ${row.device_id}:`, error.message);
+            // console.error(`Failed to parse location for device_id ${row.device_id}:`, error.message);
             locationObject = row.location; // Keep it as a string if parsing fails
             }
         
             return {
             device_id: row.device_id,
-            location: locationObject, // Use the parsed object or original string
             date: row.date,
-            time: row.time
+            time: row.time,
+            location: locationObject // Use the parsed object or original string
+            
             };
         });
+       //  console.log(parsedRows);
         
         if (parsedRows.length > 0) {
             return res.status(200).json({

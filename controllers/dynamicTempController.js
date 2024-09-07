@@ -101,13 +101,13 @@ const getTemplate = async (req, res) => {
         })
 
         if (template.length > 0) {
-            res.status(200).json({ status: "success", data: template })
+            return res.status( 200).json({ status: "success", data: template })
         }
         else {
-            res.status(200).json({ status: "failure", message: "data not found" })
+            return res.status(200).json({ status: "failure", message: "data not found" })
         }
     } catch (error) {
-        res.status(500).json({ status: "failure", message: "Internal server error" })
+        return res.status( 500).json({ status: "failure", message: "Internal server error" })
         console.log(error.message);
 
     }
@@ -139,15 +139,15 @@ const getAllTemplate = async (req, res) => {
             ]
         })
         if (count > 0) {
-            res.status(200).json({ status: "success", count: count, data: rows })
+            return res.status( 200).json({ status: "success", count: count, data: rows })
         }
         else {
-            res.status(200).json({ status: "failure", data: rows })
+            return res.status(200).json({ status: "failure", data: rows })
         }
     } catch (error) {
         console.log(error.message);
 
-        res.status(500).json({ status: "failure", message: "Internal server error" })
+        return res.status( 500).json({ status: "failure", message: "Internal server error" })
     }
 }
 
@@ -170,12 +170,12 @@ const updateTemplate = async (req, res) => {
             }
         })
         if (templateUpdate > 0) {
-            res.status(200).json({ status: "success", row_Affected: templateUpdate[0] })
+            return res.status( 200).json({ status: "success", row_Affected: templateUpdate[0] })
         } else {
-            res.status(200).json({ status: "failure", message: "Template not updated" })
+            return res.status(200).json({ status: "failure", message: "Template not updated" })
         }
     } catch (error) {
-        res.status(500).json({ status: "failure", message: "Internal server error" })
+        return res.status( 500).json({ status: "failure", message: "Internal server error" })
     }
 }
 
@@ -193,12 +193,12 @@ const updateButton = async (req, res) => {
             }
         })
         if (butttonUpdate > 0) {
-            res.status(200).json({ status: "success", row_Affected: butttonUpdate[0] })
+            return res.status( 200).json({ status: "success", row_Affected: butttonUpdate[0] })
         } else {
-            res.status(200).json({ status: "failure", message: "Button not updated" })
+            return res.status( 200).json({ status: "failure", message: "Button not updated" })
         }
     } catch (error) {
-        res.status(500).json({ status: "failure", message: "Internal server error" })
+        return res.status( 500).json({ status: "failure", message: "Internal server error" })
         console.log(error.message);
 
     }
@@ -217,12 +217,12 @@ const updateContent = async (req, res) => {
             }
         })
         if (contentUpdate > 0) {
-            res.status(200).json({ status: "success", row_Affected: contentUpdate[0] })
+            return res.status( 200).json({ status: "success", row_Affected: contentUpdate[0] })
         } else {
-            res.status(200).json({ status: "failure", message: "Content is not updated" })
+            return res.status( 200).json({ status: "failure", message: "Content is not updated" })
         }
     } catch (error) {
-        res.status(500).json({ status: "failure", message: "Internal server error" })
+        return res.status( 500).json({ status: "failure", message: "Internal server error" })
         console.log(error.message);
 
     }
@@ -266,13 +266,13 @@ const deleteTemplate = async (req, res) => {
         );
 
         if (template > 0) {
-            res.status(200).json({ status: "success", message: "data deleted" })
+            return res.status( 200).json({ status: "success", message: "data deleted" })
         }
         else {
-            res.status(200).json({ status: "failure", message: "data not found" })
+            return res.status( 200).json({ status: "failure", message: "data not found" })
         }
     } catch (error) {
-        res.status(500).json({ status: "failure", message: "Internal server error" })
+        return res.status( 500).json({ status: "failure", message: "Internal server error" })
         console.log(error.message);
     }
 }
@@ -293,16 +293,16 @@ const craeteSubMenuTemplate = async (req, res) => {
                 link_url: req.body.link_url
             });
             if (tempSubMenu) {
-                res.status(200).json({ status: "success", data: tempSubMenu, temp_Id: tempSubMenu.temp_id })
+                return res.status( 200).json({ status: "success", data: tempSubMenu, temp_Id: tempSubMenu.temp_id })
             }
             else {
-                res.status(200).json({ status: "failure", message: "sub menu is not created " })
+                return res.status( 200).json({ status: "failure", message: "sub menu is not created " })
             }
         } else {
-            res.status(200).json({ status: "failure", message: `Template Id : ${req.params.id} is not exist` })
+            return res.status( 200).json({ status: "failure", message: `Template Id : ${req.params.id} is not exist` })
         }
     } catch (error) {
-        res.status(500).json({ status: "failure", message: "Internal server error" })
+        return res.status( 500).json({ status: "failure", message: "Internal server error" })
         console.log(error.message);
 
     }
@@ -322,13 +322,13 @@ const getSubMenuByID = async (req, res) => {
             },
         });
         if (templateSubMenu) {
-            res.status(200).json({ status: "success", data: templateSubMenu })
+            return res.status( 200).json({ status: "success", data: templateSubMenu })
         }
         else {
-            res.status(200).json({ status: "failure", message: "data not found" })
+            return res.status( 200).json({ status: "failure", message: "data not found" })
         }
     } catch (e) {
-        res.status(500).json({ status: "failure", message: "Internal server error" })
+        return res.status( 500).json({ status: "failure", message: "Internal server error" })
         console.log(error.message);
     }
 }
@@ -348,14 +348,15 @@ const getSubMenuByTempId = async (req, res) => {
 
         });
         if (templateSubMenu) {
-            res.status(200).json({ status: "success", data: templateSubMenu })
+            return  res.status( 200).json({ status: "success", data: templateSubMenu })
         }
         else {
-            res.status(200).json({ status: "failure", message: "data not found" })
+            return res.status(200).json({ status: "failure", message: "data not found" })
         }
     } catch (e) {
-        res.status(200).json({ status: "failure", message: "Internal server error" })
-        console.log(error.message);
+        console.log(e.message);
+        return res.status(500).json({ status: "failure", message: "Internal server error" })
+        
     }
 }
 
@@ -370,14 +371,14 @@ const getAllSubMenu = async (req, res) => {
             }
         });
         if (templateSubMenu) {
-            res.status(200).json({ status: "success", data: templateSubMenu })
+            return res.status(200).json({ status: "success", data: templateSubMenu })
         }
         else {
-            res.status(200).json({ status: "failure", message: "data not found" })
+            return res.status(200).json({ status: "failure", message: "data not found" })
         }
     } catch (e) {
-        res.status(200).json({ status: "failure", message: "Internal server error" })
         console.log(error.message);
+        return res.status(500).json({ status: "failure", message: "Internal server error" })
     }
 }
 // UPDATE SUB MENU 
@@ -395,12 +396,12 @@ const updateSubMenu = async (req, res) => {
         console.log(subMenutUpdate > 0);
 
         if (subMenutUpdate) {
-            res.status(200).json({ status: "success", row_Affected: subMenutUpdate[0] })
+            return res.status(200).json({ status: "success", row_Affected: subMenutUpdate[0] })
         } else {
-            res.status(200).json({ status: "failure", message: "submenu is not updated" })
+            return res.status(200).json({ status: "failure", message: "submenu is not updated" })
         }
     } catch (error) {
-        res.status(500).json({ status: "failure", message: "Internal server error" })
+        return res.status(500).json({ status: "failure", message: "Internal server error" })
         console.log(error.message)
     }
 }
@@ -414,13 +415,13 @@ const deleteSubMenu = async (req, res) => {
             }
         });
         if (templateSubMenu > 0) {
-            res.status(200).json({ status: "success", message: `sub menu ${req.params.id} deleted successfully` })
+            return res.status(200).json({ status: "success", message: `sub menu ${req.params.id} deleted successfully` })
         }
         else {
-            res.status(200).json({ status: "failure", message: "data not found" })
+            return res.status(200).json({ status: "failure", message: "data not found" })
         }
     } catch (e) {
-        res.status(200).json({ status: "failure", message: "Internal server error" })
+        return res.status(500).json({ status: "failure", message: "Internal server error" })
         console.log(error.message);
     }
 }
@@ -435,13 +436,13 @@ const getButton = async (req, res) => {
             }
         });
         if (templateButton) {
-            res.status(200).json({ status: "success", data: templateButton })
+            return res.status( 200).json({ status: "success", data: templateButton })
         }
         else {
-            res.status(200).json({ status: "failure", message: "data not found" })
+            return res.status( 200).json({ status: "failure", message: "data not found" })
         }
     } catch (e) {
-        res.status(500).json({ status: "failure", message: "Internal server error" })
+        return res.status( 500).json({ status: "failure", message: "Internal server error" })
         console.log(e.message);
     }
 }
@@ -456,13 +457,13 @@ const getContent = async (req, res) => {
             }
         });
         if (templateContent) {
-            res.status(200).json({ status: "success", data: templateContent })
+            return res.status( 200).json({ status: "success", data: templateContent })
         }
         else {
-            res.status(200).json({ status: "failure", message: "data not found" })
+            return res.status( 200).json({ status: "failure", message: "data not found" })
         }
     } catch (e) {
-        res.status(500).json({ status: "failure", message: "Internal server error" })
+        return res.status( 500).json({ status: "failure", message: "Internal server error" })
         console.log(e.message);
     }
 }
@@ -476,13 +477,13 @@ const deleteButton = async (req, res) => {
             }
         });
         if (templateButton > 0) {
-            res.status(200).json({ status: "success", message: 'button deleted successfully', row_Affected: templateButton[0] })
+            return res.status( 200).json({ status: "success", message: 'button deleted successfully', row_Affected: templateButton[0] })
         }
         else {
-            res.status(200).json({ status: "failure", message: "data not found" })
+            return res.status( 200).json({ status: "failure", message: "data not found" })
         }
     } catch (e) {
-        res.status(500).json({ status: "failure", message: "Internal server error" })
+        return res.status( 500).json({ status: "failure", message: "Internal server error" })
         console.log(e.message);
     }
 }
@@ -496,13 +497,13 @@ const deleteContent = async (req, res) => {
             }
         });
         if (templateContent > 0) {
-            res.status(200).json({ status: "success", message: 'content deleted successfully', row_Affected: templateContent[0] })
+            return res.status( 200).json({ status: "success", message: 'content deleted successfully', row_Affected: templateContent[0] })
         }
         else {
-            res.status(200).json({ status: "failure", message: "data not found" })
+            return res.status( 200).json({ status: "failure", message: "data not found" })
         }
     } catch (e) {
-        res.status(500).json({ status: "failure", message: "Internal server error" })
+        return res.status( 500).json({ status: "failure", message: "Internal server error" })
         console.log(e.message);
     }
 }
@@ -543,7 +544,7 @@ const TempHistory = async (req, res) => {
             return res.status(200).json({ status: "success" ,data:historydata[0]})
         }
         else{
-            return res.status(200).json({ status: "fail", message: "data is not found"  })
+            return res.status(200).json({ status: "failure", message: "data is not found"  })
         }
     } catch (error) {
         return res.status(500).json({ status: "failure", message: error.message });

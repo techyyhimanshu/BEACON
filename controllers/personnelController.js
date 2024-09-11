@@ -93,8 +93,8 @@ const personIn = async (req, res,next) => {
         }
     })
     const now = new Date();
-    const currentDate = now.toISOString().split('T')[0];
-    const currentTime = now.toLocaleTimeString('en-US', { hour12: false });
+    const currentDate = now.toLocaleDateString('en-GB', { timeZone: 'Asia/Kolkata' });
+    const currentTime = now.toLocaleTimeString('en-US', { hour12: false, timeZone: 'Asia/Kolkata' });
     if (personnelExist !== null) {
         await inAttendance(personnelExist.personnel_id, currentDate, currentTime)
         return res.status(200).json({
@@ -153,8 +153,8 @@ const personOut = async (req, res) => {
             return res.status(200).json({ status: "failure", message: "Person not found" });
         }
         const now = new Date();
-        const currentDate = now.toISOString().split('T')[0];
-        const currentTime = now.toLocaleTimeString('en-US', { hour12: false });
+        const currentDate = now.toLocaleDateString('en-GB', { timeZone: 'Asia/Kolkata' });
+        const currentTime = now.toLocaleTimeString('en-US', { hour12: false, timeZone: 'Asia/Kolkata' });
         // Update the outTime if it's currently null
         const [affectedRows] = await db.sequelize.query(
             `UPDATE DailyAttendances 

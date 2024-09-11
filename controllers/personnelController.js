@@ -96,7 +96,7 @@ const personIn = async (req, res,next) => {
     const currentDate = now.toISOString().split('T')[0];
     const currentTime = now.toLocaleTimeString('en-US', { hour12: false });
     if (personnelExist !== null) {
-        inAttendance(personnelExist.personnel_id, currentDate, currentTime)
+        await inAttendance(personnelExist.personnel_id, currentDate, currentTime)
         return res.status(200).json({
             status: "success",
             data: { url: "https://beacon-git-main-ac-ankurs-projects.vercel.app/dailyattendance" },

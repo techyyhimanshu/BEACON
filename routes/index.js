@@ -13,6 +13,7 @@ const orgMenuRoute = require('./orgMenuRoute');
 const dynamicTempRoute = require('./dynamicTempRoute');
 const dynamicBeaconRoute = require('./dynamicBeaconRoute');
 const likeRoute = require('./likeRoute');
+const studentRoute = require('./studentRoute');
 
 // const sp_user = require('./sp_user');
 
@@ -34,6 +35,7 @@ routes.use(menuRoute);
 routes.use(orgMenuRoute);
 routes.use(dynamicBeaconRoute);
 routes.use(dynamicTempRoute);
+routes.use(studentRoute);
 
 // extra
 // routes.use(sp_user);

@@ -1,0 +1,42 @@
+const { Router } = require('express');
+const multer = require('multer');
+const { createStudent, studentIn,studentOut,getMonthlyReport, forgotPassword, resetPassword} = require('../controllers/studentController');
+const router = Router();
+
+// Define the file filter (if needed)
+const fileFilter = (req, file, cb) => {
+  const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif','application/pdf'];
+  if (allowedMimeTypes.includes(file.mimetype)) {
+    cb(null, true); // Accept the file
+  } else {
+    cb(new Error('Invalid file type.'), false); // Reject the file
+  }
+};
+// Middleware to handle multer errors
+const multerErrorHandler = (err, req, res, next) => {
+    if (err instanceof multer.MulterError) {
+        // Multer-specific errors
+        res.status(400).json({ status: 'failure', message: err.message });
+    } else if (err) {
+        // Other errors
+        res.status(400).json({ status: 'failure', message: err.message });
+    } else {
+        // Pass to the next middleware
+        next();
+    }
+};
+const upload = multer({ fileFilter });
+
+router.post('/api/student',upload.fields([
+  { name: 'profile_pic', maxCount: 1 },
+  { name: 'aadhar', maxCount: 1 },
+  { name: 'pan_card', maxCount: 1 }
+]),createStudent);
+
+router.get("/api/student/in/:device_id?",studentIn)
+router.post("/api/student/out",studentOut)
+router.post("/api/student/report/monthly",getMonthlyReport)
+router.post("/api/student/forgot/password",forgotPassword)
+router.post("/api/reset-password/:token?",resetPassword)
+
+module.exports = router;

@@ -596,6 +596,37 @@ const sendMessageToUser = async (token, title, body) => {
         
     }
 };
+
+const getAllBeaconsWithLastVisited=async (req,res)=>{
+    try {
+        const data= await db.sequelize.query(`SELECT 
+    b.beacon_name, 
+    bv.beacon_mac, 
+    d.div_name, 
+    o.org_name, 
+    MAX(bv.createdAt) AS lastVisited
+    FROM 
+        Beacons b
+    JOIN 
+        BeaconVisited bv ON bv.beacon_mac = b.mac
+    JOIN 
+        divisionDetails d ON d.div_id = b.div_id
+    JOIN 
+        OrganizationDetails o ON o.org_id = d.org_id
+    GROUP BY 
+        b.beacon_name, bv.beacon_mac 
+    `,{
+        type:Sequelize.QueryTypes.SELECT
+    })    
+    if(!data){
+        return res.status(200).json({status:"failure",data:data})
+    }
+    return res.status(200).json({status:"success",data:data})
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({status:"failure",message:"Internal server error"})
+    }
+}
 // Exporting the functions to be used in other files
 module.exports = {
     addBeacon,
@@ -605,5 +636,6 @@ module.exports = {
     getSingleBeacon,
     getBeaconsList,
     beaconVisited,
-    deleteBeacon
+    deleteBeacon,
+    getAllBeaconsWithLastVisited
 };

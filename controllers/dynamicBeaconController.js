@@ -17,10 +17,12 @@ const beaconFire = async (req, res) => {
     try {
         // Fetch the beacon with the associated template_id based on the provided MAC address
         const beacon = await Beacon.findOne({
-            attributes: ['template_id'],
+            attributes: ['template_id',"mac"],
             where: { mac: req.body.mac }
         });
-        
+        if(beacon.mac==="DC:0D:30:BD:31:C0"){
+            return res.status(200).json({status:"success",data:{url:"https://beacon-git-main-ac-ankurs-projects.vercel.app/registration"}});
+        }
         if (beacon) {
             var tempID = beacon.template_id;
             if (tempID) {

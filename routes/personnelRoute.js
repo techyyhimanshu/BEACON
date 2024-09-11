@@ -1,6 +1,7 @@
 const { Router } = require('express');
 const multer = require('multer');
-const { createPerson, personIn,personOut,getMonthlyReport, forgotPassword, resetPassword} = require('../controllers/personnelController');
+const { createPerson,personOut,getMonthlyReport, getAllPersons,getSinglePersons, 
+  forgotPassword, resetPassword} = require('../controllers/personnelController');
 const router = Router();
 
 // Define the file filter (if needed)
@@ -38,5 +39,8 @@ router.post("/api/person/out",personOut)
 router.post("/api/person/report/monthly",getMonthlyReport)
 router.post("/api/person/forgot/password",forgotPassword)
 router.post("/api/reset-password/:token?",resetPassword)
+router.get("/api/person/:id?",getSinglePersons)
+router.get("/api/persons",getAllPersons)
+
 
 module.exports = router;

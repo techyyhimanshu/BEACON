@@ -80,6 +80,48 @@ const createPerson = async (req, res,next) => {
     }
 }
 
+const getAllPersons = async (req, res) => {
+    try {
+        const allPerson = await PersonnelRecords.findAll({
+            attributes : ["personnel_id","name","father_name","dob","email","phone_one",
+                "present_address","isVerified"
+            ],
+        });
+        if (allPerson){
+            return res.status(200).json({ status: 'success', data:allPerson});
+        }
+        else{
+            return res.status(200).json({ status: 'success', message: 'no persnol user added yet' });
+        }
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ status: 'error', message: 'Internal server error'})
+    }
+};
+
+const getSinglePersons = async (req, res) => {
+    try {
+        const allPerson = await PersonnelRecords.findAll({
+            attributes : ["personnel_id","name","father_name","dob","email","phone_one","phone_two",
+                "present_address","permanent_address","aadhar_no","course","date_of_joining",
+                "device_id","image_path","aadhar_path","pan_card_path","isVerified"
+            ],            
+            where:{
+                personnel_id : req.params.id
+            }
+        });
+        if (allPerson){
+            return res.status(200).json({ status: 'success', data:allPerson});
+        }
+        else{
+            return res.status(200).json({ status: 'success', message: 'no persnol user added yet' });
+        }
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ status: 'error', message: 'Internal server error'})
+    }
+}
+
 // personnel in(api)
 const personIn = async (req, res,next) => {
     const device_id=req.body.device_uniqueID
@@ -99,10 +141,11 @@ const personIn = async (req, res,next) => {
         await inAttendance(personnelExist.personnel_id, currentDate, currentTime)
         return res.status(200).json({
             status: "success",
+            //  go for daily attendance watch
             data: { url: "https://beacon-git-main-ac-ankurs-projects.vercel.app/dailyattendance" },
         });
     }
-
+    // go for new registration
     return res.status(200).json({ status: "success", data: { url: "https://beacon-git-main-ac-ankurs-projects.vercel.app/registration" } });
 }
 
@@ -331,5 +374,7 @@ module.exports = {
     personOut,
     getMonthlyReport,
     forgotPassword,
-    resetPassword
+    resetPassword,
+    getAllPersons,
+    getSinglePersons
 }

@@ -9,12 +9,19 @@ const env = process.env.NODE_ENV || 'development';
 const config = require(__dirname + '/../config/config.js')[env];
 const db = {};
 
-let sequelize;
-if (config.use_env_variable) {
-  sequelize = new Sequelize(process.env[config.use_env_variable], config);
-} else {
-  sequelize = new Sequelize(config.database, config.username, config.password, config);
-}
+// let sequelize;
+// if (config.use_env_variable) {
+//   sequelize = new Sequelize(process.env[config.use_env_variable], config);
+// } else {
+//   sequelize = new Sequelize(config.database, config.username, config.password, config);
+// }
+
+// Create a Sequelize instance with timezone configuration
+const sequelize = new Sequelize(config.database, config.username, config.password, {
+  dialect: config.dialect,
+  host: config.host,
+  timezone: '+05:30', // Set this to your local timezone, e.g., IST for India Standard Time
+});
 
 fs
   .readdirSync(__dirname)

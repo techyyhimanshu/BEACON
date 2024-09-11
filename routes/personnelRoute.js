@@ -1,6 +1,6 @@
 const { Router } = require('express');
 const multer = require('multer');
-const { createStudent, studentIn,studentOut,getMonthlyReport, forgotPassword, resetPassword} = require('../controllers/studentController');
+const { createPerson, personIn,personOut,getMonthlyReport, forgotPassword, resetPassword} = require('../controllers/personnelController');
 const router = Router();
 
 // Define the file filter (if needed)
@@ -27,16 +27,16 @@ const multerErrorHandler = (err, req, res, next) => {
 };
 const upload = multer({ fileFilter });
 
-router.post('/api/student',upload.fields([
+router.post('/api/person',upload.fields([
   { name: 'profile_pic', maxCount: 1 },
   { name: 'aadhar', maxCount: 1 },
   { name: 'pan_card', maxCount: 1 }
-]),createStudent);
+]),createPerson);
 
-router.get("/api/student/in/:device_id?",studentIn)
-router.post("/api/student/out",studentOut)
-router.post("/api/student/report/monthly",getMonthlyReport)
-router.post("/api/student/forgot/password",forgotPassword)
+// router.get("/api/person/in/:device_id?",personIn)
+router.post("/api/person/out",personOut)
+router.post("/api/person/report/monthly",getMonthlyReport)
+router.post("/api/person/forgot/password",forgotPassword)
 router.post("/api/reset-password/:token?",resetPassword)
 
 module.exports = router;

@@ -1,15 +1,12 @@
 const { UPDATE, SELECT } = require("sequelize/lib/query-types");
 const db = require("../models");
-const StudentRecords = db.StudentRecords;
-const Beacon = db.Beacon;
+const PersonnelRecords = db.PersonnelRecords;
 const Sequelize = require("sequelize");
-const jwt = require("jsonwebtoken");
-// const Attendance = db.Attendance
+const Attendance = db.Attendance
 // const ResetToken = db.ResetToken
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const { log } = require("console");
 const moment = require('moment-timezone');
 const nodemailer = require('nodemailer');
 // test comment1 for deployement
@@ -28,7 +25,7 @@ const saveFile = (fileBuffer, filePath) => {
     });
 };
 
-const createStudent = async (req, res,next) => {
+const createPerson = async (req, res,next) => {
     const transaction = await db.sequelize.transaction();
     try {
     // try {
@@ -43,7 +40,7 @@ const createStudent = async (req, res,next) => {
             ? `uploads/pancard/${Date.now()}-${req.files['pan_card'][0].originalname}`
             : null;
 
-        // Prepare data for Student creation
+        // Prepare data for Personnel creation
         const dataToCreate = {
             ...req.body,
             image_path: profilePicPath || null,
@@ -53,8 +50,8 @@ const createStudent = async (req, res,next) => {
 
         // Log data to create for debugging
 
-        // Create student details within a transaction
-        const student = await StudentRecords.create(dataToCreate, { transaction });
+        // Create personnel details within a transaction
+        const personnel = await PersonnelRecords.create(dataToCreate, { transaction });
 
         // Save the files to disk only if they are provided
         if (req.files['profile_pic']) {
@@ -83,32 +80,23 @@ const createStudent = async (req, res,next) => {
     }
 }
 
-// student in(api)
-const studentIn = async (req, res,next) => {
-    // const beaconExist = await Beacon.findOne({
-    //     attributes: ["beacon_id"],
-    //     where: {
-    //         beacon_mac: req.body.beacon_mac
-    //     }
-    // })
-    // if (!beaconExist) {
-    //     return res.status(200).json({ status: "failure", message: "Beacon not found" })
-    // }
-    if (!req.params.device_id) {
-       const error= new CustomError('Invalid student id',400)
-       return next(error)
+// personnel in(api)
+const personIn = async (req, res,next) => {
+    const device_id=req.body.device_uniqueID
+    if (!device_id) {
+        return res.status(400).json({ status: 'failure', message: 'Device ID is required'})
     }
-    const studentExist = await Devices.findOne({
-        attributes: ["student_id"],
+    const personnelExist = await PersonnelRecords.findOne({
+        attributes: ["personnel_id"],
         where: {
-            device_unique_id: req.params.device_id
+            device_id: device_id
         }
     })
     const now = new Date();
     const currentDate = now.toISOString().split('T')[0];
     const currentTime = now.toLocaleTimeString('en-US', { hour12: false });
-    if (studentExist !== null) {
-        inAttendance(studentExist.student_id, currentDate, currentTime)
+    if (personnelExist !== null) {
+        inAttendance(personnelExist.personnel_id, currentDate, currentTime)
         return res.status(200).json({
             status: "success",
             data: { url: "https://beacon-git-main-ac-ankurs-projects.vercel.app/dailyattendance" },
@@ -119,18 +107,18 @@ const studentIn = async (req, res,next) => {
 }
 
 // function to perform attendance-in operation 
-const inAttendance = async (studentId, currentDate, currentTime) => {
+const inAttendance = async (personnelId, currentDate, currentTime) => {
     const isAlreadyAttended = await Attendance.findOne({
-        attributes: ["student_id"],
+        attributes: ["personnel_id"],
 
         where: {
-            student_id: studentId,
+            personnel_id: personnelId,
             date: currentDate
         }
     })
     if (!isAlreadyAttended) {
         const data = await Attendance.create({
-            student_id: studentId,
+            personnel_id: personnelId,
             date: currentDate,
             inTime: currentTime,
         })
@@ -138,25 +126,40 @@ const inAttendance = async (studentId, currentDate, currentTime) => {
     }
     return false
 }
-//Student out(api)
-const studentOut = async (req, res) => {
+//Personnel out(api)
+const personOut = async (req, res) => {
     try {
-        // Fetch the student_id associated with the provided device_id
-        const student = await Devices.findOne({
-            attributes: ['student_id'],
-            where: { device_unique_id: req.body.device_id }
+        // Fetch the personnel_id associated with the provided device_id
+        const {beacon_mac,device_id}=req.body
+        const beacon=await db.Beacon.findOne({
+            attributes:["mac"],
+            where:{
+                mac:beacon_mac
+            }
+        })
+        if(beacon===null){
+            return res.status(200).json({ status: "failure", message: "Beacon not found"})
+        }        
+        if(beacon_mac!=="DC:0D:30:BD:31:C0"){
+            return res.status(400).json({ status: "failure", message: "Not allowed"})
+        }
+        const personnel = await PersonnelRecords.findOne({
+            attributes: ['personnel_id'],
+            where: { device_id: device_id }
         });
 
-        // If no student is found, return a 404 error
-        if (!student) {
-            return res.status(404).json({ status: "failure", message: "Student not found" });
+        // If no personnel is found, return a 404 error
+        if (!personnel) {
+            return res.status(200).json({ status: "failure", message: "Person not found" });
         }
-
+        const now = new Date();
+        const currentDate = now.toISOString().split('T')[0];
+        const currentTime = now.toLocaleTimeString('en-US', { hour12: false });
         // Update the outTime if it's currently null
         const [affectedRows] = await db.sequelize.query(
-            `UPDATE dailyAttendances 
+            `UPDATE DailyAttendances 
              SET outTime = :outTime 
-             WHERE student_id = :studentID 
+             WHERE personnel_id = :personnelID 
              AND date = :todayDate 
              AND outTime IS NULL`,
             {
@@ -164,7 +167,7 @@ const studentOut = async (req, res) => {
                 replacements: {
                     outTime: currentTime,
                     todayDate: currentDate,
-                    studentID: student.student_id
+                    personnelID: personnel.personnel_id
                 }
             }
         );
@@ -198,14 +201,14 @@ const getMonthlyReport = async (req, res) => {
             [db.sequelize.fn('timediff', db.sequelize.col('outTime'), db.sequelize.col('inTime')), 'workedHours']
         ],
         where: {
-            student_id: req.body.student_id,
+            personnel_id: req.body.personnel_id,
             [db.Sequelize.Op.and]: [
                 db.sequelize.where(db.sequelize.fn('month', db.sequelize.col('date')), req.body.month)
             ]
         }
     })
     if (!data) {
-        return res.status(404).json({ status: "failure", message: "Student not found" })
+        return res.status(404).json({ status: "failure", message: "Personnel not found" })
     }
     return res.status(200).json({ status: "success", data })
 
@@ -217,7 +220,7 @@ const sendResetEmail = async (to, subject, text) => {
         const transporter = nodemailer.createTransport({
             service: 'Gmail', // You can use other services like 'Outlook', 'Yahoo', etc.
             auth: {
-                student: process.env.EMAIL_USER, // Your email address
+                personnel: process.env.EMAIL_USER, // Your email address
                 pass: process.env.EMAIL_PASS  // Your email password or app-specific password
             }
         });
@@ -247,13 +250,13 @@ const forgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
 
-        // Check if the student exists
-        const student = await StudentRecords.findOne({
-            attributes: ["email", "student_id"],
+        // Check if the personnel exists
+        const personnel = await PersonnelRecords.findOne({
+            attributes: ["email", "personnel_id"],
             where: { email }
         });
-        if (!student) {
-            return res.status(404).json({ message: 'Student not found' });
+        if (!personnel) {
+            return res.status(404).json({ message: 'Personnel not found' });
         }
 
         // Generate a reset token and expiry date
@@ -270,17 +273,17 @@ const forgotPassword = async (req, res) => {
         const currentDateTime = now.format('YYYY-MM-DD HH:mm:ss');
         const expiryDateTime = resetTokenExpiry.format('YYYY-MM-DD HH:mm:ss');
 
-        // Update the student with the reset token and expiry
+        // Update the personnel with the reset token and expiry
         await ResetToken.create({
             token: resetToken,
             expiry: expiryDateTime,
-            student_id: student.student_id,
+            personnel_id: personnel.personnel_id,
             createdAt: currentDateTime
         });
 
         // Send the reset email
         const resetLink = `${"http://localhost:3000/api"}/reset-password/${resetToken}`;
-        await sendResetEmail(student.email, 'Password Reset', `Click here to reset your password: ${resetLink}`);
+        await sendResetEmail(personnel.email, 'Password Reset', `Click here to reset your password: ${resetLink}`);
         return res.status(200).json({ message: 'Password reset email sent!' });
     } catch (error) {
         console.error(error);
@@ -295,17 +298,17 @@ const resetPassword = async (req, res) => {
             return res.status(400).json({ message: 'Invalid token' });
         }
         const { password } = req.body;
-        const student = await ResetToken.findOne({
-            attributes: ["student_id", "expiry"],
+        const personnel = await ResetToken.findOne({
+            attributes: ["personnel_id", "expiry"],
             where: {
                 token,
                 isUsed: null
             }
         })
-        if (!student) {
+        if (!personnel) {
             return res.status(404).json({ message: 'Invalid token' })
         }
-        const expiry = student.expiry;
+        const expiry = personnel.expiry;
         const now = new Date();
         const expiryDate = new Date(expiry);
         if (now > expiryDate) {
@@ -323,9 +326,9 @@ const resetPassword = async (req, res) => {
     }
 }
 module.exports = {
-    createStudent,
-    studentIn,
-    studentOut,
+    createPerson,
+    personIn,
+    personOut,
     getMonthlyReport,
     forgotPassword,
     resetPassword

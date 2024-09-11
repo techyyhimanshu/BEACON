@@ -2,14 +2,14 @@
 const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-  class StudentRecords extends Model {
+  class PersonnelRecords extends Model {
     static associate(models) {
       // define association here
     }
   }
 
-  StudentRecords.init({
-    user_id: {
+  PersonnelRecords.init({
+    personnel_id: {
       allowNull: false,
       autoIncrement: true,
       primaryKey: true,
@@ -219,6 +219,7 @@ module.exports = (sequelize, DataTypes) => {
     device_id:{
       type:DataTypes.STRING,
       allowNull: false,
+      unique:true
     },
     image_path: {
       type: DataTypes.STRING,
@@ -238,9 +239,9 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {
     sequelize,
-    modelName: 'StudentRecords',
+    modelName: 'PersonnelRecords',
     paranoid: true
   });
 
-  return StudentRecords;
+  return PersonnelRecords;
 };

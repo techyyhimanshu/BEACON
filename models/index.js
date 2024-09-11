@@ -56,7 +56,8 @@ db.tbl_temp_bg = require('./tbl_temp_bg')(sequelize, DataTypes);
 db.bgImages = require('./tbl_temp_bg')(sequelize, DataTypes);
 db.DeviceFcmToken = require('./devicefcmtoken')(sequelize, DataTypes);
 db.tbl_temp_like = require('./tbl_temp_like')(sequelize, DataTypes);
-db.StudentRecords = require('./studentrecord')(sequelize, DataTypes);
+db.PersonnelRecords = require('./personnelrecord')(sequelize, DataTypes);
+db.Attendance = require('./dailyattendance')(sequelize, DataTypes);
 
 
 

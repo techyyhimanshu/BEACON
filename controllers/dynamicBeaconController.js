@@ -1,13 +1,10 @@
 const db = require("../models");
 const Sequelize = require('sequelize');
 const tbl_template = require("../models/tbl_template");
-const TempButton = db.tbl_temp_button;
-const TempContent = db.tbl_temp_content;
-const TempSubMenu = db.tbl_temp_menu;
 const Template = db.tbl_template;
 const Beacon = db.Beacon;
 const BeaconVisited = db.BeaconVisited;
-const User = db.user;
+const { personIn } = require("../controllers/personnelController")
 const TempLikes = db.tbl_temp_like;
 
 function isNumber(value) {
@@ -17,20 +14,20 @@ const beaconFire = async (req, res) => {
     try {
         // Fetch the beacon with the associated template_id based on the provided MAC address
         const beacon = await Beacon.findOne({
-            attributes: ['template_id',"mac"],
+            attributes: ['template_id', "mac"],
             where: { mac: req.body.mac }
         });
-        if(beacon.mac==="DC:0D:30:BD:31:C0"){
-            return res.status(200).json({status:"success",data:{url:"https://beacon-git-main-ac-ankurs-projects.vercel.app/registration"}});
-        }
         if (beacon) {
+            if (beacon.mac === "DC:0D:30:BD:31:C0") {
+                const response = personIn(req, res)
+                return response
+            }
             var tempID = beacon.template_id;
             if (tempID) {
                 //tempID = tempID * 1;
                 // console.log(isNumber(tempID));
-                
-                if(!isNumber(tempID))
-                {                   
+
+                if (!isNumber(tempID)) {
                     req.body.temp_id = 0;
                     await beaconVisited(req.body);
                     return res.status(200).json({ status: "success", url: tempID });
@@ -94,13 +91,13 @@ const beaconVisited = async (data) => {
     const uniqueId = data.device_uniqueID;
     try {
         // Create BeaconVisited record and fetch user data in parallel
-        
+
         const data2 = await BeaconVisited.create({
             beacon_mac: data.mac,
             device_id: uniqueId,
             location: data.location,
             temp_id: data.temp_id
-        })        
+        })
         return data2;
     } catch (error) {
         console.log(error);

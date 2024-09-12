@@ -135,10 +135,16 @@ const personIn = async (req, res, next) => {
         }
     })
     const now = new Date();
-    const currentDateTime = now.toLocaleString('en-CA', {hour12:false, timeZone: 'Asia/Kolkata' });
+
+    // Convert to IST (Asia/Kolkata time zone) by adding the offset manually
+    const indiaOffset = 5.5 * 60 * 60 * 1000; // 5 hours 30 minutes offset from UTC
+    const istTime = new Date(now.getTime() + indiaOffset);
+    
+    // Format the IST time into MySQL DATETIME format
+    const currentDateTime = istTime.toISOString().slice(0, 19).replace('T', ' ');
     const formattedDateTime = currentDateTime.replace(',', '');    
     if (personnelExist !== null) {
-        await inAttendance(personnelExist.personnel_id, formattedDateTime)
+        await inAttendance(personnelExist.personnel_id, currentDateTime)
         return res.status(200).json({
             status: "success",
             url: "https://beacon-git-main-ac-ankurs-projects.vercel.app/dailyattendance"

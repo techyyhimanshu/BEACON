@@ -157,6 +157,8 @@ const inAttendance = async (personnelId) => {
     // })
     // if (!isAlreadyAttended) {
         const currentDateTime = moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');    
+        console.log(currentDateTime);
+        
         const data = await Attendance.create({
             personnel_id: personnelId,
             timestamps:currentDateTime

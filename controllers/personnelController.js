@@ -134,17 +134,8 @@ const personIn = async (req, res, next) => {
             device_id: device_id
         }
     })
-    const now = new Date();
-
-    // Convert to IST (Asia/Kolkata time zone) by adding the offset manually
-    const indiaOffset = 5.5 * 60 * 60 * 1000; // 5 hours 30 minutes offset from UTC
-    const istTime = new Date(now.getTime() + indiaOffset);
-    
-    // Format the IST time into MySQL DATETIME format
-    const currentDateTime = istTime.toISOString().slice(0, 19).replace('T', ' ');
-    const formattedDateTime = currentDateTime.replace(',', '');    
     if (personnelExist !== null) {
-        await inAttendance(personnelExist.personnel_id, currentDateTime)
+        await inAttendance(personnelExist.personnel_id)
         return res.status(200).json({
             status: "success",
             url: "https://beacon-git-main-ac-ankurs-projects.vercel.app/dailyattendance"
@@ -155,7 +146,7 @@ const personIn = async (req, res, next) => {
     return res.status(200).json({ status: "success", url: "https://beacon-git-main-ac-ankurs-projects.vercel.app/registration" } );
 }
 // function to perform attendance-in operation 
-const inAttendance = async (personnelId, currentDateTime) => {
+const inAttendance = async (personnelId) => {
     // const isAlreadyAttended = await Attendance.findOne({
     //     attributes: ["personnel_id"],
 
@@ -165,6 +156,7 @@ const inAttendance = async (personnelId, currentDateTime) => {
     //     }
     // })
     // if (!isAlreadyAttended) {
+        const currentDateTime = moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');    
         const data = await Attendance.create({
             personnel_id: personnelId,
             timestamps:currentDateTime

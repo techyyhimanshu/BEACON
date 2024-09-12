@@ -25,10 +25,10 @@ const saveFile = (fileBuffer, filePath) => {
     });
 };
 
-const createPerson = async (req, res,next) => {
+const createPerson = async (req, res, next) => {
     const transaction = await db.sequelize.transaction();
     try {
-    // try {
+        // try {
         // Prepare paths for file storage but check if files are provided
         const profilePicPath = req.files['profile_pic']
             ? `uploads/profilePictures/${Date.now()}-${req.files['profile_pic'][0].originalname}`
@@ -71,20 +71,20 @@ const createPerson = async (req, res,next) => {
     } catch (error) {
         await transaction.rollback();
         console.log(error.message);
-        
-        if(error instanceof Sequelize.ValidationError){
-            const errorMessages=error.errors.map(err=>err.message)
+
+        if (error instanceof Sequelize.ValidationError) {
+            const errorMessages = error.errors.map(err => err.message)
             return res.status(400).json({ status: 'failure', message: errorMessages });
         }
-        return res.status(500).json({ status: 'error', message: 'Internal server error'})
+        return res.status(500).json({ status: 'error', message: 'Internal server error' })
     }
 }
 
 // personnel in(api)
-const personIn = async (req, res,next) => {
-    const device_id=req.body.device_uniqueID
+const personIn = async (req, res, next) => {
+    const device_id = req.body.device_uniqueID
     if (!device_id) {
-        return res.status(400).json({ status: 'failure', message: 'Device ID is required'})
+        return res.status(400).json({ status: 'failure', message: 'Device ID is required' })
     }
     const personnelExist = await PersonnelRecords.findOne({
         attributes: ["personnel_id"],
@@ -99,11 +99,12 @@ const personIn = async (req, res,next) => {
         await inAttendance(personnelExist.personnel_id, currentDate, currentTime)
         return res.status(200).json({
             status: "success",
-            data: { url: "https://beacon-git-main-ac-ankurs-projects.vercel.app/dailyattendance" },
-        });
+            url: "https://beacon-git-main-ac-ankurs-projects.vercel.app/dailyattendance"
+        },
+        );
     }
 
-    return res.status(200).json({ status: "success", data: { url: "https://beacon-git-main-ac-ankurs-projects.vercel.app/registration" } });
+    return res.status(200).json({ status: "success", url: "https://beacon-git-main-ac-ankurs-projects.vercel.app/registration" } );
 }
 
 // function to perform attendance-in operation 
@@ -130,18 +131,18 @@ const inAttendance = async (personnelId, currentDate, currentTime) => {
 const personOut = async (req, res) => {
     try {
         // Fetch the personnel_id associated with the provided device_id
-        const {beacon_mac,device_id}=req.body
-        const beacon=await db.Beacon.findOne({
-            attributes:["mac"],
-            where:{
-                mac:beacon_mac
+        const { beacon_mac, device_id } = req.body
+        const beacon = await db.Beacon.findOne({
+            attributes: ["mac"],
+            where: {
+                mac: beacon_mac
             }
         })
-        if(beacon===null){
-            return res.status(200).json({ status: "failure", message: "Beacon not found"})
-        }        
-        if(beacon_mac!=="DC:0D:30:BD:31:C0"){
-            return res.status(400).json({ status: "failure", message: "Not allowed"})
+        if (beacon === null) {
+            return res.status(200).json({ status: "failure", message: "Beacon not found" })
+        }
+        if (beacon_mac !== "DC:0D:30:BD:31:C0") {
+            return res.status(400).json({ status: "failure", message: "Not allowed" })
         }
         const personnel = await PersonnelRecords.findOne({
             attributes: ['personnel_id'],

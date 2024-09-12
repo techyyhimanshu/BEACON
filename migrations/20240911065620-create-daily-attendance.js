@@ -13,15 +13,9 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull:false
       },
-      date:{
-        type:Sequelize.DATEONLY,
+      timestamps:{
+        type:Sequelize.DATE,
         allowNull:false
-      },
-      inTime:{
-        type:Sequelize.TIME
-      },
-      outTime:{
-        type:Sequelize.TIME
       }
     });
   },

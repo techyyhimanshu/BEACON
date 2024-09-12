@@ -9,6 +9,7 @@ const path = require('path');
 const crypto = require('crypto');
 const moment = require('moment-timezone');
 const nodemailer = require('nodemailer');
+const { timeStamp } = require("console");
 // test comment1 for deployement
 
 
@@ -134,10 +135,10 @@ const personIn = async (req, res, next) => {
         }
     })
     const now = new Date();
-    const currentDate = now.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
-    const currentTime = now.toLocaleTimeString('en-US', { hour12: false, timeZone: 'Asia/Kolkata' });
+    const currentDateTime = now.toLocaleString('en-CA', {hour12:false, timeZone: 'Asia/Kolkata' });
+    const formattedDateTime = currentDateTime.replace(',', '');    
     if (personnelExist !== null) {
-        await inAttendance(personnelExist.personnel_id, currentDate, currentTime)
+        await inAttendance(personnelExist.personnel_id, formattedDateTime)
         return res.status(200).json({
             status: "success",
             url: "https://beacon-git-main-ac-ankurs-projects.vercel.app/dailyattendance"
@@ -148,24 +149,23 @@ const personIn = async (req, res, next) => {
     return res.status(200).json({ status: "success", url: "https://beacon-git-main-ac-ankurs-projects.vercel.app/registration" } );
 }
 // function to perform attendance-in operation 
-const inAttendance = async (personnelId, currentDate, currentTime) => {
-    const isAlreadyAttended = await Attendance.findOne({
-        attributes: ["personnel_id"],
+const inAttendance = async (personnelId, currentDateTime) => {
+    // const isAlreadyAttended = await Attendance.findOne({
+    //     attributes: ["personnel_id"],
 
-        where: {
-            personnel_id: personnelId,
-            date: currentDate
-        }
-    })
-    if (!isAlreadyAttended) {
+    //     where: {
+    //         personnel_id: personnelId,
+    //         timestamps: currentDateTime
+    //     }
+    // })
+    // if (!isAlreadyAttended) {
         const data = await Attendance.create({
             personnel_id: personnelId,
-            date: currentDate,
-            inTime: currentTime,
+            timestamps:currentDateTime
         })
         return data;
-    }
-    return false
+    // }
+    // return false
 }
 //Personnel out(api)
 const personOut = async (req, res) => {

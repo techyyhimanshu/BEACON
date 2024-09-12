@@ -1,4 +1,5 @@
 'use strict';
+const { database } = require('firebase-admin');
 const {
   Model
 } = require('sequelize');
@@ -18,15 +19,8 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false
     },
-    date: {
-      type: DataTypes.DATEONLY,
-      allowNull: false
-    },
-    inTime: {
-      type: DataTypes.TIME
-    },
-    outTime: {
-      type: DataTypes.TIME
+    timestamps:{
+      type:DataTypes.DATE
     }
 
   }, {

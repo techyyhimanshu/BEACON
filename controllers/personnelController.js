@@ -159,10 +159,11 @@ const inAttendance = async (personnelId) => {
         const currentDateTime = moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');    
         console.log(currentDateTime);
         
-        const data = await Attendance.create({
-            personnel_id: personnelId,
-            timestamps:currentDateTime
-        })
+        const data = await db.sequelize.query(`INSERT INTO DailyAttendances (personnel_id,timestamps)
+VALUES (?,?);`,{
+    replacements: [personnelId,currentDateTime],
+    type: db.Sequelize.QueryTypes.INSERT
+})
         return data;
     // }
     // return false

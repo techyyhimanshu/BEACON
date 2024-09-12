@@ -80,6 +80,47 @@ const createPerson = async (req, res, next) => {
     }
 }
 
+const getAllPersons = async (req, res) => {
+    try {
+        const allPerson = await PersonnelRecords.findAll({
+            attributes : ["personnel_id","name","father_name","dob","email","phone_one",
+                "present_address","isVerified"
+            ],
+        });
+        if (allPerson){
+            return res.status(200).json({ status: 'success', data:allPerson});
+        }
+        else{
+            return res.status(200).json({ status: 'success', message: 'no persnol user added yet' });
+        }
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ status: 'error', message: 'Internal server error'})
+    }
+};
+
+const getSinglePerson = async (req, res) => {
+    try {
+        const Person = await PersonnelRecords.findAll({
+            attributes : ["personnel_id","name","father_name","dob","email","phone_one","phone_two",
+                "present_address","permanent_address","aadhar_no","course","date_of_joining",
+                "device_id","image_path","aadhar_path","pan_card_path","isVerified"
+            ],            
+            where:{
+                personnel_id : req.params.id
+            }
+        });
+        if (Person){
+            return res.status(200).json({ status: 'success', data:Person});
+        }
+        else{
+            return res.status(200).json({ status: 'success', message: 'no persnol user added yet' });
+        }
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ status: 'error', message: 'Internal server error'})
+    }
+}
 // personnel in(api)
 const personIn = async (req, res, next) => {
     const device_id = req.body.device_uniqueID
@@ -106,7 +147,6 @@ const personIn = async (req, res, next) => {
 
     return res.status(200).json({ status: "success", url: "https://beacon-git-main-ac-ankurs-projects.vercel.app/registration" } );
 }
-
 // function to perform attendance-in operation 
 const inAttendance = async (personnelId, currentDate, currentTime) => {
     const isAlreadyAttended = await Attendance.findOne({
@@ -246,7 +286,6 @@ const sendResetEmail = async (to, subject, text) => {
     }
 };
 
-
 const forgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
@@ -326,11 +365,35 @@ const resetPassword = async (req, res) => {
         return res.status(500).json({ message: 'Internal server error' });
     }
 }
+const VerifyPerson = async (req, res) => {
+    try {
+        const Person = await PersonnelRecords.update({
+            isVerified : true
+        },{           
+            where:{
+                personnel_id : req.params.id
+            }
+        });
+        if (Person){
+            return res.status(200).json({ status: 'success', message: `Person ID :${req.params.id} is verified successfully`});
+        }
+        else{
+            return res.status(200).json({ status: 'success', message: 'person is not verified' });
+        }
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ status: 'error', message: 'Internal server error'})
+    }
+}
 module.exports = {
     createPerson,
     personIn,
     personOut,
     getMonthlyReport,
     forgotPassword,
-    resetPassword
+    resetPassword,
+    getAllPersons,
+    getSinglePerson,
+    VerifyPerson
+
 }

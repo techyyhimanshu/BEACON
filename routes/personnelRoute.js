@@ -1,7 +1,9 @@
 const { Router } = require('express');
 const multer = require('multer');
-const { createPerson, personIn,personOut,getMonthlyReport, forgotPassword, resetPassword} = require('../controllers/personnelController');
+const { createPerson,personOut,getMonthlyReport, getAllPersons,getSinglePerson,VerifyPerson,
+  forgotPassword, resetPassword} = require('../controllers/personnelController');
 const router = Router();
+const verifyToken = require('../middlewares/authMiddleware');
 
 // Define the file filter (if needed)
 const fileFilter = (req, file, cb) => {
@@ -38,5 +40,10 @@ router.post("/api/person/out",personOut)
 router.post("/api/person/report/monthly",getMonthlyReport)
 router.post("/api/person/forgot/password",forgotPassword)
 router.post("/api/reset-password/:token?",resetPassword)
+router.get("/api/person/:id?",getSinglePerson)
+router.get("/api/persons",getAllPersons)
+router.get("/api/person/:id?/verify",verifyToken,VerifyPerson)
+
+
 
 module.exports = router;

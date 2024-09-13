@@ -65,8 +65,12 @@ db.DeviceFcmToken = require('./devicefcmtoken')(sequelize, DataTypes);
 db.tbl_temp_like = require('./tbl_temp_like')(sequelize, DataTypes);
 db.PersonnelRecords = require('./personnelrecord')(sequelize, DataTypes);
 db.Attendance = require('./dailyattendance')(sequelize, DataTypes);
+db.dailytask = require('./dailytask')(sequelize, DataTypes);
 
 
+
+db.PersonnelRecords.belongsTo(db.dailytask,{foreignKey:'personnel_id'})
+db.dailytask.hasMany(db.PersonnelRecords,{foreignKey:'personnel_id'})
 
 db.BeaconVisited.hasMany(db.tbl_template,{foreignKey:'temp_id'})
 db.tbl_template.belongsTo(db.BeaconVisited,{foreignKey:'temp_id'})

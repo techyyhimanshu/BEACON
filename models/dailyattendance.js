@@ -22,7 +22,6 @@ module.exports = (sequelize, DataTypes) => {
     timestamps:{
       type:DataTypes.DATE
     }
-
   }, {
     sequelize,
     modelName: 'DailyAttendance',

@@ -14,6 +14,8 @@ const dynamicTempRoute = require('./dynamicTempRoute');
 const dynamicBeaconRoute = require('./dynamicBeaconRoute');
 const likeRoute = require('./likeRoute');
 const personnelRoute = require('./personnelRoute');
+const dailyTaskRoute = require('./dailyTaskRoute');
+
 
 // const sp_user = require('./sp_user');
 
@@ -36,6 +38,8 @@ routes.use(orgMenuRoute);
 routes.use(dynamicBeaconRoute);
 routes.use(dynamicTempRoute);
 routes.use(personnelRoute);
+routes.use(dailyTaskRoute);
+
 
 // extra
 // routes.use(sp_user);

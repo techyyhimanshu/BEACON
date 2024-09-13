@@ -129,7 +129,7 @@ const personIn = async (req, res, next) => {
         return res.status(400).json({ status: 'failure', message: 'Device ID is required' })
     }
     const personnelExist = await PersonnelRecords.findOne({
-        attributes: ["personnel_id"],
+        attributes: ["device_id","personnel_id"],
         where: {
             device_id: device_id
         }
@@ -138,6 +138,7 @@ const personIn = async (req, res, next) => {
         await inAttendance(personnelExist.personnel_id)
         return res.status(200).json({
             status: "success",
+            device_id:personnelExist.device_id,
             url: "https://beacon-git-main-ac-ankurs-projects.vercel.app/dailyattendance"
         },
         );
@@ -227,34 +228,95 @@ const personOut = async (req, res) => {
         return res.status(500).json({ status: "Error", message: "Internal server error" });
     }
 };
+
+
 const getMonthlyReport = async (req, res) => {
-    const data = await Attendance.findAll({
-        attributes: [
-            "date",
-            "inTime",
-            "outTime",
-            [
-                db.sequelize.literal(`CASE 
-                    WHEN outTime IS NOT NULL AND inTime IS NOT NULL THEN 1 
-                    ELSE 0 
-                END`),
-                'isPresent'
-            ],
-            [db.sequelize.fn('timediff', db.sequelize.col('outTime'), db.sequelize.col('inTime')), 'workedHours']
-        ],
-        where: {
-            personnel_id: req.body.personnel_id,
-            [db.Sequelize.Op.and]: [
-                db.sequelize.where(db.sequelize.fn('month', db.sequelize.col('date')), req.body.month)
-            ]
+    const { device_id, month, year } = req.body;
+
+    const formattedMonth = month < 10 ? `0${month}` : month;
+    // Step 1: Generate full month's date range
+    const startDate = moment(`${year}-${formattedMonth}-01`);
+    const endDate = startDate.clone().endOf('month');
+
+    const dateRange = [];
+    let currentDate = startDate.clone();
+    while (currentDate.isSameOrBefore(endDate)) {
+        dateRange.push(currentDate.format('YYYY-MM-DD'));
+        currentDate.add(1, 'day');
+    }
+    
+
+    // Step 2: Fetch attendance data for the given month
+    const attendanceData = await db.sequelize.query(
+        `SELECT d.personnel_id AS person_id, 
+                DATE(d.timestamps) AS date, 
+                MIN(d.timestamps) AS start, 
+                MAX(d.timestamps) AS end, 
+                TIMEDIFF(MAX(TIME(d.timestamps)), MIN(TIME(d.timestamps))) AS workedHours
+         FROM DailyAttendances d
+         JOIN PersonnelRecords p ON d.personnel_id = p.personnel_id
+         WHERE p.device_id = ? 
+         AND MONTH(d.timestamps) = ? 
+         AND YEAR(d.timestamps) = ?
+         GROUP BY DATE(d.timestamps), d.personnel_id`,
+        {
+            replacements: [device_id, month, year],
+            type: db.sequelize.QueryTypes.SELECT,
         }
-    })
+    );
+
+    // Step 3: Map attendance data to the full month
+    const report = dateRange.map((date) => {
+        const attendance = attendanceData.find((entry) => entry.date === date);
+        if (attendance) {
+            return {
+                title:"Present",
+                start: attendance.start,
+                end: attendance.end,
+                status:"present"
+            };
+        } else {
+            return {
+                title:"Absent",
+                start: date,
+                end: null,
+                status:"absent"
+            };
+        }
+    });
+
+    // Step 4: Return the final report
+    return res.status(200).json({ status: "success", data: report });
+};
+
+
+const getTodayReport = async (req, res) => {
+    const currentDate = moment().tz('Asia/Kolkata').format('YYYY-MM-DD');    
+    const data=await db.sequelize.query(`SELECT  
+    d.personnel_id AS person_id,
+    DATE(d.timestamps) AS date,
+    MIN(TIME(d.timestamps)) AS inTime,
+    TIMEDIFF(MAX(d.timestamps), MIN(d.timestamps)) AS todayWorkedHours,
+    TIMEDIFF('07:00:00', TIMEDIFF(MAX(d.timestamps), MIN(d.timestamps))) AS remainingTime
+FROM 
+    DailyAttendances d
+JOIN 
+    PersonnelRecords p ON d.personnel_id = p.personnel_id
+WHERE 
+    p.device_id = ?
+    AND DATE(d.timestamps) = ?
+GROUP BY 
+    DATE(d.timestamps), d.personnel_id,p.device_id`,{
+    replacements: [req.body.device_id,currentDate],
+    type: db.sequelize.QueryTypes.SELECT
+})
     if (!data) {
         return res.status(404).json({ status: "failure", message: "Personnel not found" })
     }
     return res.status(200).json({ status: "success", data })
 
 }
+
 
 const sendResetEmail = async (to, subject, text) => {
     try {
@@ -395,6 +457,7 @@ module.exports = {
     resetPassword,
     getAllPersons,
     getSinglePerson,
-    VerifyPerson
+    VerifyPerson,
+    getTodayReport
 
 }

@@ -84,42 +84,42 @@ const createPerson = async (req, res, next) => {
 const getAllPersons = async (req, res) => {
     try {
         const allPerson = await PersonnelRecords.findAll({
-            attributes : ["personnel_id","name","father_name","dob","email","phone_one",
-                "present_address","isVerified"
+            attributes: ["personnel_id", "name", "father_name", "dob", "email", "phone_one",
+                "present_address", "isVerified"
             ],
         });
-        if (allPerson){
-            return res.status(200).json({ status: 'success', data:allPerson});
+        if (allPerson) {
+            return res.status(200).json({ status: 'success', data: allPerson });
         }
-        else{
+        else {
             return res.status(200).json({ status: 'success', message: 'no persnol user added yet' });
         }
     } catch (error) {
         console.log(error.message);
-        return res.status(500).json({ status: 'error', message: 'Internal server error'})
+        return res.status(500).json({ status: 'error', message: 'Internal server error' })
     }
 };
 
 const getSinglePerson = async (req, res) => {
     try {
         const Person = await PersonnelRecords.findAll({
-            attributes : ["personnel_id","name","father_name","dob","email","phone_one","phone_two",
-                "present_address","permanent_address","aadhar_no","course","date_of_joining",
-                "device_id","image_path","aadhar_path","pan_card_path","isVerified"
-            ],            
-            where:{
-                personnel_id : req.params.id
+            attributes: ["personnel_id", "name", "father_name", "dob", "email", "phone_one", "phone_two",
+                "present_address", "permanent_address", "aadhar_no", "course", "date_of_joining",
+                "device_id", "image_path", "aadhar_path", "pan_card_path", "isVerified"
+            ],
+            where: {
+                personnel_id: req.params.id
             }
         });
-        if (Person){
-            return res.status(200).json({ status: 'success', data:Person});
+        if (Person) {
+            return res.status(200).json({ status: 'success', data: Person });
         }
-        else{
+        else {
             return res.status(200).json({ status: 'success', message: 'no persnol user added yet' });
         }
     } catch (error) {
         console.log(error.message);
-        return res.status(500).json({ status: 'error', message: 'Internal server error'})
+        return res.status(500).json({ status: 'error', message: 'Internal server error' })
     }
 }
 // personnel in(api)
@@ -129,7 +129,7 @@ const personIn = async (req, res, next) => {
         return res.status(400).json({ status: 'failure', message: 'Device ID is required' })
     }
     const personnelExist = await PersonnelRecords.findOne({
-        attributes: ["device_id","personnel_id"],
+        attributes: ["device_id", "personnel_id"],
         where: {
             device_id: device_id
         }
@@ -138,13 +138,13 @@ const personIn = async (req, res, next) => {
         await inAttendance(personnelExist.personnel_id)
         return res.status(200).json({
             status: "success",
-            device_id:personnelExist.device_id,
+            device_id: personnelExist.device_id,
             url: "https://beacon-git-main-ac-ankurs-projects.vercel.app/dailyattendance"
         },
         );
     }
 
-    return res.status(200).json({ status: "success", url: "https://beacon-git-main-ac-ankurs-projects.vercel.app/registration" } );
+    return res.status(200).json({ status: "success", url: "https://beacon-git-main-ac-ankurs-projects.vercel.app/registration" });
 }
 // function to perform attendance-in operation 
 const inAttendance = async (personnelId) => {
@@ -157,15 +157,15 @@ const inAttendance = async (personnelId) => {
     //     }
     // })
     // if (!isAlreadyAttended) {
-        const currentDateTime = moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');    
-        console.log(currentDateTime);
-        
-        const data = await db.sequelize.query(`INSERT INTO DailyAttendances (personnel_id,timestamps)
-VALUES (?,?);`,{
-    replacements: [personnelId,currentDateTime],
-    type: db.Sequelize.QueryTypes.INSERT
-})
-        return data;
+    const currentDateTime = moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
+    console.log(currentDateTime);
+
+    const data = await db.sequelize.query(`INSERT INTO DailyAttendances (personnel_id,timestamps)
+VALUES (?,?);`, {
+        replacements: [personnelId, currentDateTime],
+        type: db.Sequelize.QueryTypes.INSERT
+    })
+    return data;
     // }
     // return false
 }
@@ -232,13 +232,24 @@ const personOut = async (req, res) => {
 
 const getMonthlyReport = async (req, res) => {
     const { device_id, month, year } = req.body;
-    const endDate = moment().tz('Asia/Kolkata').format('YYYY-MM-DD'); 
+    var endDate,startDate;
     const formattedMonth = month < 10 ? `0${month}` : month;
-    // Step 1: Generate full month's date range
-    const startDate = moment(`${year}-${formattedMonth}-01`);
+    const currentMonth=moment().tz('Asia/Kolkata').format('MM')
+    if(formattedMonth>currentMonth){
+        return res.status(200).json({status:"success",data:{}})
+    }    
+    if (formattedMonth === currentMonth) {      
+        startDate = moment(`${year}-${formattedMonth}-01`);
+        endDate = moment().tz('Asia/Kolkata').format('YYYY-MM-DD');
+    }
+    else {
+        // Step 1: Generate full month's date range
+        startDate = moment(`${year}-${formattedMonth}-01`);
+        endDate = startDate.clone().endOf('month');
+    }
     // const endDate = startDate.clone().endOf('month');
-    console.log(endDate);
-    
+    console.log(startDate);
+
 
     const dateRange = [];
     let currentDate = startDate.clone();
@@ -246,7 +257,7 @@ const getMonthlyReport = async (req, res) => {
         dateRange.push(currentDate.format('YYYY-MM-DD'));
         currentDate.add(1, 'day');
     }
-    
+
 
     // Step 2: Fetch attendance data for the given month
     const attendanceData = await db.sequelize.query(
@@ -272,17 +283,17 @@ const getMonthlyReport = async (req, res) => {
         const attendance = attendanceData.find((entry) => entry.date === date);
         if (attendance) {
             return {
-                title:"Present",
+                title: "Present",
                 start: attendance.start,
                 end: attendance.end,
-                status:"present"
+                status: "present"
             };
         } else {
             return {
-                title:"Absent",
+                title: "Absent",
                 start: date,
                 end: null,
-                status:"absent"
+                status: "absent"
             };
         }
     });
@@ -293,8 +304,8 @@ const getMonthlyReport = async (req, res) => {
 
 
 const getTodayReport = async (req, res) => {
-    const currentDate = moment().tz('Asia/Kolkata').format('YYYY-MM-DD');    
-    const data=await db.sequelize.query(`SELECT  
+    const currentDate = moment().tz('Asia/Kolkata').format('YYYY-MM-DD');
+    const data = await db.sequelize.query(`SELECT  
     d.personnel_id AS person_id,
     DATE(d.timestamps) AS date,
     MIN(TIME(d.timestamps)) AS inTime,
@@ -308,10 +319,10 @@ WHERE
     p.device_id = ?
     AND DATE(d.timestamps) = ?
 GROUP BY 
-    DATE(d.timestamps), d.personnel_id,p.device_id`,{
-    replacements: [req.body.device_id,currentDate],
-    type: db.sequelize.QueryTypes.SELECT
-})
+    DATE(d.timestamps), d.personnel_id,p.device_id`, {
+        replacements: [req.body.device_id, currentDate],
+        type: db.sequelize.QueryTypes.SELECT
+    })
     if (!data) {
         return res.status(404).json({ status: "failure", message: "Personnel not found" })
     }
@@ -433,21 +444,21 @@ const resetPassword = async (req, res) => {
 const VerifyPerson = async (req, res) => {
     try {
         const Person = await PersonnelRecords.update({
-            isVerified : true
-        },{           
-            where:{
-                personnel_id : req.params.id
+            isVerified: true
+        }, {
+            where: {
+                personnel_id: req.params.id
             }
         });
-        if (Person){
-            return res.status(200).json({ status: 'success', message: `Person ID :${req.params.id} is verified successfully`});
+        if (Person) {
+            return res.status(200).json({ status: 'success', message: `Person ID :${req.params.id} is verified successfully` });
         }
-        else{
+        else {
             return res.status(200).json({ status: 'success', message: 'person is not verified' });
         }
     } catch (error) {
         console.log(error.message);
-        return res.status(500).json({ status: 'error', message: 'Internal server error'})
+        return res.status(500).json({ status: 'error', message: 'Internal server error' })
     }
 }
 module.exports = {

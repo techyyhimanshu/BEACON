@@ -232,7 +232,7 @@ const personOut = async (req, res) => {
 
 const getMonthlyReport = async (req, res) => {
     const { device_id, month, year } = req.body;
-    var endDate,startDate;
+    let endDate,startDate;
     const formattedMonth = month < 10 ? `0${month}` : month;
     const currentMonth=moment().tz('Asia/Kolkata').format('MM')
     if(formattedMonth>currentMonth){
@@ -291,8 +291,8 @@ const getMonthlyReport = async (req, res) => {
         } else {
             return {
                 title: "Absent",
-                start: date,
-                end: null,
+                start: `${date}T10:30:00.000Z`,
+                end: `${date}T17:30:00.000Z`,
                 status: "absent"
             };
         }

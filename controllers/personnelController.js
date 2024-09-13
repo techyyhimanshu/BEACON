@@ -232,11 +232,13 @@ const personOut = async (req, res) => {
 
 const getMonthlyReport = async (req, res) => {
     const { device_id, month, year } = req.body;
-
+    const endDate = moment().tz('Asia/Kolkata').format('YYYY-MM-DD'); 
     const formattedMonth = month < 10 ? `0${month}` : month;
     // Step 1: Generate full month's date range
     const startDate = moment(`${year}-${formattedMonth}-01`);
-    const endDate = startDate.clone().endOf('month');
+    // const endDate = startDate.clone().endOf('month');
+    console.log(endDate);
+    
 
     const dateRange = [];
     let currentDate = startDate.clone();

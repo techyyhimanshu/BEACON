@@ -113,7 +113,7 @@ const asignTask = async (req, res) => {
             return res.status(200).json({ status: "failure", message: "Person ID does not exist" });
         }
 
-        req.body.status = "assigned";  // Set the default status to 'assigned'
+        req.body.status = "asigned";  // Set the default status to 'assigned'
         const data = await DailyTask.create(req.body);
 
         if (data) {

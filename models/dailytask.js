@@ -20,14 +20,69 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
       type: DataTypes.INTEGER
     },
-    personnel_id: DataTypes.INTEGER,
-    asignBy: DataTypes.STRING,
-    project: DataTypes.STRING,
-    title: DataTypes.STRING,
-    
+    personnel_id:{
+       type : DataTypes.INTEGER,
+       allowNull : false,
+       validate : 
+       {
+        notNull: {
+          msg: "Personnel id cannot be null"
+        },
+        notEmpty: {
+          msg: "Personnel id cannot be empty"
+        }
+       }
+      },
+    asignBy: {
+      type : DataTypes.STRING,
+      allowNull : false,
+      defaultValue : "admin"
+    },
+    project:{
+      type :DataTypes.STRING,
+      allowNull : false, 
+      defaultValue : 'Learning Task'
+    },
+    title: {
+      type : DataTypes.STRING,
+      allowNull : false,
+      defaultValue : "untitled"
+    }, 
     description: DataTypes.STRING,
-    validFrom: DataTypes.DATE,
-    validTill: DataTypes.DATE
+    validFrom: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      validate: {
+        isFutureDate(value) {
+          if (new Date(value) <= new Date()) {
+            throw new Error('validFrom must be a future date');
+          }
+        }
+      }
+    },
+    validTill: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      validate: {
+        isFutureDate(value) {
+          if (new Date(value) <= new Date()) {
+            throw new Error('validTill must be a future date');
+          }
+        }
+      }
+    },
+    status: {
+      type: DataTypes.ENUM,
+      values: ['asigned','pending', 'in-progress', 'completed', 'on-hold'],
+      allowNull: false,
+      defaultValue: 'pending',
+      validate: {
+        isIn: {
+          args: [['asigned','pending', 'in-progress', 'completed', 'on-hold']],
+          msg: "Status must be one of 'pending', 'in-progress', 'completed', 'on-hold'"
+        }
+      }
+    },
   }, {
     sequelize,
     modelName: 'dailyTask',

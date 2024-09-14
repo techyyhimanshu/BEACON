@@ -10,16 +10,23 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       personnel_id: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+        allowNull : false
       },
       asignBy: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull : false,
+        defaultValue : "admin"
       },
       project: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull : false, 
+        defaultValue : 'Learning Task'
       },
       title: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull : false, 
+        defaultValue : 'untitled'
       },
       description: {
         type: Sequelize.STRING
@@ -29,6 +36,18 @@ module.exports = {
       },
       validTill: {
         type: Sequelize.DATE
+      },
+      status: {
+        type: Sequelize.ENUM,
+        values: ['asigned','pending', 'in-progress', 'completed', 'on-hold'],
+        allowNull: false,
+        defaultValue: 'pending',
+        validate: {
+          isIn: {
+            args: [['asigned','pending', 'in-progress', 'completed', 'on-hold']],
+            msg: "Status must be one of 'pending', 'in-progress', 'completed', 'on-hold'"
+          }
+        }
       },
       createdAt: {
         allowNull: false,

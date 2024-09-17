@@ -14,7 +14,7 @@ module.exports = {
       },
       template_name: {
         type: Sequelize.STRING,
-        unique :ture
+        unique :true
       },
       description: {
         type: Sequelize.STRING

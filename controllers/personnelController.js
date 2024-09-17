@@ -372,7 +372,7 @@ const forgotPassword = async (req, res) => {
             where: { email }
         });
         if (!personnel) {
-            return res.status(404).json({ message: 'Personnel not found' });
+            return res.status(404).json({ message: 'User not found' });
         }
 
         // Generate a reset token and expiry date

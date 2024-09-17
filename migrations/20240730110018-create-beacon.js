@@ -10,7 +10,7 @@ module.exports = {
         primaryKey: true,
       },
       beacon_name :{
-        type : DataTypes.STRING,
+        type : Sequelize.STRING,
       },
       mac: {
         type: Sequelize.STRING,

@@ -41,4 +41,4 @@ app.use(express.json());
 app.use(routes);
 
 // Start server
-app.listen(PORT, () => console.log(`Listening on port: ${PORT}`));
+app.listen(PORT, () => console.log(`Listening🧐 on port: ${PORT}`));

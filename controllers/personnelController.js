@@ -283,14 +283,14 @@ const getMonthlyReport = async (req, res) => {
         const attendance = attendanceData.find((entry) => entry.date === date);
         if (attendance) {
             return {
-                title: "Present",
+                title: "P",
                 start: attendance.start,
                 end: attendance.end,
                 status: "present"
             };
         } else {
             return {
-                title: "Absent",
+                title: "A",
                 start: `${date}T10:30:00.000Z`,
                 end: `${date}T17:30:00.000Z`,
                 status: "absent"

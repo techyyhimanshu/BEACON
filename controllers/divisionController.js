@@ -6,6 +6,7 @@ const Sequelize = require("sequelize")
 const argon2 = require('argon2') 
 const jwt = require('jsonwebtoken')
 
+// create divison 
 const createDivision = async (req, res) => {
     try {
         const username = req.username

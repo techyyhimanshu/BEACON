@@ -152,6 +152,7 @@ const templateAsignToBeacon = async (req, res) => {
     }
 }
 
+// add sepcial link to beacon 
 const LinkAsignToBeacon = async (req, res) => {
     try {
         // CHECK BEACON EXISTANCE

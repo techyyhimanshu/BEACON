@@ -462,6 +462,7 @@ const VerifyPerson = async (req, res) => {
     }
 }
 module.exports = {
+    // export module comnt just for check 
     createPerson,
     personIn,
     personOut,

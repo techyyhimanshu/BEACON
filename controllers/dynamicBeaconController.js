@@ -4,7 +4,9 @@ const tbl_template = require("../models/tbl_template");
 const Template = db.tbl_template;
 const Beacon = db.Beacon;
 const BeaconVisited = db.BeaconVisited;
+const ConnectionLog = db.ConnectionLog;
 const { personIn } = require("../controllers/personnelController")
+const errorHandler = require('../middlewares/errorMiddleware')
 const TempLikes = db.tbl_temp_like;
 
 function isNumber(value) {
@@ -18,7 +20,7 @@ const beaconFire = async (req, res) => {
             where: { mac: req.body.mac }
         });
         if (beacon) {
-            if (beacon.mac === "DC:0D:30:BD:31:C0") {
+            if (beacon.mac === "DC:0D:30:BD:31:C0" || beacon.mac==="DC:0D:30:BD:31:F7") {
                 const response = personIn(req, res)
                 return response
             }
@@ -191,17 +193,46 @@ const LinkAsignToBeacon = async (req, res) => {
     }
 }
 
-const testBeaconHit = async (req,res) => {
+const createConnectionLogs = async (req, res) => {
     try {
-        res.status(200).json({status:"success",message:"Beacon hit successfully"})
+        const { user_id, beacon_mac } = req.body
+        const createdLog = await ConnectionLog.create({
+            user_id: user_id,
+            beacon_mac: beacon_mac,
+        })
+        if (!createdLog) {
+            return res.status(200).json({ status: "failure", message: "log not created" })
+        }
+        return res.status(200).json({ status: "success", message: "log created" })
     } catch (error) {
         console.log(error.name, error.message);
-        return res.status(500).json({ status: "failure", message: "Internal server error"})
+        return res.status(500).json({ status: "failure", message: "Internal server error" })
+        // next(error)
+    }
+}
+const getConnectionLogs = async (req, res) => {
+    try {
+        const { user_id, beacon_mac, date } = req.body
+        const connectionLogs = await db.sequelize.query(`select count(log_id)*5 as totalConectionTime from beaconDB.ConnectionLogs
+        where beacon_mac=?
+        and user_id=? and date(createdAt)=?`, {
+            type: db.sequelize.QueryTypes.SELECT,
+            replacements:[beacon_mac,user_id,date]
+        })
+        if (!connectionLogs) {
+            return res.status(200).json({ status: "failure", message: "No logs found" })
+        }
+        return res.status(200).json({ status: "success", data:connectionLogs })
+    } catch (error) {
+        console.log(error.name, error.message);
+        return res.status(500).json({ status: "failure", message: "Internal server error" })
+        // next(error)
     }
 }
 module.exports = {
     beaconFire,
     templateAsignToBeacon,
     LinkAsignToBeacon,
-    testBeaconHit
+    createConnectionLogs,
+    getConnectionLogs
 }

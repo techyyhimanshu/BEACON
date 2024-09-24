@@ -3,6 +3,7 @@ const mysql = require('mysql2');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const routes = require('./routes/index');
+const errorMiddleware=require('./middlewares/errorMiddleware')
 // test comment by victor on forked repo
 dotenv.config();
 
@@ -30,15 +31,20 @@ connection.connect(error => {
         console.error('Error connecting to MySQL:', error);
         return;
     }
-    
+
     console.log('Connected to MySQL database');
 });
-
 // Middleware to parse JSON
-app.use(express.json());
-
+app.use(express.json({
+    limit: '50kb'
+}));
+app.use(express.urlencoded({
+    extended: true, limit: "50kb"
+}))
+app.use(express.static("uploads"))
 // Routes
 app.use(routes);
 
+app.use(errorMiddleware)
 // Start server
 app.listen(PORT, () => console.log(`Listening🧐 on port: ${PORT}`));

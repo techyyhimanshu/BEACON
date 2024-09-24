@@ -71,13 +71,16 @@ const createPerson = async (req, res, next) => {
         return res.status(200).json({ status: 'success', message: 'Created successfully' });
     } catch (error) {
         await transaction.rollback();
-        console.log(error.message);
-
+        // console.log(error.message);
         if (error instanceof Sequelize.ValidationError) {
             const errorMessages = error.errors.map(err => err.message)
-            return res.status(400).json({ status: 'failure', message: errorMessages });
+            error={
+                status:400,
+                message:errorMessages
+            }
+            next(error)
         }
-        return res.status(500).json({ status: 'error', message: 'Internal server error' })
+        next(error)
     }
 }
 
@@ -183,7 +186,7 @@ const personOut = async (req, res) => {
         if (beacon === null) {
             return res.status(200).json({ status: "failure", message: "Beacon not found" })
         }
-        if (beacon_mac !== "DC:0D:30:BD:31:C0") {
+        if (beacon_mac !== "DC:0D:30:BD:31:C0" || beacon.mac!=="DC:0D:30:BD:31:F7") {
             return res.status(400).json({ status: "failure", message: "Not allowed" })
         }
         const personnel = await PersonnelRecords.findOne({

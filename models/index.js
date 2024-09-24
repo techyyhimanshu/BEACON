@@ -71,6 +71,7 @@ db.tbl_temp_like = require('./tbl_temp_like')(sequelize, DataTypes);
 db.PersonnelRecords = require('./personnelrecord')(sequelize, DataTypes);
 db.Attendance = require('./dailyattendance')(sequelize, DataTypes);
 db.dailytask = require('./dailytask')(sequelize, DataTypes);
+db.ConnectionLog = require('./connectionlog')(sequelize, DataTypes);
 
 
 

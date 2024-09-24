@@ -86,11 +86,30 @@ const createPerson = async (req, res, next) => {
 
 const getAllPersons = async (req, res) => {
     try {
-        const allPerson = await PersonnelRecords.findAll({
-            attributes: ["personnel_id", "name", "father_name", "dob", "email", "phone_one",
-                "present_address", "isVerified"
-            ],
-        });
+        const allPerson = await db.sequelize.query(`SELECT 
+    pr.personnel_id,
+    pr.name,
+    pr.father_name,
+    pr.dob,
+    pr.email,
+    pr.phone_one,
+    pr.present_address,
+    pr.isVerified,
+    MIN(da.timestamps) AS inTime,
+    MAX(da.timestamps) AS outTime,
+    COUNT(da.personnel_id) AS connectionCount,
+    TIMEDIFF(MAX(da.timestamps), MIN(da.timestamps)) AS todayWorkedHours
+FROM 
+    PersonnelRecords pr
+JOIN 
+    DailyAttendances da ON da.personnel_id = pr.personnel_id
+WHERE 
+    DATE(da.timestamps) = CURRENT_DATE()
+GROUP BY 
+    pr.personnel_id;
+`,{
+    type: db.sequelize.QueryTypes.SELECT
+})
         if (allPerson) {
             return res.status(200).json({ status: 'success', data: allPerson });
         }

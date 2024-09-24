@@ -191,8 +191,17 @@ const LinkAsignToBeacon = async (req, res) => {
     }
 }
 
+const testBeaconHit = async (req,res) => {
+    try {
+        res.status(200).json({status:"success",message:"Beacon hit successfully"})
+    } catch (error) {
+        console.log(error.name, error.message);
+        return res.status(500).json({ status: "failure", message: "Internal server error"})
+    }
+}
 module.exports = {
     beaconFire,
     templateAsignToBeacon,
-    LinkAsignToBeacon
+    LinkAsignToBeacon,
+    testBeaconHit
 }

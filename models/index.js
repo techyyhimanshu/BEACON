@@ -21,6 +21,11 @@ const sequelize = new Sequelize(config.database, config.username, config.passwor
   dialect: config.dialect,
   host: config.host,
   timezone: '+05:30', // Set this to your local timezone, e.g., IST for India Standard Time
+  pool:{
+    max: 5,
+    min:0,
+    acquire: 30000,
+  }
 });
 
 fs

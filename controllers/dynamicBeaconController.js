@@ -20,7 +20,7 @@ const beaconFire = async (req, res) => {
             where: { mac: req.body.mac }
         });
         if (beacon) {
-            if (beacon.mac === "DC:0D:30:BD:31:C0" || beacon.mac==="DC:0D:30:BD:31:F7") {
+            if (beacon.mac === "DC:0D:30:BD:31:C0" || beacon.mac==="DC:0D:30:BD:31:F7" || beacon.mac==="DC:0D:30:BD:31:A8") {
                 const response = personIn(req, res)
                 return response
             }

@@ -186,7 +186,7 @@ const personOut = async (req, res) => {
         if (beacon === null) {
             return res.status(200).json({ status: "failure", message: "Beacon not found" })
         }
-        if (beacon_mac !== "DC:0D:30:BD:31:C0" || beacon.mac!=="DC:0D:30:BD:31:F7") {
+        if (beacon_mac !== "DC:0D:30:BD:31:C0" || beacon.mac!=="DC:0D:30:BD:31:F7"|| beacon.mac!=="DC:0D:30:BD:31:A8") {
             return res.status(400).json({ status: "failure", message: "Not allowed" })
         }
         const personnel = await PersonnelRecords.findOne({

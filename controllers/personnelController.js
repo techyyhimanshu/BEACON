@@ -95,6 +95,7 @@ const getAllPersons = async (req, res) => {
     pr.phone_one,
     pr.present_address,
     pr.isVerified,
+    pr.device_id,
     MIN(da.timestamps) AS inTime,
     MAX(da.timestamps) AS outTime,
     COUNT(da.personnel_id) AS connectionCount,

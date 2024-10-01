@@ -72,6 +72,8 @@ db.PersonnelRecords = require('./personnelrecord')(sequelize, DataTypes);
 db.Attendance = require('./dailyattendance')(sequelize, DataTypes);
 db.dailytask = require('./dailytask')(sequelize, DataTypes);
 db.ConnectionLog = require('./connectionlog')(sequelize, DataTypes);
+db.DailyTaskReport = require('./dailytaskreport')(sequelize, DataTypes);
+db.Project = require('./project')(sequelize, DataTypes);
 
 
 

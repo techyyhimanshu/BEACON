@@ -6,12 +6,14 @@ const { getAllTask,
         getPersonTask,
         deleteTask,
         asignTask,
-        taskReport}=require("../controllers/dailyTaskController")
+        taskReport,
+        dailyTaskList}=require("../controllers/dailyTaskController")
 // Define your routes here
 
 router.get("/api/dailyTask",getAllTask)
+router.get("/api/tasks/list",dailyTaskList)
 router.get("/api/Task/:id?",getSingleTask)
-router.get("/api/personnel/task/:id?",getPersonTask)
+router.get("/api/personnel/:id?/tasks",getPersonTask)
 router.post("/api/asignTask",asignTask)
 router.post("/api/reportTask",taskReport)
 router.put("/api/Task/:id?",updateTask)

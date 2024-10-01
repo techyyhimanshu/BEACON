@@ -3,59 +3,59 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class dailyTask extends Model {
+  class DailyTask extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
+      // Define associations here if necessary
     }
   }
-  dailyTask.init({
+  DailyTask.init({
     task_id: {
       allowNull: false,
       autoIncrement: true,
       primaryKey: true,
       type: DataTypes.INTEGER
     },
-    personnel_id:{
-       type : DataTypes.INTEGER,
-       allowNull : false,
-       validate : 
-       {
+    personnel_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      validate: {
         notNull: {
-          msg: "Personnel id cannot be null"
+          msg: "Personnel ID cannot be null"
         },
         notEmpty: {
-          msg: "Personnel id cannot be empty"
+          msg: "Personnel ID cannot be empty"
         }
-       }
-      },
-    asignBy: {
-      type : DataTypes.STRING,
-      allowNull : false,
-      defaultValue : "admin"
+      }
     },
-    project:{
-      type :DataTypes.STRING,
-      allowNull : false, 
-      defaultValue : 'Learning Task'
+    asignBy: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: "admin"
+    },
+    project_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     title: {
-      type : DataTypes.STRING,
-      allowNull : false,
-      defaultValue : "untitled"
-    }, 
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: 'untitled'
+    },
     description: DataTypes.STRING,
     validFrom: {
       type: DataTypes.DATE,
       allowNull: false,
       validate: {
         isFutureDate(value) {
-          if (new Date(value) <= new Date()) {
-            throw new Error('validFrom must be a future date');
+          const currentDate = new Date().toISOString().split('T')[0];
+          const valueDate = new Date(value).toISOString().split('T')[0];
+          if (valueDate < currentDate) {
+            throw new Error('validFrom must not be a past date');
           }
         }
       }
@@ -67,25 +67,27 @@ module.exports = (sequelize, DataTypes) => {
         isFutureDate(value) {
           if (new Date(value) <= new Date()) {
             throw new Error('validTill must be a future date');
+          } else if (new Date(value) < this.validFrom) {
+            throw new Error('validTill cannot be earlier than validFrom');
           }
         }
       }
     },
-    status: {
+    priority: {
       type: DataTypes.ENUM,
-      values: ['asigned','pending', 'in-progress', 'completed', 'on-hold'],
+      values: ['low', 'medium', 'high'],
       allowNull: false,
-      defaultValue: 'pending',
+      defaultValue: 'low',
       validate: {
         isIn: {
-          args: [['asigned','pending', 'in-progress', 'completed', 'on-hold']],
-          msg: "Status must be one of 'pending', 'in-progress', 'completed', 'on-hold'"
+          args: [['low', 'medium', 'high']],
+          msg: "Priority must be one of 'low', 'medium', or 'high'"
         }
       }
-    },
+    }
   }, {
     sequelize,
-    modelName: 'dailyTask',
+    modelName: 'DailyTask',
   });
-  return dailyTask;
+  return DailyTask;
 };

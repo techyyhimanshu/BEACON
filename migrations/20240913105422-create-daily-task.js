@@ -2,7 +2,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('dailyTasks', {
+    await queryInterface.createTable('DailyTasks', {
       task_id: {
         allowNull: false,
         autoIncrement: true,
@@ -18,10 +18,9 @@ module.exports = {
         allowNull : false,
         defaultValue : "admin"
       },
-      project: {
-        type: Sequelize.STRING,
+      project_id: {
+        type: Sequelize.INTEGER,
         allowNull : false, 
-        defaultValue : 'Learning Task'
       },
       title: {
         type: Sequelize.STRING,
@@ -32,22 +31,32 @@ module.exports = {
         type: Sequelize.STRING
       },
       validFrom: {
-        type: Sequelize.DATE
-      },
-      validTill: {
-        type: Sequelize.DATE
-      },
-      status: {
-        type: Sequelize.ENUM,
-        values: ['asigned','pending', 'in-progress', 'completed', 'on-hold'],
+        type: Sequelize.DATE,
         allowNull: false,
-        defaultValue: 'pending',
         validate: {
-          isIn: {
-            args: [['asigned','pending', 'in-progress', 'completed', 'on-hold']],
-            msg: "Status must be one of 'pending', 'in-progress', 'completed', 'on-hold'"
+          isFutureDate(value) {
+            if (new Date(value) <= new Date()) {
+              throw new Error('validFrom must be a future date');
+            }
           }
         }
+      },
+      validTill: {
+        type: Sequelize.DATE,
+        allowNull: false,
+        validate: {
+          isAfterValidFrom(value) {
+            if (new Date(value) <= new Date(this.validFrom)) {
+              throw new Error('validTill must be after validFrom');
+            }
+          }
+        }
+      },
+      priority: {
+        type: Sequelize.ENUM,
+        values: ['low', 'medium', 'high'],
+        allowNull: false,
+        defaultValue: 'low'
       },
       createdAt: {
         allowNull: false,
@@ -60,6 +69,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('dailyTasks');
+    await queryInterface.dropTable('DailyTasks');
   }
 };

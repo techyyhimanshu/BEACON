@@ -14,7 +14,7 @@ const admin = require("../config/firebase");
 const Sequelize = require("sequelize");
 // const beacon = require("../models/beacon");
 // const appclass = require("../appClass");
-
+// triel add cmt amdv
 
 
 const addBeacon2 = async (req, res) => {

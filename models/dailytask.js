@@ -20,18 +20,6 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
       type: DataTypes.INTEGER
     },
-    personnel_id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      validate: {
-        notNull: {
-          msg: "Personnel ID cannot be null"
-        },
-        notEmpty: {
-          msg: "Personnel ID cannot be empty"
-        }
-      }
-    },
     asignBy: {
       type: DataTypes.STRING,
       allowNull: false,

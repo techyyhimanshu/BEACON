@@ -74,11 +74,14 @@ db.dailytask = require('./dailytask')(sequelize, DataTypes);
 db.ConnectionLog = require('./connectionlog')(sequelize, DataTypes);
 db.DailyTaskReport = require('./dailytaskreport')(sequelize, DataTypes);
 db.Project = require('./project')(sequelize, DataTypes);
+db.assignedtask = require('./assignedtask')(sequelize, DataTypes);
 
 
+db.PersonnelRecords.belongsTo(db.assignedtask,{foreignKey:'personnel_id'})
+db.assignedtask.hasMany(db.PersonnelRecords,{foreignKey:'personnel_id'})
 
-db.PersonnelRecords.belongsTo(db.dailytask,{foreignKey:'personnel_id'})
-db.dailytask.hasMany(db.PersonnelRecords,{foreignKey:'personnel_id'})
+db.dailytask.belongsTo(db.assignedtask,{foreignKey:'task_id'})
+db.assignedtask.hasMany(db.dailytask,{foreignKey:'task_id'})
 
 db.BeaconVisited.hasMany(db.tbl_template,{foreignKey:'temp_id'})
 db.tbl_template.belongsTo(db.BeaconVisited,{foreignKey:'temp_id'})

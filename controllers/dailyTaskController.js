@@ -4,6 +4,8 @@ const DailyTask = db.dailytask;
 const PersonnelRecords = db.PersonnelRecords;
 const DailyTaskReport = db.DailyTaskReport;
 const Project = db.Project;
+const AssignedTask = db.assignedtask;
+
 const moment = require('moment-timezone');
 const { SELECT } = require("sequelize/lib/query-types");
 
@@ -74,10 +76,11 @@ const getPersonTask = async (req, res) => {
     try {
         // First, get the task count
         const taskCountResult = await db.sequelize.query(
-            `SELECT COUNT(dt.task_id) as task_count
-             FROM DailyTasks dt 
-             JOIN PersonnelRecords pr ON pr.personnel_id = dt.personnel_id
-             WHERE pr.device_id = ?`,
+            `SELECT COUNT(dt.task_id) AS task_count
+            FROM DailyTasks dt
+            JOIN AssignedTasks ast ON ast.task_id = dt.task_id
+            JOIN PersonnelRecords pr ON pr.personnel_id = ast.personnel_id
+            WHERE pr.device_id = ?`,
             {
                 type: db.Sequelize.QueryTypes.SELECT,
                 replacements: [req.params.id]
@@ -89,16 +92,17 @@ const getPersonTask = async (req, res) => {
         // Then, get the actual task details
         const tasks = await db.sequelize.query(
             `SELECT dt.task_id, dt.asignBy, dt.title, dt.description,
-                    dt.validFrom, dt.validTill, dt.priority, p.project_name
-             FROM DailyTasks dt 
-             JOIN PersonnelRecords pr ON pr.personnel_id = dt.personnel_id
-             JOIN Projects p ON p.project_id = dt.project_id
-             WHERE pr.device_id = ?`,
-            {
-                type: db.Sequelize.QueryTypes.SELECT,
-                replacements: [req.params.id]
-            }
-        );
+            dt.validFrom, dt.validTill, dt.priority, p.project_name
+            FROM DailyTasks dt
+            JOIN AssignedTasks tp ON tp.task_id = dt.task_id
+            JOIN PersonnelRecords pr ON pr.personnel_id = tp.personnel_id
+            JOIN Projects p ON p.project_id = dt.project_id
+            WHERE pr.device_id = ?`,
+                {
+                    type: db.Sequelize.QueryTypes.SELECT,
+                    replacements: [req.params.id]
+                }
+            );
 
         // Check if tasks are found
         if (tasks.length > 0) {
@@ -132,6 +136,8 @@ const deleteTask = async (req, res) => {
 
 // Assign a task
 const asignTask = async (req, res) => {
+    const t = await db.sequelize.transaction();
+
     try {
         const { assignedBy, project_id, title, description, validFrom, validTill, priority } = req.body;
         const personel_ids = Array.isArray(req.body.personnel_id) ? req.body.personnel_id : [req.body.personnel_id];
@@ -144,15 +150,15 @@ const asignTask = async (req, res) => {
         const existingPersonnelIds = existingPersonnel.map(p => p.personnel_id);
 
         const notExistingPersonnelIds = personel_ids.filter(id => !existingPersonnelIds.includes(id));
+
         if (notExistingPersonnelIds.length > 0) {
             return res.status(200).json({ status: "failure", message: `Person ID ${notExistingPersonnelIds.join(', ')} does not exist` });
-        }
+        };
         const project = await Project.findByPk(project_id)
         if (!project) {
             return res.status(200).json({ status: "failure", message: "Project not found" });
         }
-        const bulkData = personel_ids.map(personnel_id => ({
-            personnel_id,
+        const taskData = {
             assignedBy,
             project_id,
             title,
@@ -160,10 +166,23 @@ const asignTask = async (req, res) => {
             validFrom,
             validTill,
             priority
+        };
+
+        // create task 
+        const data = await DailyTask.create(taskData, {t});
+        let task_id = data.task_id*1
+        console.log(task_id);
+        
+        // assiged to PERSON
+        const assignData = personel_ids.map(personnel_id => ({
+            task_id,personnel_id
         }));
-        const data = await DailyTask.bulkCreate(bulkData);
+        const assignTask = await AssignedTask.bulkCreate(assignData , {t});
+        await t.commit();
         return res.status(200).json({ status: "success", message: "Created successfully" });
+
     } catch (error) {
+        await t.rollback();
         if (error instanceof Sequelize.ValidationError) {
             const errorMessages = error.errors.map((err) => err.message);
             return res.status(500).json({ status: "failure", message: errorMessages });

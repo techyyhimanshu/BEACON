@@ -182,7 +182,7 @@ const taskReport = async (req, res) => {
 
     try {
         const currentDateTime = moment().tz('Asia/Kolkata').format('HH:mm:ss');
-        if (!(currentDateTime > "16:00:00" && currentDateTime < "18:00:00")) {
+        if (!(currentDateTime > "14:00:00" && currentDateTime < "18:00:00")) {
             return res.status(200).json({ status: "failure", message: "Not allowed! Try between 4PM to 6PM" });
         }
         const allowedStatusValues = ['pending', 'in-progress', 'completed',];

@@ -40,14 +40,17 @@ const getProjectTasks = async (req, res) => {
         }]
       }]
     });
+    let teamWork=[]
     tasks = tasks.map(task => {
       // Convert to plain object to manipulate it freely
       const taskObj = task.toJSON();      
       // Restructure AssignedTask to include personnel_id and name
-      taskObj.AssignedTask = {
-        personnel_id: taskObj.AssignedTask.personnel_id,
-        name: taskObj.AssignedTask.PersonnelRecord.name
-      };
+      teamWork = taskObj.AssignedTasks.map (  person => ({
+        personnel_id: person.personnel_id,
+        name: person.PersonnelRecord.name
+      }))
+      taskObj.teamWork=teamWork
+      delete  taskObj.AssignedTasks
     
       // Return the modified task object
       return taskObj;

@@ -74,9 +74,11 @@ const updateTask = async (req, res) => {
 // Get tasks by personnel ID
 const getPersonTask = async (req, res) => {
     try {
+
+
         // First, get the task count
         const taskCountResult = await db.sequelize.query(
-            `SELECT COUNT(dt.task_id) AS task_count
+            `SELECT COUNT(dt.task_id) AS task_count, pr.name
             FROM DailyTasks dt
             JOIN AssignedTasks ast ON ast.task_id = dt.task_id
             JOIN PersonnelRecords pr ON pr.personnel_id = ast.personnel_id
@@ -87,11 +89,13 @@ const getPersonTask = async (req, res) => {
             }
         );
 
+        console.log(taskCountResult);
+        
         const task_count = taskCountResult[0].task_count;
 
         // Then, get the actual task details
         const tasks = await db.sequelize.query(
-            `SELECT dt.task_id, dt.asignBy, dt.title, dt.description,
+            `SELECT  dt.task_id, dt.asignBy, dt.title, dt.description,
             dt.validFrom, dt.validTill, dt.priority, p.project_name
             FROM DailyTasks dt
             JOIN AssignedTasks tp ON tp.task_id = dt.task_id
@@ -106,7 +110,7 @@ const getPersonTask = async (req, res) => {
 
         // Check if tasks are found
         if (tasks.length > 0) {
-            return res.status(200).json({ status: "success", count: task_count, data: tasks });
+            return res.status(200).json({ status: "success",fullName :taskCountResult[0].name ,  count: task_count, data: tasks });
         } else {
             return res.status(404).json({ status: "failure", message: "No tasks found for this person" });
         }

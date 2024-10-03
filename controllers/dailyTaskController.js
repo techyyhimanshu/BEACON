@@ -97,7 +97,7 @@ const getPersonTask = async (req, res) => {
             JOIN AssignedTasks tp ON tp.task_id = dt.task_id
             JOIN PersonnelRecords pr ON pr.personnel_id = tp.personnel_id
             JOIN Projects p ON p.project_id = dt.project_id
-            WHERE pr.device_id = ?`,
+            WHERE pr.device_id = ? order by priority desc`,
                 {
                     type: db.Sequelize.QueryTypes.SELECT,
                     replacements: [req.params.id]
@@ -183,10 +183,14 @@ const asignTask = async (req, res) => {
 
     } catch (error) {
         await t.rollback();
-        if (error instanceof Sequelize.ValidationError) {
+        if (error instanceof Sequelize.ValidationError) {            
             const errorMessages = error.errors.map((err) => err.message);
-            return res.status(500).json({ status: "failure", message: errorMessages });
-        } else {
+            return res.status(400).json({ status: "failure", message: errorMessages });
+        } 
+        else if(error instanceof Sequelize.AggregateError){
+            const errorMessages = error.errors.map((err) => err.message);
+            return res.status(400).json({ status: "failure", message: errorMessages });
+        }else {
             console.log(error);
             return res.status(500).json({ status: "failure", message: "Internal server error" });
         }
@@ -197,7 +201,7 @@ const taskReport = async (req, res) => {
 
     try {
         const currentDateTime = moment().tz('Asia/Kolkata').format('HH:mm:ss');
-        if (!(currentDateTime > "16:00:00" && currentDateTime < "18:00:00")) {
+        if (!(currentDateTime > "14:00:00" && currentDateTime < "18:00:00")) {
             return res.status(200).json({ status: "failure", message: "Not allowed! Try between 4PM to 6PM" });
         }
         const allowedStatusValues = ['pending', 'in-progress', 'completed',];

@@ -93,7 +93,7 @@ const getPersonTask = async (req, res) => {
              FROM DailyTasks dt 
              JOIN PersonnelRecords pr ON pr.personnel_id = dt.personnel_id
              JOIN Projects p ON p.project_id = dt.project_id
-             WHERE pr.device_id = ?`,
+             WHERE pr.device_id = ? order by priority desc`,
             {
                 type: db.Sequelize.QueryTypes.SELECT,
                 replacements: [req.params.id]
@@ -161,13 +161,17 @@ const asignTask = async (req, res) => {
             validTill,
             priority
         }));
-        const data = await DailyTask.bulkCreate(bulkData);
+        const data = await DailyTask.bulkCreate(bulkData,{validate:true});
         return res.status(200).json({ status: "success", message: "Created successfully" });
     } catch (error) {
-        if (error instanceof Sequelize.ValidationError) {
+        if (error instanceof Sequelize.ValidationError) {            
             const errorMessages = error.errors.map((err) => err.message);
-            return res.status(500).json({ status: "failure", message: errorMessages });
-        } else {
+            return res.status(400).json({ status: "failure", message: errorMessages });
+        } 
+        else if(error instanceof Sequelize.AggregateError){
+            const errorMessages = error.errors.map((err) => err.message);
+            return res.status(400).json({ status: "failure", message: errorMessages });
+        }else {
             console.log(error);
             return res.status(500).json({ status: "failure", message: "Internal server error" });
         }

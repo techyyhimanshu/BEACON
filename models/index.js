@@ -77,8 +77,11 @@ db.Project = require('./project')(sequelize, DataTypes);
 db.assignedtask = require('./assignedtask')(sequelize, DataTypes);
 
 
-db.PersonnelRecords.belongsTo(db.assignedtask,{foreignKey:'personnel_id'})
-db.assignedtask.hasMany(db.PersonnelRecords,{foreignKey:'personnel_id'})
+db.dailytask.belongsTo(db.assignedtask,{foreignKey:'personnel_id'})
+db.assignedtask.hasMany(db.dailytask,{foreignKey:'personnel_id'})
+
+db.PersonnelRecords.hasMany(db.assignedtask,{foreignKey:'personnel_id'})
+db.assignedtask.belongsTo(db.PersonnelRecords,{foreignKey:'personnel_id'})
 
 db.dailytask.belongsTo(db.assignedtask,{foreignKey:'task_id'})
 db.assignedtask.hasMany(db.dailytask,{foreignKey:'task_id'})

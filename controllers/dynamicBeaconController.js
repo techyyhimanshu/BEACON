@@ -20,7 +20,14 @@ const beaconFire = async (req, res) => {
             where: { mac: req.body.mac }
         });
         if (beacon) {
-            if (beacon.mac === "DC:0D:30:BD:31:C0" || beacon.mac==="DC:0D:30:BD:31:F7" || beacon.mac==="DC:0D:30:BD:31:A8") {
+            if(beacon.mac==="DC:0D:30:BD:31:C0"){
+                return res.status(200).json({
+                    status: "success",
+                    // device_id: personnelExist.device_id,
+                    url: "https://status-intern.vercel.app/"
+                })
+            }
+            if ( beacon.mac==="DC:0D:30:BD:31:F7" || beacon.mac==="DC:0D:30:BD:31:A8") {
                 const response = personIn(req, res)
                 return response
             }

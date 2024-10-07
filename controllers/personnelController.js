@@ -104,7 +104,7 @@ GROUP BY
     type: db.sequelize.QueryTypes.SELECT
 })
         if (allPerson) {
-            return res.status(200).json({ status: 'success', data: allPerson });
+            return res.status(200).json({ status: 'success', count: allPerson.length,  data: allPerson });
         }
         else {
             return res.status(200).json({ status: 'success', message: 'no persnol user added yet' });

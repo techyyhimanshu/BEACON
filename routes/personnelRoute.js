@@ -1,7 +1,7 @@
 const { Router } = require('express');
 const multer = require('multer');
 const { createPerson,personOut,getMonthlyReport, getAllPersons,getSinglePerson,VerifyPerson,
-  forgotPassword, resetPassword,
+  forgotPassword, resetPassword,getAllPersonTodayAttendence,
   getTodayReport} = require('../controllers/personnelController');
 const router = Router();
 const verifyToken = require('../middlewares/authMiddleware');
@@ -44,6 +44,7 @@ router.post("/api/person/forgot/password",forgotPassword)
 router.post("/api/reset-password/:token?",resetPassword)
 router.get("/api/person/:id?",getSinglePerson)
 router.get("/api/persons",getAllPersons)
+router.get("/api/persons/todayAttendence",getAllPersonTodayAttendence)
 router.get("/api/person/:id?/verify",verifyToken,VerifyPerson)
 
 

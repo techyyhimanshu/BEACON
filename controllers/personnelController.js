@@ -95,6 +95,37 @@ const getAllPersons = async (req, res) => {
     pr.phone_one,
     pr.present_address,
     pr.isVerified,
+    pr.device_id 
+FROM 
+    PersonnelRecords pr
+GROUP BY 
+    pr.personnel_id;
+`,{
+    type: db.sequelize.QueryTypes.SELECT
+})
+        if (allPerson) {
+            return res.status(200).json({ status: 'success', data: allPerson });
+        }
+        else {
+            return res.status(200).json({ status: 'success', message: 'no persnol user added yet' });
+        }
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ status: 'error', message: 'Internal server error' })
+    }
+};
+
+const getAllPersonTodayAttendence = async (req, res) => {
+    try {
+        const allPerson = await db.sequelize.query(`SELECT 
+    pr.personnel_id,
+    pr.name,
+    pr.father_name,
+    pr.dob,
+    pr.email,
+    pr.phone_one,
+    pr.present_address,
+    pr.isVerified,
     pr.device_id,
     MIN(da.timestamps) AS inTime,
     MAX(da.timestamps) AS outTime,
@@ -103,8 +134,8 @@ const getAllPersons = async (req, res) => {
 FROM 
     PersonnelRecords pr
 JOIN 
-    DailyAttendances da ON da.personnel_id = pr.personnel_id
-WHERE 
+    DailyAttendances da ON da.personnel_id = pr.personnel_id    
+    WHERE 
     DATE(da.timestamps) = CURRENT_DATE()
 GROUP BY 
     pr.personnel_id;
@@ -495,6 +526,7 @@ module.exports = {
     getAllPersons,
     getSinglePerson,
     VerifyPerson,
-    getTodayReport
+    getTodayReport,
+    getAllPersonTodayAttendence
 
 }

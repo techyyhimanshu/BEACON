@@ -146,7 +146,7 @@ const getSinglePerson = async (req, res) => {
     }
 }
 // personnel in(api)
-const personIn = async (req, res, next) => {
+const personIn = async (req, res,mac, next) => {
     const device_id = req.body.device_uniqueID
     if (!device_id) {
         return res.status(400).json({ status: 'failure', message: 'Device ID is required' })
@@ -159,6 +159,13 @@ const personIn = async (req, res, next) => {
     })
     if (personnelExist !== null) {
         await inAttendance(personnelExist.personnel_id)
+        if(mac==="DC:0D:30:BD:31:C0"){
+            return res.status(200).json({
+                status: "success",
+                // device_id: personnelExist.device_id,
+                url: "https://status-intern.vercel.app/"
+            })
+        }
         return res.status(200).json({
             status: "success",
             device_id: personnelExist.device_id,
